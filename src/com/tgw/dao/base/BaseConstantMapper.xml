@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tgw.dao.base.BaseConstantMapper">
+
+	<select id="searchData" parameterType="com.tgw.bean.base.BaseEnConstant"  resultType="map">
+		<bind name="nameCon" value="'%' + _parameter.getName() + '%'" />
+		<bind name="namespaceCon" value="'%' + _parameter.getNamespace() + '%'" />
+		<bind name="noteCon" value="'%' + _parameter.getNote() + '%'" />
+
+		select bec.id,bec.name,bec.code,bec.namespace,bec.note
+		  from bas_en_constant bec
+		<where>
+			<if test="name!=null and name!=''">
+				bec.name like #{nameCon}
+			</if>
+			<if test="code!=null and code!=''">
+			  	and bec.code = #{code}
+			</if>
+			<if test="namespace!=null and namespace!=''">
+				and bec.namespace like #{namespaceCon}
+			</if>
+			<if test="note!=null and note!=''">
+				and bec.note like #{noteCon}
+			</if>
+		</where>
+	</select>
+
+</mapper>

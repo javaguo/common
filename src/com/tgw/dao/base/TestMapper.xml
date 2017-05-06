@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tgw.dao.base.TestMapper">
+	<resultMap id="defaultResultMenuMap" type="com.tgw.bean.system.SysEnMenu">
+		<id column="id" property="id"/>
+		<result column="menu_identify" property="menuIdentify"/>
+		<result column="text" property="text"/>
+		<result column="link" property="link"/>
+		<result column="qtip" property="qtip"/>
+		<result column="leaf" property="leaf"/>
+		<result column="expanded" property="expanded"/>
+		<result column="fk_parent_id" property="parentId"/>
+		<result column="is_self_url" property="isSelfUrl"/>
+
+	</resultMap>
+
+	<select id="loadMenuByRole"  resultMap="defaultResultMenuMap">
+		select menu.id,menu.menu_identify,menu.text,menu.link,menu.qtip,menu.leaf,
+		menu.expanded,menu.fk_parent_id,menu.is_self_url
+		from sys_re_role_menu rm,sys_en_role role,sys_en_menu menu
+		where rm.fk_role_id = role.id
+		and rm.fk_menu_id = menu.id
+		and role.id=#{roleId}
+	</select>
+
+	<select id="testTypeAliasesMap"  resultType="map">
+		select menu.id,menu.menu_identify,menu.text,menu.link,menu.qtip,menu.leaf,
+			   menu.expanded,menu.fk_parent_id,menu.is_self_url
+ 		from sys_re_role_menu rm,sys_en_role role,sys_en_menu menu
+		where rm.fk_role_id = role.id
+    	  and rm.fk_menu_id = menu.id
+		  and role.id=#{roleId}
+	</select>
+
+	<select id="testTypeAliasesList"  resultType="string">
+		select menu.id,menu.menu_identify,menu.text,menu.link,menu.qtip,menu.leaf,
+		menu.expanded,menu.fk_parent_id,menu.is_self_url
+		from sys_re_role_menu rm,sys_en_role role,sys_en_menu menu
+		where rm.fk_role_id = role.id
+		and rm.fk_menu_id = menu.id
+		and role.id=#{roleId}
+	</select>
+
+	<select id="searchData"  resultType="map">
+		select menu.id,menu.menu_identify,menu.text,'查询结果TestMapper' test
+ 		from sys_re_role_menu rm,sys_en_role role,sys_en_menu menu
+		where rm.fk_role_id = role.id
+    	  and rm.fk_menu_id = menu.id
+	</select>
+</mapper>

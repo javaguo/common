@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tgw.dao.example.ExampleBeanMapper">
+
+	<select id="searchData" parameterType="com.tgw.bean.example.ExampleBean"  resultType="map">
+
+select exam.id,exam.form_text formText,exam.form_text_area formTextArea,
+				exam.form_checkbox formCheckbox,exam.form_radio formRadio,exam.form_combo_box formComboBox,
+			exam.form_hidden formHidden,exam.form_display formDisplay
+		  from example_bean exam
+
+	</select>
+
+</mapper>
