@@ -1,0 +1,46 @@
+项目访问地址：
+http://localhost:8080/common/manage/app/indexShare.jsp
+http://localhost:8080/common/exampleBean/searchData.do
+
+分页测试：
+http://localhost:8080/common/test/list.do
+查询结果转为map测试
+http://localhost:8080/common/test/testTypeAliasesMap.do
+http://localhost:8080/common/test/testTypeAliasesList.do
+
+http://localhost:8080/common/test/beforeSearchData.do
+http://localhost:8080/common/test/searchData.do?start=2&limit=10
+
+
+
+百度编辑器
+http://localhost:8080/common/resource/js/plugin/ueditor1_4_3-utf8/index.html
+http://localhost:8080/common/resource/js/plugin/ueditor1_4_3-utf8/mydemo.html
+http://localhost:8080/common/resource/js/plugin/ueditor1_4_3-utf8/jsp/controller.jsp?action=config
+
+富文本编辑器
+http://localhost:8080/common/index.html
+http://localhost:8080/common/resource/js/plugin/ckeditor/samples/index.html
+E:\j2ee\ideaProject\common2\common\WebRoot\resource\js\plugin\ueditor1_4_3-utf8\index.html
+
+
+20170206   1.5h
+20170207   5h
+20170208   3h
+20170209   0
+20170210   2
+20170211   6
+20170212   8
+20170213   2
+20170215   3
+20170220   1
+20170221   2.5    解决菜单图标问题、列表checkbox选中值的问题
+20170223   2.5
+20170309   1   解决列表查询刷新问题
+20170318   1
+20170319   2
+20170322   2
+20170323   3
+20170326   1
+20170327   1
+20170328   2
