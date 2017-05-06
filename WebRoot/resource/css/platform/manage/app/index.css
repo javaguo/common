@@ -1,0 +1,14 @@
+@CHARSET "UTF-8";
+#head-region-container{
+background-color: #eeeeee;
+height: 50px;
+vertical-align: middle;
+}
+
+#foot-region-container{
+border-top-width:1px;
+border-top-style:solid;
+border-top-color:#aaaaaa;
+height: 25px;
+text-align: center;
+}
