@@ -1,0 +1,12 @@
+/.externalToolBuilders/
+
+/.idea/
+/out/
+common.iml
+
+
+/.myeclipse/
+/.settings/
+.classpath
+
+*.class
