@@ -1,12 +1,12 @@
 package com.tgw.controller.base;
 
 import com.tgw.bean.base.AbstractBaseBean;
-import com.tgw.bean.system.SysEnControllerField;
-import com.tgw.bean.system.SysEnControllerFunction;
+import com.tgw.bean.system.*;
 import com.tgw.exception.PlatformException;
 import com.tgw.service.base.BaseService;
 import com.tgw.utils.PlatformUtils;
 import com.tgw.utils.config.PlatformSysConstant;
+import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -479,6 +479,8 @@ public class BaseController<T extends AbstractBaseBean> implements Serializable 
         this.getSysEnControllerFieldList().add( sysEnControllerField );
     }
 
+
+
 	/**
 	 * 添加列表页面每一个字段的相关属性
 	 * @param name
@@ -488,6 +490,73 @@ public class BaseController<T extends AbstractBaseBean> implements Serializable 
     public void addField( String name, String fieldLabel, String type ){
         this.addField(name,fieldLabel,type,null,true,true,true,true,true,null,null);
     }
+
+	public void addFieldRadioInitDataByMethod(String name, String fieldLabel, String xtype, boolean isValid, boolean isAllowAdd, boolean isAllowUpdate, boolean isAllowSearch, boolean isAllowBlank,String loadDataMethodName){
+		String jsonData = null;
+		this.addFieldRadio(name,fieldLabel,xtype,isValid,isAllowAdd,isAllowUpdate,isAllowSearch,isAllowBlank,null,null,jsonData);
+	}
+
+	public void addFieldRadioInitDataByJson(String name, String fieldLabel, String xtype, boolean isValid, boolean isAllowAdd, boolean isAllowUpdate, boolean isAllowSearch, boolean isAllowBlank,String jsonData){
+		this.addFieldRadio(name,fieldLabel,xtype,isValid,isAllowAdd,isAllowUpdate,isAllowSearch,isAllowBlank,null,null,jsonData);
+	}
+
+	public void addFieldRadio(String name, String fieldLabel, String xtype, boolean isValid, boolean isAllowAdd, boolean isAllowUpdate, boolean isAllowSearch, boolean isAllowBlank,String emptyText, String vtype,String jsonData){
+		SysEnControllerField  sysEnControllerField = new SysEnControllerField(name,fieldLabel,null,xtype,isValid,isAllowAdd,isAllowUpdate,isAllowSearch,isAllowBlank,emptyText,vtype);
+
+		SysEnFieldRadioGroup radioGroup = new SysEnFieldRadioGroup();
+
+		JSONArray ja = JSONArray.fromObject(jsonData);
+		for( int i=0 ;i<ja.size();i++ ){
+			JSONObject tempJo = ja.getJSONObject(i);
+			if( !tempJo.containsKey("name") ){
+				throw new PlatformException("缺少name属性。");
+			}
+			if( !tempJo.containsKey("value") ){
+				throw new PlatformException("缺少value属性。");
+			}
+
+			SysEnFieldRadio radio = new SysEnFieldRadio();
+			radio.setName( tempJo.getString("name") );
+			radio.setValue( tempJo.getString("value") );
+
+			radioGroup.getRadioList().add(radio);
+		}
+
+		sysEnControllerField.setSysEnFormFieldAttr( radioGroup );
+		this.getSysEnControllerFieldList().add( sysEnControllerField );
+
+	}
+
+	public void addFieldCheckboxInitDataByJson(String name, String fieldLabel, String xtype, boolean isValid, boolean isAllowAdd, boolean isAllowUpdate, boolean isAllowSearch, boolean isAllowBlank,String jsonData){
+		this.addFieldCheckbox(name,fieldLabel,xtype,isValid,isAllowAdd,isAllowUpdate,isAllowSearch,isAllowBlank,null,null,jsonData);
+	}
+
+	public void addFieldCheckbox(String name, String fieldLabel, String xtype, boolean isValid, boolean isAllowAdd, boolean isAllowUpdate, boolean isAllowSearch, boolean isAllowBlank,String emptyText, String vtype,String jsonData){
+		SysEnControllerField  sysEnControllerField = new SysEnControllerField(name,fieldLabel,null,xtype,isValid,isAllowAdd,isAllowUpdate,isAllowSearch,isAllowBlank,emptyText,vtype);
+
+		SysEnFieldCheckboxGroup checkboxGroup = new SysEnFieldCheckboxGroup();
+
+		JSONArray ja = JSONArray.fromObject(jsonData);
+		for( int i=0 ;i<ja.size();i++ ){
+			JSONObject tempJo = ja.getJSONObject(i);
+			if( !tempJo.containsKey("name") ){
+				throw new PlatformException("缺少name属性。");
+			}
+			if( !tempJo.containsKey("value") ){
+				throw new PlatformException("缺少value属性。");
+			}
+
+			SysEnFieldCheckbox checkbox = new SysEnFieldCheckbox();
+			checkbox.setName( tempJo.getString("name") );
+			checkbox.setValue( tempJo.getString("value") );
+
+			checkboxGroup.getCheckboxList().add(checkbox);
+		}
+
+		sysEnControllerField.setSysEnFormFieldAttr( checkboxGroup );
+		this.getSysEnControllerFieldList().add( sysEnControllerField );
+
+	}
 
     /**
      * 添加菜单按钮

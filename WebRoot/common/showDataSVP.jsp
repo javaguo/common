@@ -51,27 +51,61 @@ Ext.onReady(function() {
 			margin: 8
 		},
 		items: [
-			{
-				xtype: 'radiogroup',
-				fieldLabel: '单选按钮',
-				// Arrange radio buttons into two columns, distributed vertically
-				columns: 2,
-				vertical: true,
-				items: [
-					{ boxLabel: 'Item 1', name: 'rb', inputValue: '1' },
-					{ boxLabel: 'Item 2', name: 'rb', inputValue: '2', checked: true},
-					{ boxLabel: 'Item 3', name: 'rb', inputValue: '3' },
-					{ boxLabel: 'Item 4', name: 'rb', inputValue: '4' },
-					{ boxLabel: 'Item 5', name: 'rb', inputValue: '5' },
-					{ boxLabel: 'Item 6', name: 'rb', inputValue: '6' }
-				]
-			},
-				<c:forEach items="${addFieldList}" var="fieldInfo" varStatus="fieldStatus">
 
-					{ id:'${menuIdentify}${fieldInfo.name}Add',fieldLabel: '${fieldInfo.fieldLabel}',name: '${fieldInfo.name}',
-					  type: '${fieldInfo.type}'
-					  <c:if test='${fieldInfo.xtype!=null}'>,xtype: '${fieldInfo.xtype}'</c:if>
-					}
+				<c:forEach items="${addFieldList}" var="fieldInfo" varStatus="fieldStatus">
+					<c:choose>
+						<%-- 单选按钮开始 --%>
+						<c:when test='${fieldInfo.xtype=="radiogroup"}'>
+							{
+								xtype: '${fieldInfo.xtype}',
+								fieldLabel: '${fieldInfo.fieldLabel}',
+								labelStyle:'vertical-align: middle;',
+								width:210,
+								columns: 2,
+								vertical: true,
+								items: [
+									<c:forEach items="${fieldInfo.sysEnFormFieldAttr.radioList}" var="radioFieldInfo" varStatus="radioFieldStatus">
+										{ boxLabel: '${radioFieldInfo.name}', name: '${fieldInfo.name}',
+											inputValue: '${radioFieldInfo.value}',width:60 }
+										<c:choose>
+											<c:when test="${radioFieldStatus.last}"></c:when>
+											<c:otherwise>,</c:otherwise>
+										</c:choose>
+									</c:forEach>
+								]
+							},
+						</c:when>
+						<%-- 单选按钮结束 --%>
+						<%-- 多选按钮开始 --%>
+						<c:when test='${fieldInfo.xtype=="checkboxgroup"}'>
+						{
+							xtype: '${fieldInfo.xtype}',
+							fieldLabel: '${fieldInfo.fieldLabel}',
+							labelStyle:'vertical-align: middle;',
+							width:250,
+							columns: 3,
+							vertical: true,
+							items: [
+								<c:forEach items="${fieldInfo.sysEnFormFieldAttr.checkboxList}" var="checkboxFieldInfo" varStatus="checkboxFieldStatus">
+										{ boxLabel: '${checkboxFieldInfo.name}', name: '${fieldInfo.name}',
+											inputValue: '${checkboxFieldInfo.value}',width:60 }
+									<c:choose>
+									<c:when test="${checkboxFieldStatus.last}"></c:when>
+									<c:otherwise>,</c:otherwise>
+									</c:choose>
+								</c:forEach>
+							]
+						},
+						</c:when>
+						<%-- 多选按钮结束 --%>
+						<c:otherwise>
+							{ id:'${menuIdentify}${fieldInfo.name}Add',fieldLabel: '${fieldInfo.fieldLabel}',name: '${fieldInfo.name}',
+								type: '${fieldInfo.type}'
+								<c:if test='${fieldInfo.xtype!=null}'>,xtype: '${fieldInfo.xtype}'</c:if>
+							}
+						</c:otherwise>
+					</c:choose>
+
 					<c:choose>
 						<c:when test="${fieldStatus.last}"></c:when>
 						<c:otherwise>,</c:otherwise>

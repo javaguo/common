@@ -24,6 +24,7 @@ public class ExampleBeanController extends BaseController<ExampleBean>{
      * 构造块，初始化控制器
      */
     {
+        System.out.println("执行构造块，初始化Controller！");
         //构造字段
         this.addField("id","ID","string",null,true,false,false,false,false,null,null);//ID的isValid参数要设置为true
 /*        this.addField("baseByte","字段baseByte","string",null,true,true,true,true,true,null,null);
@@ -51,8 +52,13 @@ public class ExampleBeanController extends BaseController<ExampleBean>{
         this.addField("formText","form文本","string","textfield",true,true,true,true,true,null,null);
         this.addField("formPassword","form密码","string","textfield",true,true,true,true,true,null,null);
         this.addField("formTextArea","form文本域","string","textareafield",true,true,true,true,true,null,null);
-        this.addField("formCheckbox","form多选","string",null,true,true,true,true,true,null,null);
-        this.addField("formRadio","form单选","string",null,true,true,true,true,true,null,null);
+
+        String radioJson = "[{name:'优秀',value:'90'},{name:'良好',value:'80'},{name:'中等',value:'70'},{name:'及格',value:'60'},{name:'差',value:'50'}]";
+        this.addFieldRadioInitDataByJson("formRadio","form单选","radiogroup",true,true,true,true,true,radioJson);
+
+        String checkboxJson = "[{name:'读书',value:'readbook'},{name:'跑步',value:'running'},{name:'游泳',value:'swimming'},{name:'编程',value:'programme'},{name:'游戏',value:'game'}]";
+        this.addFieldCheckboxInitDataByJson("formRadio","form多选","checkboxgroup",true,true,true,true,true,checkboxJson);
+
         this.addField("formComboBox","form下拉框","string",null,true,true,true,true,true,null,null);
         this.addField("formHidden","form隐藏域","string","hiddenfield",true,true,true,true,true,null,null);
         this.addField("formDate","form日期","string","datefield",true,true,true,true,true,null,null);

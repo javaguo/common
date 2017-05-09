@@ -18,6 +18,7 @@ public class SysEnControllerField extends AbstractBaseBean {
     private boolean isAllowBlank;//是否可为空
     private String emptyText;//字段提示信息
     private String vtype;//字段正则验证类型
+    private SysEnFormField sysEnFormFieldAttr;//字段具体属性
 
     public SysEnControllerField(String name, String fieldLabel, String type, String xtype, boolean isValid, boolean isAllowAdd, boolean isAllowUpdate, boolean isAllowSearch, boolean isAllowBlank, String emptyText, String vtype) {
         this.name = name;
@@ -140,5 +141,13 @@ public class SysEnControllerField extends AbstractBaseBean {
 
     public void setVtype(String vtype) {
         this.vtype = vtype;
+    }
+
+    public SysEnFormField getSysEnFormFieldAttr() {
+        return sysEnFormFieldAttr;
+    }
+
+    public void setSysEnFormFieldAttr(SysEnFormField sysEnFormFieldAttr) {
+        this.sysEnFormFieldAttr = sysEnFormFieldAttr;
     }
 }
