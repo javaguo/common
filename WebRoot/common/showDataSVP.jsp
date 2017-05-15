@@ -34,6 +34,90 @@ Ext.onReady(function() {
 	/**onReady开始*/	
 	Ext.tip.QuickTipManager.init();
 
+	
+	<%-- 下拉框初始化数据开始 --%>
+	Ext.define('comboBoxDataModel${menuIdentify}', {
+		extend: 'Ext.data.Model',
+		fields: ['id', 'name']
+	});
+	
+	<c:forEach items="${comboBoxList}" var="comboBoxInfo" varStatus="comboBoxStatus">
+		<c:choose>
+
+			<c:when test='${comboBoxInfo.loadDataImplModel=="json"}'>
+				var comboBoxStore${comboBoxInfo.comboBoxName}${menuIdentify} = Ext.create('Ext.data.Store', {
+					fields: ['id', 'name'],
+					data : [
+						<c:forEach items="${comboBoxInfo.comboBoxOptionList}" var="comboBoxOptionInfo" varStatus="comboBoxOptionStatus">
+							{"id":"${comboBoxOptionInfo.value}", "name":"${comboBoxOptionInfo.name}"}
+							<c:choose>
+								<c:when test="${comboBoxOptionStatus.last}"></c:when>
+								<c:otherwise>,</c:otherwise>
+							</c:choose>
+						</c:forEach>
+					]
+				});
+			</c:when>
+			
+			<c:when test='${comboBoxInfo.loadDataImplModel=="sql"}'>
+				var comboBoxStore${comboBoxInfo.comboBoxName}${menuIdentify} = new Ext.data.Store({
+					model:comboBoxDataModel${menuIdentify},
+					proxy: new Ext.data.HttpProxy({
+						url: '<%=basePath%>${controllerBaseUrl}/loadComboxData.do',
+						noCache:false,
+						reader:{
+							type:'json',
+							rootProperty: 'comboboxData'
+						}
+					}),
+					remoteSort: true
+				});
+				<c:choose>
+					<c:when test='${ !comboBoxInfo.isCascade || ( comboBoxInfo.isCascade && comboBoxInfo.comboBoxOrder==1 )}'>
+						comboBoxStore${comboBoxInfo.comboBoxName}${menuIdentify}.on("beforeload",function(){
+							Ext.apply(comboBoxStore${comboBoxInfo.comboBoxName}${menuIdentify}.proxy.extraParams, {"loadDataMethodName":"${comboBoxInfo.loadDataMethodName}","value":"1"});
+						});
+						comboBoxStore${comboBoxInfo.comboBoxName}${menuIdentify}.load();
+					</c:when>
+				</c:choose>
+				//var var${comboBoxInfo.comboBoxName}${menuIdentify} = ${comboBoxInfo.isCascade};
+				//var var${comboBoxInfo.comboBoxName}${menuIdentify}2 = ${comboBoxInfo.isLast};
+			</c:when>
+
+			<c:otherwise>
+			</c:otherwise>
+		</c:choose>
+		
+		var  comboBox${comboBoxInfo.comboBoxName}${menuIdentify} = Ext.create('Ext.form.ComboBox', {
+						id:'comboBoxId${comboBoxInfo.comboBoxName}${menuIdentify}',
+						xtype: 'combobox',
+						store: comboBoxStore${comboBoxInfo.comboBoxName}${menuIdentify},
+						triggerAction: 'all',
+						//queryMode: 'local',
+						displayField: 'name',
+						valueField: 'id',
+						width:80,
+						loadingText: 'loading...',
+						emptyText: "请选择",
+						mode: "local",
+						typeAhead: true  //延时查询
+		});
+		
+		<c:choose>
+			<c:when test='${ comboBoxInfo.loadDataImplModel=="sql" && comboBoxInfo.isCascade && !comboBoxInfo.isLast }'>
+				comboBox${comboBoxInfo.comboBoxName}${menuIdentify}.on('select', function() {
+					
+					comboBox${comboBoxInfo.childComboBox}${menuIdentify}.reset();
+					Ext.apply(comboBoxStore${comboBoxInfo.childComboBox}${menuIdentify}.proxy.extraParams, {"loadDataMethodName":"loadComboboxData","value":comboBox${comboBoxInfo.comboBoxName}${menuIdentify}.getValue()});
+					comboBoxStore${comboBoxInfo.childComboBox}${menuIdentify}.load();
+					
+				}); 
+			</c:when>
+		</c:choose>
+		
+	</c:forEach>
+	<%-- 下拉框初始化数据结束 --%>
+
 	var  addPanel${menuIdentify}=new Ext.FormPanel({
 		id:'addPanel${menuIdentify}',
 		frame : true,
@@ -51,7 +135,6 @@ Ext.onReady(function() {
 			margin: 8
 		},
 		items: [
-
 				<c:forEach items="${addFieldList}" var="fieldInfo" varStatus="fieldStatus">
 					<c:choose>
 						<%-- 单选按钮开始 --%>
@@ -98,6 +181,26 @@ Ext.onReady(function() {
 						},
 						</c:when>
 						<%-- 多选按钮结束 --%>
+						<%-- 下拉框开始 --%>
+						<c:when test='${fieldInfo.xtype=="combobox"}'>
+						{
+							xtype: 'fieldcontainer',
+							fieldLabel: '${fieldInfo.fieldLabel}',
+							labelStyle:'vertical-align: middle;',
+							width:350,
+							layout: 'hbox',
+							items:[
+								<c:forEach items="${fieldInfo.sysEnFormFieldAttr.comboBoxList}" var="comboBoxFieldInfo" varStatus="comboBoxFieldStatus">
+									comboBox${comboBoxFieldInfo.comboBoxName}${menuIdentify}
+									<c:choose>
+										<c:when test="${comboBoxFieldStatus.last}"></c:when>
+										<c:otherwise>,</c:otherwise>
+									</c:choose>
+								</c:forEach>
+							]
+						},
+						</c:when>
+						<%-- 下拉框结束 --%>
 						<c:otherwise>
 							{ id:'${menuIdentify}${fieldInfo.name}Add',fieldLabel: '${fieldInfo.fieldLabel}',name: '${fieldInfo.name}',
 								type: '${fieldInfo.type}'

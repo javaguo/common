@@ -73,6 +73,9 @@ public class BaseController<T extends AbstractBaseBean> implements Serializable 
             //可在列表显示的字段
 			List<SysEnControllerField> showFieldList = new ArrayList<SysEnControllerField>();
 
+			//页面上的所有下拉框
+			List<SysEnFieldComboBox> comboBoxList = new ArrayList<SysEnFieldComboBox>();
+
             for( SysEnControllerField conField : this.getSysEnControllerFieldList() ){
                 /*if( "id".equals( conField.getName() ) ){//编辑页面一定需要id，不管id字段配置成什么状态，都要加上id
                     updateFieldList.add( conField );
@@ -97,6 +100,13 @@ public class BaseController<T extends AbstractBaseBean> implements Serializable 
 
                 showFieldList.add( conField );
 
+				if( "combobox".equals( conField.getXtype() ) ){
+					SysEnFieldComboBoxGroup comboBoxGroup = (SysEnFieldComboBoxGroup)conField.getSysEnFormFieldAttr();
+					 comboBoxGroup.getComboBoxList();
+					for( SysEnFieldComboBox comboBox:comboBoxGroup.getComboBoxList() ){
+						comboBoxList.add( comboBox );
+					}
+				}
             }
 
 			modelAndView.addObject("fieldList",this.getSysEnControllerFieldList() );
@@ -104,6 +114,8 @@ public class BaseController<T extends AbstractBaseBean> implements Serializable 
 			modelAndView.addObject("updateFieldList",updateFieldList );
 			modelAndView.addObject("searFieldList",searFieldList );
 			modelAndView.addObject("showFieldList",showFieldList );
+
+			modelAndView.addObject("comboBoxList",comboBoxList);
 
 
             int searchConditionFieldNum = searFieldList.size();
@@ -455,6 +467,31 @@ public class BaseController<T extends AbstractBaseBean> implements Serializable 
 
     }
 
+	@RequestMapping("/loadComboxData.do")
+	public ModelAndView loadComboxData(HttpServletRequest request, HttpServletResponse response, T bean){
+		System.out.println("----------------- BaseController --> loadComboxData()   -----------------");
+		ModelAndView modelAndView = new ModelAndView();
+
+		String json;
+		try {
+			String loadDataMethodName = request.getParameter("loadDataMethodName");
+			String value = request.getParameter("value");
+			if( StringUtils.isBlank( loadDataMethodName )  || StringUtils.isBlank( value ) ){
+				throw new PlatformException("加载下来框数据请求参数为空！");
+			}
+
+			//查询数据
+			json = (String)this.getBaseService().loadComboboxData(loadDataMethodName,value);
+		} catch(Exception e) {
+			e.printStackTrace();
+			json = "{\"comboboxData\":[]}";
+		}
+
+		modelAndView.addObject( PlatformSysConstant.JSONSTR, json );
+		modelAndView.setViewName( this.getJsonView() );
+		return modelAndView;
+	}
+
 	/**
 	 * 添加列表页面每一个字段的相关属性
 	 * @param name
@@ -556,6 +593,121 @@ public class BaseController<T extends AbstractBaseBean> implements Serializable 
 		sysEnControllerField.setSysEnFormFieldAttr( checkboxGroup );
 		this.getSysEnControllerFieldList().add( sysEnControllerField );
 
+	}
+
+	public void addFieldComboBoxBySQL( String name, String fieldLabel,  boolean isValid, boolean isAllowAdd, boolean isAllowUpdate, boolean isAllowSearch, boolean isAllowBlank,String loadDataMethodName  ){
+		SysEnControllerField  sysEnControllerField = new SysEnControllerField(name,fieldLabel,null,"combobox",isValid,isAllowAdd,isAllowUpdate,isAllowSearch,isAllowBlank,null,null);
+
+		SysEnFieldComboBox comboBox = new SysEnFieldComboBox();
+		comboBox.setComboBoxName( name );
+		comboBox.setLoadDataImplModel("sql");
+		comboBox.setLoadDataMethodName( loadDataMethodName );
+		comboBox.setCascade(false);
+
+		SysEnFieldComboBoxGroup comboCoxGroup = new SysEnFieldComboBoxGroup();
+		comboCoxGroup.setCascade( false );
+		comboCoxGroup.getComboBoxList().add( comboBox );
+
+		sysEnControllerField.setSysEnFormFieldAttr( comboCoxGroup );
+		this.getSysEnControllerFieldList().add(sysEnControllerField);
+	}
+
+	public void addFieldComboBoxByJSON( String name, String fieldLabel,  boolean isValid, boolean isAllowAdd, boolean isAllowUpdate, boolean isAllowSearch, boolean isAllowBlank,String jsonData  ){
+		SysEnControllerField  sysEnControllerField = new SysEnControllerField(name,fieldLabel,null,"combobox",isValid,isAllowAdd,isAllowUpdate,isAllowSearch,isAllowBlank,null,null);
+
+		SysEnFieldComboBox comboBox = new SysEnFieldComboBox();
+		comboBox.setComboBoxName( name );
+		comboBox.setLoadDataImplModel("json");
+		comboBox.setCascade(false);
+
+		JSONArray ja = JSONArray.fromObject(jsonData);
+		for( int i=0 ;i<ja.size();i++ ){
+			JSONObject tempJo = ja.getJSONObject(i);
+			if( !tempJo.containsKey("name") ){
+				throw new PlatformException("缺少name属性。");
+			}
+			if( !tempJo.containsKey("value") ){
+				throw new PlatformException("缺少value属性。");
+			}
+
+			SysEnFieldComboBoxOption comboBoxOption = new SysEnFieldComboBoxOption();
+			comboBoxOption.setName( tempJo.getString("name") );
+			comboBoxOption.setValue( tempJo.getString("value") );
+
+			comboBox.getComboBoxOptionList().add( comboBoxOption );
+		}
+
+		SysEnFieldComboBoxGroup comboCoxGroup = new SysEnFieldComboBoxGroup();
+		comboCoxGroup.setCascade( false );
+		comboCoxGroup.getComboBoxList().add( comboBox );
+
+		sysEnControllerField.setSysEnFormFieldAttr( comboCoxGroup );
+		this.getSysEnControllerFieldList().add(sysEnControllerField);
+	}
+
+	/*public void addFieldComboBoxCascadeBySQL( String name, String fieldLabel,  boolean isValid, boolean isAllowAdd, boolean isAllowUpdate, boolean isAllowSearch, boolean isAllowBlank,
+											  String loadDataMethodName,String comboBoxGroupName,int comboBoxOrder,String parentComboBox,String childComboBox  ){
+
+	}*/
+
+	public void addFieldComboBoxCascadeBySQL(  String fieldLabel,  boolean isValid, boolean isAllowAdd, boolean isAllowUpdate, boolean isAllowSearch, boolean isAllowBlank,
+											  String comboBoxGroupName,String[] comboBoxNames,String[] loadDataMethodNames ){
+		if( comboBoxNames==null || loadDataMethodNames ==null || ( comboBoxNames.length!=loadDataMethodNames.length ) ){
+			return ;
+		}
+		SysEnControllerField  sysEnControllerField = new SysEnControllerField(null,fieldLabel,null,"combobox",isValid,isAllowAdd,isAllowUpdate,isAllowSearch,isAllowBlank,null,null);
+
+		SysEnFieldComboBoxGroup comboCoxGroup = new SysEnFieldComboBoxGroup();
+		comboCoxGroup.setCascade( true );
+
+		int comboBoxNum = comboBoxNames.length;
+		for( int i=0;i<comboBoxNum;i++ ){
+			if( StringUtils.isBlank( comboBoxNames[i] )  || StringUtils.isBlank( loadDataMethodNames[i] ) ){
+				throw new PlatformException("构造下拉框出错！参数错误！");
+			}
+
+			SysEnFieldComboBox tempComboBox = new SysEnFieldComboBox();
+			tempComboBox.setComboBoxName( comboBoxNames[i] );
+			tempComboBox.setLoadDataImplModel("sql");
+			tempComboBox.setLoadDataMethodName( loadDataMethodNames[i] );
+			tempComboBox.setCascade(true);
+			tempComboBox.setComboBoxOrder( i+1 );
+			if( i>0 ){
+				tempComboBox.setParentComboBox( comboBoxNames[i-1] );
+			}
+			if( i+1<comboBoxNum ){
+				tempComboBox.setChildComboBox( comboBoxNames[i+1] );
+			}
+
+			if( i==0 && i+1==comboBoxNum ){
+				tempComboBox.setFirst( true );
+				tempComboBox.setLast( true );
+			}else if(i==0){
+				tempComboBox.setFirst( true );
+				tempComboBox.setLast( false );
+			}else if( i+1==comboBoxNum ){
+				tempComboBox.setFirst( false );
+				tempComboBox.setLast( true );
+			}else{
+				tempComboBox.setFirst( false );
+				tempComboBox.setLast( false );
+			}
+
+			comboCoxGroup.getComboBoxList().add( tempComboBox );
+		}
+
+		sysEnControllerField.setSysEnFormFieldAttr( comboCoxGroup );
+		this.getSysEnControllerFieldList().add(sysEnControllerField);
+	}
+
+	public void addFieldComboBox(String name, String fieldLabel, String type, String xtype, boolean isValid, boolean isAllowAdd, boolean isAllowUpdate, boolean isAllowSearch, boolean isAllowBlank, String emptyText, String vtype){
+		SysEnControllerField  sysEnControllerField = new SysEnControllerField(name,fieldLabel,type,xtype,isValid,isAllowAdd,isAllowUpdate,isAllowSearch,isAllowBlank,emptyText,vtype);
+
+        /*if( null == this.getSysEnControllerFieldList() ){
+            this.setSysEnControllerFieldList( new ArrayList<SysEnControllerField>());
+        }*/
+
+		this.getSysEnControllerFieldList().add( sysEnControllerField );
 	}
 
     /**

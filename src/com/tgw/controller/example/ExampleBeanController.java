@@ -59,7 +59,16 @@ public class ExampleBeanController extends BaseController<ExampleBean>{
         String checkboxJson = "[{name:'读书',value:'readbook'},{name:'跑步',value:'running'},{name:'游泳',value:'swimming'},{name:'编程',value:'programme'},{name:'游戏',value:'game'}]";
         this.addFieldCheckboxInitDataByJson("formRadio","form多选","checkboxgroup",true,true,true,true,true,checkboxJson);
 
-        this.addField("formComboBox","form下拉框","string",null,true,true,true,true,true,null,null);
+        //this.addField("formComboBox","form下拉框","string","combobox",true,true,true,true,true,null,null);
+        String comboBoxJson = "[{name:'优',value:'90'},{name:'良',value:'80'},{name:'中',value:'70'},{name:'及格',value:'60'},{name:'差',value:'50'}]";
+        this.addFieldComboBoxByJSON("formComBox","下拉框json",true,true,false,false,true,comboBoxJson);
+
+        this.addFieldComboBoxBySQL("formComBoxSql","下拉框sql",true,true,false,false,true,"loadComboboxData");
+
+        this.addFieldComboBoxCascadeBySQL("级联1",true,true,false,false,true,"formComboboxGroup1",new String[] {"cascade1","cascade2"},new String[] {"loadComboboxData","loadComboboxData"});
+        this.addFieldComboBoxCascadeBySQL("级联2",true,true,false,false,true,"formComboboxGroup2",new String[] {"cascade2a","cascade2b","cascade2c"},new String[] {"loadComboboxData","loadComboboxData","loadComboboxData"});
+
+
         this.addField("formHidden","form隐藏域","string","hiddenfield",true,true,true,true,true,null,null);
         this.addField("formDate","form日期","string","datefield",true,true,true,true,true,null,null);
         this.addField("formTime","form时间","string","timefield",true,true,true,true,true,null,null);

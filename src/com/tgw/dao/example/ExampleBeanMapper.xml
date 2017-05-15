@@ -11,4 +11,10 @@ select exam.id,exam.form_text formText,exam.form_text_area formTextArea,
 
 	</select>
 
+	<select id="loadComboboxData"  resultType="map">
+		select menu.id,menu.text name
+		from sys_en_menu menu
+		where menu.fk_parent_id = #{value}
+	</select>
+
 </mapper>

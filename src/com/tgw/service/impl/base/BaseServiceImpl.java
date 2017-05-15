@@ -11,8 +11,10 @@ import net.sf.json.JSONObject;
 import org.springframework.stereotype.Service;
 
 import java.io.Serializable;
+import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 @Service("baseService")
 public class BaseServiceImpl  implements BaseService,Serializable {
@@ -76,6 +78,30 @@ public class BaseServiceImpl  implements BaseService,Serializable {
         for( Object obj :beanList ){
             this.getBaseModelMapper().deleteByPrimaryKey(obj);
         }
+    }
+
+    @Override
+    public Object loadComboboxData(String loadDataMethodName,Object value) throws PlatformException {
+        String resultStr;
+
+        Class baseModelMapperClass = this.getBaseModelMapper().getClass();
+        try{
+            Method method = baseModelMapperClass.getDeclaredMethod(loadDataMethodName,Object.class );
+            List<Map<String,Object>> queryResList = (List<Map<String,Object>>)method.invoke(  this.getBaseModelMapper(),value.toString() );
+
+            //组装查询结果
+            JSONObject jo = JSONObject.fromObject("{}");
+            jo.put("comboboxData", queryResList );
+            resultStr = jo.toString();
+        }catch (NoSuchMethodException e){
+            e.printStackTrace();
+            throw new PlatformException("没有找到查询combobox数据的方法。");
+        }catch (Exception e){
+            e.printStackTrace();
+            throw new PlatformException("查询combobox数据出错。");
+        }
+
+        return resultStr;
     }
 
     public BaseModelMapper getBaseModelMapper() {
