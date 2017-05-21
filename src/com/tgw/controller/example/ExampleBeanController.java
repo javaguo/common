@@ -26,8 +26,45 @@ public class ExampleBeanController extends BaseController<ExampleBean>{
     {
         System.out.println("执行构造块，初始化Controller！");
         //构造字段
-        this.addField("id","ID","string",null,true,false,false,false,false,null,null);//ID的isValid参数要设置为true
-/*        this.addField("baseByte","字段baseByte","string",null,true,true,true,true,true,null,null);
+        this.addFieldId("id","ID",null);
+        this.addFieldHidden( "formHidden","form隐藏域",true,true,true,null );
+        String formTextConfig = "labelWidth:150,width:'400',emptyText:'文本提示信息'";
+        this.addFieldText("formText","文本",true,true,true,true,true,formTextConfig);
+        String formPasswordConfig = "labelWidth:120,width:'300',emptyText:'密码提示信息'";
+        this.addFieldPassword("formPassword","密码",true,true,false,false,true,formPasswordConfig);
+        this.addFieldTextArea("formTextArea","文本域",true,true,true,true,true,null);
+        this.addFieldNumber("formNumber","数字",true,true,true,true,true,null);
+
+        this.addFieldDate("formDate","日期",true,true,true,true,true,null);
+
+        String radioJson = "[{name:'优秀',value:'90'},{name:'良好',value:'80'},{name:'中等',value:'70'},{name:'及格',value:'60'},{name:'差',value:'50'}]";
+        this.addFieldRadioInitDataByJson("formRadio","单选",true,true,true,true,true,radioJson,null);
+
+        String checkboxJson = "[{name:'读书',value:'readbook'},{name:'跑步',value:'running'},{name:'游泳',value:'swimming'},{name:'编程',value:'programme'},{name:'游戏',value:'game'}]";
+        this.addFieldCheckboxInitDataByJson("formCheckbox","多选",true,true,true,true,true,checkboxJson,null);
+
+        String comboBoxJson = "[{name:'优',value:'90'},{name:'良',value:'80'},{name:'中',value:'70'},{name:'及格',value:'60'},{name:'差',value:'50'}]";
+        this.addFieldComboBoxByJSON("formComBox","下拉框(json)",true,true,false,false,true,comboBoxJson,null);
+        this.addFieldComboBoxBySQL("formComBoxSql","下拉框(sql)",true,true,false,false,true,"loadComboboxData",null,null);
+        this.addFieldComboBoxCascadeBySQL("二级级联",true,true,false,false,true,"formComboboxGroup1","10",new String[] {"cascade1a","cascade1b"},new String[] {"loadComboboxData","loadComboboxData"},null);
+        this.addFieldComboBoxCascadeBySQL("三级级联",true,true,false,false,true,"formComboboxGroup2","1",new String[] {"cascade2a","cascade2b","cascade2c"},new String[] {"loadComboboxData","loadComboboxData","loadComboboxData"},null);
+
+        this.addFieldDisplay("formDisplay","form面板",true,true,true,true,null);
+
+        this.addFunction("menu1","功能1","baseConstant/pass.do",2,true,null,1);
+        this.addFunction("menu2","功能2","baseConstant/notPass.do",2,false,"Applicationgo",2);
+
+//        this.addField("id","ID","string",null,true,false,false,false,false,null,null);//ID的isValid参数要设置为true
+        //this.addField("formHidden","form隐藏域","string","hiddenfield",true,true,true,true,true,null,null);
+        //this.addField("formText","文本","string","textfield",true,true,true,true,true,null,null);
+        //this.addField("formPassword","密码","string","textfield",true,true,true,true,true,null,null);
+        //this.addField("formTextArea","文本域","string","textareafield",true,true,true,true,true,null,null);
+//        this.addField("formNumber","formNumber","string",null,true,true,true,true,true,null,null);
+//      this.addField("formDate","日期","string","datefield",true,true,true,true,true,null,null);
+//      this.addField("formTime","时间","string","timefield",true,true,true,true,true,null,null);
+//        this.addField("formDisplay","form面板","string","displayfield",true,true,true,true,true,null,null);
+
+        /*        this.addField("baseByte","字段baseByte","string",null,true,true,true,true,true,null,null);
         this.addField("baseShort","字段baseShort","string",null,true,true,true,true,true,null,null);
         this.addField("baseInt","字段baseInt","string",null,true,true,true,true,true,null,null);
         this.addField("baseLong","字段baseLong","string",null,true,true,true,true,true,null,null);
@@ -48,35 +85,6 @@ public class ExampleBeanController extends BaseController<ExampleBean>{
         this.addField("baseYearObj","字段baseYearObj","string",null,true,true,true,true,true,null,null);
         this.addField("baseTimestampObj","字段baseTimestampObj","string",null,true,true,true,true,true,null,null);
         this.addField("baseDateTimeObj","字段baseDateTimeObj","string",null,true,true,true,true,true,null,null);*/
-
-        this.addField("formText","form文本","string","textfield",true,true,true,true,true,null,null);
-        this.addField("formPassword","form密码","string","textfield",true,true,true,true,true,null,null);
-        this.addField("formTextArea","form文本域","string","textareafield",true,true,true,true,true,null,null);
-
-        String radioJson = "[{name:'优秀',value:'90'},{name:'良好',value:'80'},{name:'中等',value:'70'},{name:'及格',value:'60'},{name:'差',value:'50'}]";
-        this.addFieldRadioInitDataByJson("formRadio","form单选","radiogroup",true,true,true,true,true,radioJson);
-
-        String checkboxJson = "[{name:'读书',value:'readbook'},{name:'跑步',value:'running'},{name:'游泳',value:'swimming'},{name:'编程',value:'programme'},{name:'游戏',value:'game'}]";
-        this.addFieldCheckboxInitDataByJson("formRadio","form多选","checkboxgroup",true,true,true,true,true,checkboxJson);
-
-        //this.addField("formComboBox","form下拉框","string","combobox",true,true,true,true,true,null,null);
-        String comboBoxJson = "[{name:'优',value:'90'},{name:'良',value:'80'},{name:'中',value:'70'},{name:'及格',value:'60'},{name:'差',value:'50'}]";
-        this.addFieldComboBoxByJSON("formComBox","下拉框json",true,true,false,false,true,comboBoxJson);
-
-        this.addFieldComboBoxBySQL("formComBoxSql","下拉框sql",true,true,false,false,true,"loadComboboxData");
-
-        this.addFieldComboBoxCascadeBySQL("级联1",true,true,false,false,true,"formComboboxGroup1",new String[] {"cascade1","cascade2"},new String[] {"loadComboboxData","loadComboboxData"});
-        this.addFieldComboBoxCascadeBySQL("级联2",true,true,false,false,true,"formComboboxGroup2",new String[] {"cascade2a","cascade2b","cascade2c"},new String[] {"loadComboboxData","loadComboboxData","loadComboboxData"});
-
-
-        this.addField("formHidden","form隐藏域","string","hiddenfield",true,true,true,true,true,null,null);
-        this.addField("formDate","form日期","string","datefield",true,true,true,true,true,null,null);
-        this.addField("formTime","form时间","string","timefield",true,true,true,true,true,null,null);
-        this.addField("formDisplay","form面板","string","displayfield",true,true,true,true,true,null,null);
-//        this.addField("formNumber","formNumber","string",null,true,true,true,true,true,null,null);
-
-        this.addFunction("menu1","功能1","baseConstant/pass.do",2,true,null,1);
-        this.addFunction("menu2","功能2","baseConstant/notPass.do",2,false,"Applicationgo",2);
     }
 
     @Resource

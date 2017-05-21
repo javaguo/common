@@ -2,6 +2,7 @@ package com.tgw.controller.base;
 
 import com.tgw.bean.base.AbstractBaseBean;
 import com.tgw.bean.system.*;
+import com.tgw.bean.system.form.field.*;
 import com.tgw.exception.PlatformException;
 import com.tgw.service.base.BaseService;
 import com.tgw.utils.PlatformUtils;
@@ -64,6 +65,8 @@ public class BaseController<T extends AbstractBaseBean> implements Serializable 
 			/**
 			 * 初始化页面上的字段信息
 			 */
+			//所有有效字段
+			List<SysEnControllerField> validFieldList = new ArrayList<SysEnControllerField>();
 			//可被添加的字段
             List<SysEnControllerField> addFieldList = new ArrayList<SysEnControllerField>();
 			//可被更新的字段
@@ -84,6 +87,7 @@ public class BaseController<T extends AbstractBaseBean> implements Serializable 
                 if( !conField.isValid() ){
                     continue;
                 }
+				validFieldList.add( conField );
 
                 if( conField.isAllowAdd() ){
                     addFieldList.add( conField );
@@ -100,8 +104,8 @@ public class BaseController<T extends AbstractBaseBean> implements Serializable 
 
                 showFieldList.add( conField );
 
-				if( "combobox".equals( conField.getXtype() ) ){
-					SysEnFieldComboBoxGroup comboBoxGroup = (SysEnFieldComboBoxGroup)conField.getSysEnFormFieldAttr();
+				if( PlatformSysConstant.FORM_XTYPE_COMBOBOX.equals( conField.getXtype() ) ){
+					SysEnFieldComboBoxGroup comboBoxGroup = (SysEnFieldComboBoxGroup)conField.getSysEnFieldAttr();
 					 comboBoxGroup.getComboBoxList();
 					for( SysEnFieldComboBox comboBox:comboBoxGroup.getComboBoxList() ){
 						comboBoxList.add( comboBox );
@@ -110,6 +114,7 @@ public class BaseController<T extends AbstractBaseBean> implements Serializable 
             }
 
 			modelAndView.addObject("fieldList",this.getSysEnControllerFieldList() );
+			modelAndView.addObject("validFieldList",validFieldList);
 			modelAndView.addObject("addFieldList",addFieldList );
 			modelAndView.addObject("updateFieldList",updateFieldList );
 			modelAndView.addObject("searFieldList",searFieldList );
@@ -467,6 +472,13 @@ public class BaseController<T extends AbstractBaseBean> implements Serializable 
 
     }
 
+	/**
+	 * 加载下拉框数据
+	 * @param request
+	 * @param response
+	 * @param bean
+     * @return
+     */
 	@RequestMapping("/loadComboxData.do")
 	public ModelAndView loadComboxData(HttpServletRequest request, HttpServletResponse response, T bean){
 		System.out.println("----------------- BaseController --> loadComboxData()   -----------------");
@@ -476,8 +488,9 @@ public class BaseController<T extends AbstractBaseBean> implements Serializable 
 		try {
 			String loadDataMethodName = request.getParameter("loadDataMethodName");
 			String value = request.getParameter("value");
-			if( StringUtils.isBlank( loadDataMethodName )  || StringUtils.isBlank( value ) ){
-				throw new PlatformException("加载下来框数据请求参数为空！");
+			value = StringUtils.isBlank( value )?null:value.toString();
+			if( StringUtils.isBlank( loadDataMethodName )  ){
+				throw new PlatformException("加载下来框数据请求参数错误！");
 			}
 
 			//查询数据
@@ -487,12 +500,21 @@ public class BaseController<T extends AbstractBaseBean> implements Serializable 
 			json = "{\"comboboxData\":[]}";
 		}
 
+		/*try {
+			SysEnFieldText text = new SysEnFieldText();
+			JSONObject jo = JSONObject.fromObject("{emptyText:'提示信息',labelWidth:'100'}");
+			this.dealFormFieldAttr(text, jo );
+		} catch(Exception e) {
+			e.printStackTrace();
+		}*/
+
 		modelAndView.addObject( PlatformSysConstant.JSONSTR, json );
 		modelAndView.setViewName( this.getJsonView() );
 		return modelAndView;
 	}
 
 	/**
+	 * 暂时先保留此方法，框架编写完成后删除
 	 * 添加列表页面每一个字段的相关属性
 	 * @param name
 	 * @param fieldLabel
@@ -507,18 +529,14 @@ public class BaseController<T extends AbstractBaseBean> implements Serializable 
 	 * @param vtype
 	 */
 	public void addField(String name, String fieldLabel, String type, String xtype, boolean isValid, boolean isAllowAdd, boolean isAllowUpdate, boolean isAllowSearch, boolean isAllowBlank, String emptyText, String vtype){
-        SysEnControllerField  sysEnControllerField = new SysEnControllerField(name,fieldLabel,type,xtype,isValid,isAllowAdd,isAllowUpdate,isAllowSearch,isAllowBlank,emptyText,vtype);
-
-        /*if( null == this.getSysEnControllerFieldList() ){
-            this.setSysEnControllerFieldList( new ArrayList<SysEnControllerField>());
-        }*/
-
+        SysEnControllerField  sysEnControllerField = new SysEnControllerField(name,fieldLabel,type,xtype,isValid,isAllowAdd,isAllowUpdate,isAllowSearch,isAllowBlank);
         this.getSysEnControllerFieldList().add( sysEnControllerField );
     }
 
 
 
 	/**
+	 * 暂时先保留此方法，框架编写完成后删除
 	 * 添加列表页面每一个字段的相关属性
 	 * @param name
 	 * @param fieldLabel
@@ -528,48 +546,174 @@ public class BaseController<T extends AbstractBaseBean> implements Serializable 
         this.addField(name,fieldLabel,type,null,true,true,true,true,true,null,null);
     }
 
-	public void addFieldRadioInitDataByMethod(String name, String fieldLabel, String xtype, boolean isValid, boolean isAllowAdd, boolean isAllowUpdate, boolean isAllowSearch, boolean isAllowBlank,String loadDataMethodName){
-		String jsonData = null;
-		this.addFieldRadio(name,fieldLabel,xtype,isValid,isAllowAdd,isAllowUpdate,isAllowSearch,isAllowBlank,null,null,jsonData);
-	}
+	/**
+	 * 将JSONObject的键值赋值给SysEnFormField对应的字段
+	 * @param sysEnField
+	 * @param jo
+	 */
+	public void dealFormFieldAttr(SysEnFieldBase sysEnField, JSONObject jo ){
+		Class fieldClass = sysEnField.getClass();
 
-	public void addFieldRadioInitDataByJson(String name, String fieldLabel, String xtype, boolean isValid, boolean isAllowAdd, boolean isAllowUpdate, boolean isAllowSearch, boolean isAllowBlank,String jsonData){
-		this.addFieldRadio(name,fieldLabel,xtype,isValid,isAllowAdd,isAllowUpdate,isAllowSearch,isAllowBlank,null,null,jsonData);
-	}
+		SysEnFieldBase formFieldBase = new SysEnFieldBase();
+		Class baseClass = formFieldBase.getClass();
+		String baseClassInfo = baseClass.toString();
 
-	public void addFieldRadio(String name, String fieldLabel, String xtype, boolean isValid, boolean isAllowAdd, boolean isAllowUpdate, boolean isAllowSearch, boolean isAllowBlank,String emptyText, String vtype,String jsonData){
-		SysEnControllerField  sysEnControllerField = new SysEnControllerField(name,fieldLabel,null,xtype,isValid,isAllowAdd,isAllowUpdate,isAllowSearch,isAllowBlank,emptyText,vtype);
-
-		SysEnFieldRadioGroup radioGroup = new SysEnFieldRadioGroup();
-
-		JSONArray ja = JSONArray.fromObject(jsonData);
-		for( int i=0 ;i<ja.size();i++ ){
-			JSONObject tempJo = ja.getJSONObject(i);
-			if( !tempJo.containsKey("name") ){
-				throw new PlatformException("缺少name属性。");
+		boolean endFlag = false;
+		while( !endFlag ){
+			/**
+			 *getDeclaredFields只能获取类本身声明的字段，父类声明的字段获取不到
+			 * 所以要通过循环设置所有的字段属性值
+			 */
+			Field[] fields = fieldClass.getDeclaredFields();
+			for( Field field : fields ){
+				try{
+					String fieldName = field.getName();
+					if( jo.containsKey(fieldName) ){
+						Method method = fieldClass.getDeclaredMethod( "set"+PlatformUtils.firstLetterToUpperCase( fieldName ),String.class );
+						method.invoke(sysEnField,jo.get(fieldName).toString() );
+					}
+				}catch( Exception e ){
+					e.printStackTrace();
+				}
 			}
-			if( !tempJo.containsKey("value") ){
-				throw new PlatformException("缺少value属性。");
+
+			String fieldClassInfo = fieldClass.toString();
+			if( baseClassInfo.equals( fieldClassInfo ) ){
+				endFlag = true;
+			}else{
+				fieldClass = fieldClass.getSuperclass();
 			}
-
-			SysEnFieldRadio radio = new SysEnFieldRadio();
-			radio.setName( tempJo.getString("name") );
-			radio.setValue( tempJo.getString("value") );
-
-			radioGroup.getRadioList().add(radio);
 		}
 
-		sysEnControllerField.setSysEnFormFieldAttr( radioGroup );
+	}
+
+	public void addFieldId( String name, String fieldLabel,String configs ){
+		SysEnControllerField  sysEnControllerField = new SysEnControllerField(name,fieldLabel,PlatformSysConstant.FORM_XTYPE_HIDDEN,true,false,false,false,false);
+
+		SysEnFieldBase formField = new SysEnFieldBase();
+		formField.setConfigs( configs );
+		/*if( StringUtils.isNotBlank( configs ) ){
+			JSONObject jo = JSONObject.fromObject( "{"+configs+"}" );
+			this.dealFormFieldAttr( formField,jo );
+		}*/
+
+		sysEnControllerField.setSysEnFieldAttr( formField );
 		this.getSysEnControllerFieldList().add( sysEnControllerField );
-
 	}
 
-	public void addFieldCheckboxInitDataByJson(String name, String fieldLabel, String xtype, boolean isValid, boolean isAllowAdd, boolean isAllowUpdate, boolean isAllowSearch, boolean isAllowBlank,String jsonData){
-		this.addFieldCheckbox(name,fieldLabel,xtype,isValid,isAllowAdd,isAllowUpdate,isAllowSearch,isAllowBlank,null,null,jsonData);
+	public void addFieldHidden( String name, String fieldLabel, boolean isValid, boolean isAllowAdd, boolean isAllowUpdate,String configs){
+		SysEnControllerField  sysEnControllerField = new SysEnControllerField(name,fieldLabel,PlatformSysConstant.FORM_XTYPE_HIDDEN,isValid,isAllowAdd,isAllowUpdate,false,true);
+
+		SysEnFieldHidden formField = new SysEnFieldHidden();
+		formField.setConfigs( configs );
+		/*if( StringUtils.isNotBlank(configs) ){
+			JSONObject jo = JSONObject.fromObject( "{"+ configs +"}" );
+			this.dealFormFieldAttr( formField,jo );
+		}*/
+
+		sysEnControllerField.setSysEnFieldAttr( formField );
+		this.getSysEnControllerFieldList().add( sysEnControllerField );
 	}
 
-	public void addFieldCheckbox(String name, String fieldLabel, String xtype, boolean isValid, boolean isAllowAdd, boolean isAllowUpdate, boolean isAllowSearch, boolean isAllowBlank,String emptyText, String vtype,String jsonData){
-		SysEnControllerField  sysEnControllerField = new SysEnControllerField(name,fieldLabel,null,xtype,isValid,isAllowAdd,isAllowUpdate,isAllowSearch,isAllowBlank,emptyText,vtype);
+	public void addFieldText( String name, String fieldLabel, boolean isValid, boolean isAllowAdd, boolean isAllowUpdate, boolean isAllowSearch, boolean isAllowBlank ){
+		String tempConfigs = "inputType:'"+PlatformSysConstant.FORM_INPUTTYPE_TEXT+"'";
+		this.addFieldText(name,fieldLabel,isValid,isAllowAdd,isAllowUpdate,isAllowSearch,isAllowBlank,tempConfigs);
+	}
+
+	public void addFieldText( String name, String fieldLabel, boolean isValid, boolean isAllowAdd, boolean isAllowUpdate, boolean isAllowSearch, boolean isAllowBlank, String emptyText, String vtype ){
+		String tempConfigs = "inputType:'"+PlatformSysConstant.FORM_INPUTTYPE_TEXT+"',emptyText:'"+emptyText+"',"+"vtype:'"+vtype+"'";
+		this.addFieldText(name,fieldLabel,isValid,isAllowAdd,isAllowUpdate,isAllowSearch,isAllowBlank,tempConfigs);
+	}
+
+	public void addFieldText( String name, String fieldLabel, boolean isValid, boolean isAllowAdd, boolean isAllowUpdate, boolean isAllowSearch, boolean isAllowBlank, String emptyText, String vtype,String configs ){
+		String tempConfigs = "inputType:'"+PlatformSysConstant.FORM_INPUTTYPE_TEXT+"',emptyText:'"+emptyText+"',"+"vtype:'"+vtype+"',"+configs;
+		this.addFieldText(name,fieldLabel,isValid,isAllowAdd,isAllowUpdate,isAllowSearch,isAllowBlank,tempConfigs);
+	}
+
+	public void addFieldPassword( String name, String fieldLabel, boolean isValid, boolean isAllowAdd, boolean isAllowUpdate, boolean isAllowSearch, boolean isAllowBlank ){
+		String tempConfigs = "inputType:'"+PlatformSysConstant.FORM_INPUTTYPE_PASSWORD+"'";
+		this.addFieldText(name,fieldLabel,isValid,isAllowAdd,isAllowUpdate,isAllowSearch,isAllowBlank,tempConfigs);
+	}
+
+	public void addFieldPassword( String name, String fieldLabel, boolean isValid, boolean isAllowAdd, boolean isAllowUpdate, boolean isAllowSearch, boolean isAllowBlank, String emptyText, String vtype ){
+		String tempConfigs = "inputType:'"+PlatformSysConstant.FORM_INPUTTYPE_PASSWORD+"',emptyText:'"+emptyText+"',"+"vtype:'"+vtype+"'";
+		this.addFieldText(name,fieldLabel,isValid,isAllowAdd,isAllowUpdate,isAllowSearch,isAllowBlank,tempConfigs);
+	}
+
+	public void addFieldPassword( String name, String fieldLabel, boolean isValid, boolean isAllowAdd, boolean isAllowUpdate, boolean isAllowSearch, boolean isAllowBlank, String emptyText, String vtype,String configs ){
+		String tempConfigs = "inputType:'"+PlatformSysConstant.FORM_INPUTTYPE_PASSWORD+"',emptyText:'"+emptyText+"',"+"vtype:'"+vtype+"',"+configs;
+		this.addFieldText(name,fieldLabel,isValid,isAllowAdd,isAllowUpdate,isAllowSearch,isAllowBlank,tempConfigs);
+	}
+
+	public void addFieldPassword( String name, String fieldLabel, boolean isValid, boolean isAllowAdd, boolean isAllowUpdate, boolean isAllowSearch, boolean isAllowBlank,String configs ){
+		String tempConfigs = "inputType:'"+PlatformSysConstant.FORM_INPUTTYPE_PASSWORD+"',"+configs;
+		this.addFieldText(name,fieldLabel,isValid,isAllowAdd,isAllowUpdate,isAllowSearch,isAllowBlank,tempConfigs);
+	}
+
+	public void addFieldText( String name, String fieldLabel, boolean isValid, boolean isAllowAdd, boolean isAllowUpdate, boolean isAllowSearch, boolean isAllowBlank,String configs ){
+		SysEnControllerField  sysEnControllerField = new SysEnControllerField(name,fieldLabel,PlatformSysConstant.FORM_XTYPE_TEXT,isValid,isAllowAdd,isAllowUpdate,isAllowSearch,isAllowBlank);
+
+		SysEnFieldText formField = new SysEnFieldText();
+		formField.setConfigs( configs );
+		/*if( StringUtils.isNotBlank( configs ) ){
+			JSONObject jo = JSONObject.fromObject( "{"+configs+"}" );
+			this.dealFormFieldAttr( formField,jo );
+		}*/
+
+		sysEnControllerField.setSysEnFieldAttr( formField );
+		this.getSysEnControllerFieldList().add( sysEnControllerField );
+	}
+
+	public void addFieldTextArea( String name, String fieldLabel, boolean isValid, boolean isAllowAdd, boolean isAllowUpdate, boolean isAllowSearch, boolean isAllowBlank,String configs ){
+		SysEnControllerField  sysEnControllerField = new SysEnControllerField(name,fieldLabel,PlatformSysConstant.FORM_XTYPE_TEXTAREA,isValid,isAllowAdd,isAllowUpdate,isAllowSearch,isAllowBlank);
+
+		SysEnFieldTextArea formField = new SysEnFieldTextArea();
+		formField.setConfigs( configs );
+		/*if( StringUtils.isNotBlank( configs ) ){
+			JSONObject jo = JSONObject.fromObject( "{"+configs+"}" );
+			this.dealFormFieldAttr( formField,jo );
+		}*/
+
+		sysEnControllerField.setSysEnFieldAttr( formField );
+		this.getSysEnControllerFieldList().add( sysEnControllerField );
+	}
+
+	public void addFieldNumber(String name, String fieldLabel, boolean isValid, boolean isAllowAdd, boolean isAllowUpdate, boolean isAllowSearch, boolean isAllowBlank,String configs){
+		SysEnControllerField  sysEnControllerField = new SysEnControllerField(name,fieldLabel,PlatformSysConstant.FORM_XTYPE_NUMBER,isValid,isAllowAdd,isAllowUpdate,isAllowSearch,isAllowBlank);
+
+		SysEnFieldNumber formField = new SysEnFieldNumber();
+		formField.setConfigs( configs );
+		/*if( StringUtils.isNotBlank( configs ) ){
+			JSONObject jo = JSONObject.fromObject( "{"+configs+"}" );
+			this.dealFormFieldAttr( formField,jo );
+		}*/
+
+		sysEnControllerField.setSysEnFieldAttr( formField );
+		this.getSysEnControllerFieldList().add( sysEnControllerField );
+	}
+
+	public void addFieldDate(String name, String fieldLabel, boolean isValid, boolean isAllowAdd, boolean isAllowUpdate, boolean isAllowSearch, boolean isAllowBlank,String configs){
+		SysEnControllerField  sysEnControllerField = new SysEnControllerField(name,fieldLabel,PlatformSysConstant.FORM_XTYPE_DATE,isValid,isAllowAdd,isAllowUpdate,isAllowSearch,isAllowBlank);
+
+		SysEnFieldDate fieldDate = new SysEnFieldDate();
+		fieldDate.setConfigs( configs );
+		/*if( StringUtils.isNotBlank( configs ) ){
+			JSONObject jo = JSONObject.fromObject( "{"+configs+"}" );
+			this.dealFormFieldAttr( fieldDate,jo );
+		}
+		fieldDate.setFormat( PlatformSysConstant.DATE_FORMAT_EXT_YMD );
+		*/
+
+		sysEnControllerField.setSysEnFieldAttr( fieldDate );
+		this.getSysEnControllerFieldList().add( sysEnControllerField );
+	}
+
+	public void addFieldCheckboxInitDataByJson(String name, String fieldLabel, boolean isValid, boolean isAllowAdd, boolean isAllowUpdate, boolean isAllowSearch, boolean isAllowBlank,String jsonData,String config){
+		this.addFieldCheckbox(name,fieldLabel,isValid,isAllowAdd,isAllowUpdate,isAllowSearch,isAllowBlank,jsonData,config);
+	}
+
+	public void addFieldCheckbox(String name, String fieldLabel, boolean isValid, boolean isAllowAdd, boolean isAllowUpdate, boolean isAllowSearch, boolean isAllowBlank,String jsonData,String config){
+		SysEnControllerField  sysEnControllerField = new SysEnControllerField(name,fieldLabel,PlatformSysConstant.FORM_XTYPE_CHECKBOXGROUP,isValid,isAllowAdd,isAllowUpdate,isAllowSearch,isAllowBlank);
 
 		SysEnFieldCheckboxGroup checkboxGroup = new SysEnFieldCheckboxGroup();
 
@@ -584,36 +728,76 @@ public class BaseController<T extends AbstractBaseBean> implements Serializable 
 			}
 
 			SysEnFieldCheckbox checkbox = new SysEnFieldCheckbox();
-			checkbox.setName( tempJo.getString("name") );
-			checkbox.setValue( tempJo.getString("value") );
+			checkbox.setBoxLabel( tempJo.getString("name") );
+			checkbox.setInputValue( tempJo.getString("value") );
 
 			checkboxGroup.getCheckboxList().add(checkbox);
 		}
 
-		sysEnControllerField.setSysEnFormFieldAttr( checkboxGroup );
+		sysEnControllerField.setSysEnFieldAttr( checkboxGroup );
 		this.getSysEnControllerFieldList().add( sysEnControllerField );
 
 	}
 
-	public void addFieldComboBoxBySQL( String name, String fieldLabel,  boolean isValid, boolean isAllowAdd, boolean isAllowUpdate, boolean isAllowSearch, boolean isAllowBlank,String loadDataMethodName  ){
-		SysEnControllerField  sysEnControllerField = new SysEnControllerField(name,fieldLabel,null,"combobox",isValid,isAllowAdd,isAllowUpdate,isAllowSearch,isAllowBlank,null,null);
+	/**
+	 *暂时没有实现
+     */
+	public void addFieldRadioInitDataByMethod(String name, String fieldLabel, boolean isValid, boolean isAllowAdd, boolean isAllowUpdate, boolean isAllowSearch, boolean isAllowBlank,String loadDataMethodName,String config){
+		String jsonData = null;
+		this.addFieldRadio(name,fieldLabel,isValid,isAllowAdd,isAllowUpdate,isAllowSearch,isAllowBlank,jsonData,config);
+	}
+
+
+	public void addFieldRadioInitDataByJson(String name, String fieldLabel, boolean isValid, boolean isAllowAdd, boolean isAllowUpdate, boolean isAllowSearch, boolean isAllowBlank,String jsonData,String config){
+		this.addFieldRadio(name,fieldLabel,isValid,isAllowAdd,isAllowUpdate,isAllowSearch,isAllowBlank,jsonData,config);
+	}
+
+	public void addFieldRadio(String name, String fieldLabel, boolean isValid, boolean isAllowAdd, boolean isAllowUpdate, boolean isAllowSearch, boolean isAllowBlank,String jsonData,String config){
+		SysEnControllerField  sysEnControllerField = new SysEnControllerField(name,fieldLabel,PlatformSysConstant.FORM_XTYPE_RADIOGROUP,isValid,isAllowAdd,isAllowUpdate,isAllowSearch,isAllowBlank);
+
+		SysEnFieldRadioGroup radioGroup = new SysEnFieldRadioGroup();
+
+		JSONArray ja = JSONArray.fromObject(jsonData);
+		for( int i=0 ;i<ja.size();i++ ){
+			JSONObject tempJo = ja.getJSONObject(i);
+			if( !tempJo.containsKey("name") ){
+				throw new PlatformException("缺少name属性。");
+			}
+			if( !tempJo.containsKey("value") ){
+				throw new PlatformException("缺少value属性。");
+			}
+
+			SysEnFieldRadio radio = new SysEnFieldRadio();
+			radio.setBoxLabel( tempJo.getString("name") );
+			radio.setInputValue( tempJo.getString("value") );
+
+			radioGroup.getRadioList().add(radio);
+		}
+
+		sysEnControllerField.setSysEnFieldAttr( radioGroup );
+		this.getSysEnControllerFieldList().add( sysEnControllerField );
+	}
+
+	public void addFieldComboBoxBySQL( String name, String fieldLabel,  boolean isValid, boolean isAllowAdd, boolean isAllowUpdate, boolean isAllowSearch, boolean isAllowBlank,String loadDataMethodName,String firstComboBoxParamValue,String config){
+		SysEnControllerField  sysEnControllerField = new SysEnControllerField(name,fieldLabel,PlatformSysConstant.FORM_XTYPE_COMBOBOX,isValid,isAllowAdd,isAllowUpdate,isAllowSearch,isAllowBlank);
 
 		SysEnFieldComboBox comboBox = new SysEnFieldComboBox();
 		comboBox.setComboBoxName( name );
 		comboBox.setLoadDataImplModel("sql");
 		comboBox.setLoadDataMethodName( loadDataMethodName );
+		comboBox.setFirstComboBoxParamValue( firstComboBoxParamValue );
 		comboBox.setCascade(false);
 
 		SysEnFieldComboBoxGroup comboCoxGroup = new SysEnFieldComboBoxGroup();
 		comboCoxGroup.setCascade( false );
 		comboCoxGroup.getComboBoxList().add( comboBox );
 
-		sysEnControllerField.setSysEnFormFieldAttr( comboCoxGroup );
+		sysEnControllerField.setSysEnFieldAttr( comboCoxGroup );
 		this.getSysEnControllerFieldList().add(sysEnControllerField);
 	}
 
-	public void addFieldComboBoxByJSON( String name, String fieldLabel,  boolean isValid, boolean isAllowAdd, boolean isAllowUpdate, boolean isAllowSearch, boolean isAllowBlank,String jsonData  ){
-		SysEnControllerField  sysEnControllerField = new SysEnControllerField(name,fieldLabel,null,"combobox",isValid,isAllowAdd,isAllowUpdate,isAllowSearch,isAllowBlank,null,null);
+	public void addFieldComboBoxByJSON( String name, String fieldLabel,  boolean isValid, boolean isAllowAdd, boolean isAllowUpdate, boolean isAllowSearch, boolean isAllowBlank,String jsonData,String config  ){
+		SysEnControllerField  sysEnControllerField = new SysEnControllerField(name,fieldLabel,PlatformSysConstant.FORM_XTYPE_COMBOBOX,isValid,isAllowAdd,isAllowUpdate,isAllowSearch,isAllowBlank);
 
 		SysEnFieldComboBox comboBox = new SysEnFieldComboBox();
 		comboBox.setComboBoxName( name );
@@ -641,21 +825,21 @@ public class BaseController<T extends AbstractBaseBean> implements Serializable 
 		comboCoxGroup.setCascade( false );
 		comboCoxGroup.getComboBoxList().add( comboBox );
 
-		sysEnControllerField.setSysEnFormFieldAttr( comboCoxGroup );
+		sysEnControllerField.setSysEnFieldAttr( comboCoxGroup );
 		this.getSysEnControllerFieldList().add(sysEnControllerField);
 	}
 
-	/*public void addFieldComboBoxCascadeBySQL( String name, String fieldLabel,  boolean isValid, boolean isAllowAdd, boolean isAllowUpdate, boolean isAllowSearch, boolean isAllowBlank,
-											  String loadDataMethodName,String comboBoxGroupName,int comboBoxOrder,String parentComboBox,String childComboBox  ){
-
-	}*/
-
 	public void addFieldComboBoxCascadeBySQL(  String fieldLabel,  boolean isValid, boolean isAllowAdd, boolean isAllowUpdate, boolean isAllowSearch, boolean isAllowBlank,
-											  String comboBoxGroupName,String[] comboBoxNames,String[] loadDataMethodNames ){
+											  String comboBoxGroupName,String firstComboBoxParamValue,String[] comboBoxNames,String[] loadDataMethodNames,String config ){
 		if( comboBoxNames==null || loadDataMethodNames ==null || ( comboBoxNames.length!=loadDataMethodNames.length ) ){
-			return ;
+			throw new PlatformException("构造下拉框出错！参数错误！");
 		}
-		SysEnControllerField  sysEnControllerField = new SysEnControllerField(null,fieldLabel,null,"combobox",isValid,isAllowAdd,isAllowUpdate,isAllowSearch,isAllowBlank,null,null);
+
+		if( comboBoxNames.length<1 ){
+			throw new PlatformException("构造下拉框出错！至少需要配置一个下来框！");
+		}
+
+		SysEnControllerField  sysEnControllerField = new SysEnControllerField(comboBoxGroupName,fieldLabel,PlatformSysConstant.FORM_XTYPE_COMBOBOX,isValid,isAllowAdd,isAllowUpdate,isAllowSearch,isAllowBlank);
 
 		SysEnFieldComboBoxGroup comboCoxGroup = new SysEnFieldComboBoxGroup();
 		comboCoxGroup.setCascade( true );
@@ -663,12 +847,15 @@ public class BaseController<T extends AbstractBaseBean> implements Serializable 
 		int comboBoxNum = comboBoxNames.length;
 		for( int i=0;i<comboBoxNum;i++ ){
 			if( StringUtils.isBlank( comboBoxNames[i] )  || StringUtils.isBlank( loadDataMethodNames[i] ) ){
-				throw new PlatformException("构造下拉框出错！参数错误！");
+				throw new PlatformException("构造下拉框出错！参数为空！");
 			}
 
 			SysEnFieldComboBox tempComboBox = new SysEnFieldComboBox();
 			tempComboBox.setComboBoxName( comboBoxNames[i] );
 			tempComboBox.setLoadDataImplModel("sql");
+			if( i==0 ){
+				tempComboBox.setFirstComboBoxParamValue( firstComboBoxParamValue );
+			}
 			tempComboBox.setLoadDataMethodName( loadDataMethodNames[i] );
 			tempComboBox.setCascade(true);
 			tempComboBox.setComboBoxOrder( i+1 );
@@ -696,17 +883,41 @@ public class BaseController<T extends AbstractBaseBean> implements Serializable 
 			comboCoxGroup.getComboBoxList().add( tempComboBox );
 		}
 
-		sysEnControllerField.setSysEnFormFieldAttr( comboCoxGroup );
+		/**
+		 * 设置每个下拉框的父子关系及所有后续级联下拉框
+		 */
+		List<SysEnFieldComboBox> comboboxList = comboCoxGroup.getComboBoxList();
+		for( int i=0;i<comboCoxGroup.getComboBoxList().size();i++ ){
+			if( i>0 ){
+				comboboxList.get(i-1).setChildSysEnFieldComboBox( comboboxList.get(i) );
+				comboboxList.get(i).setParentSysEnFieldComboBox( comboboxList.get(i-1) );
+			}
+
+			SysEnFieldComboBox tempComboBox = comboboxList.get(i);
+			if( !tempComboBox.isLast() ){
+				List<SysEnFieldComboBox> cascadeList = new ArrayList<SysEnFieldComboBox>();
+				for( int j=i+1;j<comboboxList.size();j++ ){
+					cascadeList.add( comboboxList.get(j) );
+				}
+				tempComboBox.setCascadeList( cascadeList );
+			}
+		}
+
+		sysEnControllerField.setSysEnFieldAttr( comboCoxGroup );
 		this.getSysEnControllerFieldList().add(sysEnControllerField);
 	}
 
-	public void addFieldComboBox(String name, String fieldLabel, String type, String xtype, boolean isValid, boolean isAllowAdd, boolean isAllowUpdate, boolean isAllowSearch, boolean isAllowBlank, String emptyText, String vtype){
-		SysEnControllerField  sysEnControllerField = new SysEnControllerField(name,fieldLabel,type,xtype,isValid,isAllowAdd,isAllowUpdate,isAllowSearch,isAllowBlank,emptyText,vtype);
+	public void addFieldDisplay(String name, String fieldLabel, boolean isValid, boolean isAllowAdd, boolean isAllowUpdate, boolean isAllowSearch,String configs){
+		SysEnControllerField  sysEnControllerField = new SysEnControllerField(name,fieldLabel,PlatformSysConstant.FORM_XTYPE_DISPLAY,isValid,isAllowAdd,isAllowUpdate,isAllowSearch,true);
 
-        /*if( null == this.getSysEnControllerFieldList() ){
-            this.setSysEnControllerFieldList( new ArrayList<SysEnControllerField>());
-        }*/
+		SysEnFieldDisplay formField = new SysEnFieldDisplay();
+		formField.setConfigs( configs );
+		/*if( StringUtils.isNotBlank(configs) ){
+			JSONObject jo = JSONObject.fromObject( "{"+ configs +"}" );
+			this.dealFormFieldAttr( formField,jo );
+		}*/
 
+		sysEnControllerField.setSysEnFieldAttr( formField );
 		this.getSysEnControllerFieldList().add( sysEnControllerField );
 	}
 

@@ -30,8 +30,8 @@ String browserLang=request.getLocale().toString();
 		 	src="resource/js/extjs/extjs5/ext-all.js"></script>	
 	<!-- 语言包要在ext-all.js之后引入才能生效 -->
 	<script type="text/javascript"
-		 	src="resource/js/extjs/extjs5/locale/ext-lang-<%=browserLang%>.js"></script>	
-	
+		 	src="resource/js/extjs/extjs5/locale/ext-lang-<%=browserLang%>.js"></script>
+
 	<script type="text/javascript"
 		 	src="resource/js/platform/manage/app/indexShare.js"></script>
   </head>

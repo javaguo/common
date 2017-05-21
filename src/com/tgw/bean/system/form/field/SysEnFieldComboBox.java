@@ -1,4 +1,4 @@
-package com.tgw.bean.system;
+package com.tgw.bean.system.form.field;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -6,7 +6,7 @@ import java.util.List;
 /**
  * Created by zjg on 2017/5/13.
  */
-public class SysEnFieldComboBox extends SysEnFormField{
+public class SysEnFieldComboBox extends SysEnFieldPicker {
 
     private String comboBoxName;//下拉框名称
     /**
@@ -18,12 +18,17 @@ public class SysEnFieldComboBox extends SysEnFormField{
      */
     private String loadDataImplModel;//值为sql或json
     private String loadDataMethodName;//查询下拉框数据的Mapper方法名
+    private String firstComboBoxParamValue;//初始化下拉框的参数值，loadDataImplModel值为sql时使用
     private List<SysEnFieldComboBoxOption> comboBoxOptionList = new ArrayList<SysEnFieldComboBoxOption>();
 
     private boolean isCascade;//是否是级联下拉框
     private int comboBoxOrder;//级联下拉框顺序
     private String parentComboBox;//父级联下拉框名称
     private String childComboBox;//子级联下拉框名称
+    private SysEnFieldComboBox parentSysEnFieldComboBox;
+    private SysEnFieldComboBox childSysEnFieldComboBox;
+    //下拉框的所有后续子级联框
+    private List<SysEnFieldComboBox> cascadeList = new ArrayList<SysEnFieldComboBox>();
     private boolean isFirst;
     private boolean isLast;
 
@@ -50,6 +55,14 @@ public class SysEnFieldComboBox extends SysEnFormField{
 
     public void setLoadDataMethodName(String loadDataMethodName) {
         this.loadDataMethodName = loadDataMethodName;
+    }
+
+    public String getFirstComboBoxParamValue() {
+        return firstComboBoxParamValue;
+    }
+
+    public void setFirstComboBoxParamValue(String firstComboBoxParamValue) {
+        this.firstComboBoxParamValue = firstComboBoxParamValue;
     }
 
     public List<SysEnFieldComboBoxOption> getComboBoxOptionList() {
@@ -91,6 +104,30 @@ public class SysEnFieldComboBox extends SysEnFormField{
 
     public String getChildComboBox() {
         return childComboBox;
+    }
+
+    public SysEnFieldComboBox getParentSysEnFieldComboBox() {
+        return parentSysEnFieldComboBox;
+    }
+
+    public void setParentSysEnFieldComboBox(SysEnFieldComboBox parentSysEnFieldComboBox) {
+        this.parentSysEnFieldComboBox = parentSysEnFieldComboBox;
+    }
+
+    public SysEnFieldComboBox getChildSysEnFieldComboBox() {
+        return childSysEnFieldComboBox;
+    }
+
+    public void setChildSysEnFieldComboBox(SysEnFieldComboBox childSysEnFieldComboBox) {
+        this.childSysEnFieldComboBox = childSysEnFieldComboBox;
+    }
+
+    public List<SysEnFieldComboBox> getCascadeList() {
+        return cascadeList;
+    }
+
+    public void setCascadeList(List<SysEnFieldComboBox> cascadeList) {
+        this.cascadeList = cascadeList;
     }
 
     public void setChildComboBox(String childComboBox) {

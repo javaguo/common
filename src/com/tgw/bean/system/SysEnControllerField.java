@@ -1,6 +1,7 @@
 package com.tgw.bean.system;
 
 import com.tgw.bean.base.AbstractBaseBean;
+import com.tgw.bean.system.form.field.SysEnFieldBase;
 
 /**
  * Created by zhaojg on 2016/10/20.
@@ -16,11 +17,9 @@ public class SysEnControllerField extends AbstractBaseBean {
     private boolean isAllowUpdate;//是否可更新
     private boolean isAllowSearch;//是否可被搜索
     private boolean isAllowBlank;//是否可为空
-    private String emptyText;//字段提示信息
-    private String vtype;//字段正则验证类型
-    private SysEnFormField sysEnFormFieldAttr;//字段具体属性
+    private SysEnFieldBase sysEnFieldAttr;//字段具体属性
 
-    public SysEnControllerField(String name, String fieldLabel, String type, String xtype, boolean isValid, boolean isAllowAdd, boolean isAllowUpdate, boolean isAllowSearch, boolean isAllowBlank, String emptyText, String vtype) {
+    public SysEnControllerField(String name, String fieldLabel, String type, String xtype, boolean isValid, boolean isAllowAdd, boolean isAllowUpdate, boolean isAllowSearch, boolean isAllowBlank) {
         this.name = name;
         this.fieldLabel = fieldLabel;
         this.type = type;
@@ -30,11 +29,9 @@ public class SysEnControllerField extends AbstractBaseBean {
         this.isAllowUpdate = isAllowUpdate;
         this.isAllowSearch = isAllowSearch;
         this.isAllowBlank = isAllowBlank;
-        this.emptyText = emptyText;
-        this.vtype = vtype;
     }
 
-    public SysEnControllerField(String name, String fieldLabel, String xtype, boolean isValid, boolean isAllowAdd, boolean isAllowUpdate, boolean isAllowSearch, boolean isAllowBlank, String emptyText, String vtype) {
+    public SysEnControllerField(String name, String fieldLabel, String xtype, boolean isValid, boolean isAllowAdd, boolean isAllowUpdate, boolean isAllowSearch, boolean isAllowBlank) {
         this.name = name;
         this.fieldLabel = fieldLabel;
         this.xtype = xtype;
@@ -43,9 +40,8 @@ public class SysEnControllerField extends AbstractBaseBean {
         this.isAllowUpdate = isAllowUpdate;
         this.isAllowSearch = isAllowSearch;
         this.isAllowBlank = isAllowBlank;
-        this.emptyText = emptyText;
-        this.vtype = vtype;
     }
+
 
     public Integer getId() {
         return id;
@@ -119,6 +115,10 @@ public class SysEnControllerField extends AbstractBaseBean {
         isAllowSearch = allowSearch;
     }
 
+    public boolean getIsAllowBlank() {
+        return isAllowBlank;
+    }
+
     public boolean isAllowBlank() {
         return isAllowBlank;
     }
@@ -127,27 +127,11 @@ public class SysEnControllerField extends AbstractBaseBean {
         isAllowBlank = allowBlank;
     }
 
-    public String getEmptyText() {
-        return emptyText;
+    public SysEnFieldBase getSysEnFieldAttr() {
+        return sysEnFieldAttr;
     }
 
-    public void setEmptyText(String emptyText) {
-        this.emptyText = emptyText;
-    }
-
-    public String getVtype() {
-        return vtype;
-    }
-
-    public void setVtype(String vtype) {
-        this.vtype = vtype;
-    }
-
-    public SysEnFormField getSysEnFormFieldAttr() {
-        return sysEnFormFieldAttr;
-    }
-
-    public void setSysEnFormFieldAttr(SysEnFormField sysEnFormFieldAttr) {
-        this.sysEnFormFieldAttr = sysEnFormFieldAttr;
+    public void setSysEnFieldAttr(SysEnFieldBase sysEnFieldAttr) {
+        this.sysEnFieldAttr = sysEnFieldAttr;
     }
 }

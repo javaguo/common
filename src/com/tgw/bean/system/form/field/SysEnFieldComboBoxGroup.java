@@ -1,4 +1,4 @@
-package com.tgw.bean.system;
+package com.tgw.bean.system.form.field;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -6,7 +6,7 @@ import java.util.List;
 /**
  * Created by zjg on 2017/5/14.
  */
-public class SysEnFieldComboBoxGroup extends SysEnFormField{
+public class SysEnFieldComboBoxGroup extends SysEnFieldCheckboxGroup {
 
     private String comboBoxGroupName;//级联下拉框分组名称
     private boolean isCascade;//是否是级联下拉框

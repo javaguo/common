@@ -8,6 +8,7 @@ import com.tgw.dao.base.BaseModelMapper;
 import com.tgw.exception.PlatformException;
 import com.tgw.service.base.BaseService;
 import net.sf.json.JSONObject;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Service;
 
 import java.io.Serializable;
@@ -87,7 +88,8 @@ public class BaseServiceImpl  implements BaseService,Serializable {
         Class baseModelMapperClass = this.getBaseModelMapper().getClass();
         try{
             Method method = baseModelMapperClass.getDeclaredMethod(loadDataMethodName,Object.class );
-            List<Map<String,Object>> queryResList = (List<Map<String,Object>>)method.invoke(  this.getBaseModelMapper(),value.toString() );
+            String paramValue = value==null?null:value.toString();
+            List<Map<String,Object>> queryResList = (List<Map<String,Object>>)method.invoke(  this.getBaseModelMapper(),paramValue );
 
             //组装查询结果
             JSONObject jo = JSONObject.fromObject("{}");

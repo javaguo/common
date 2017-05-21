@@ -40,12 +40,11 @@ Ext.onReady(function() {
 		extend: 'Ext.data.Model',
 		fields: ['id', 'name']
 	});
-	
 	<c:forEach items="${comboBoxList}" var="comboBoxInfo" varStatus="comboBoxStatus">
 		<c:choose>
 
 			<c:when test='${comboBoxInfo.loadDataImplModel=="json"}'>
-				var comboBoxStore${comboBoxInfo.comboBoxName}${menuIdentify} = Ext.create('Ext.data.Store', {
+				var comboBoxStore_${comboBoxInfo.comboBoxName}_${menuIdentify} = Ext.create('Ext.data.Store', {
 					fields: ['id', 'name'],
 					data : [
 						<c:forEach items="${comboBoxInfo.comboBoxOptionList}" var="comboBoxOptionInfo" varStatus="comboBoxOptionStatus">
@@ -60,7 +59,7 @@ Ext.onReady(function() {
 			</c:when>
 			
 			<c:when test='${comboBoxInfo.loadDataImplModel=="sql"}'>
-				var comboBoxStore${comboBoxInfo.comboBoxName}${menuIdentify} = new Ext.data.Store({
+				var comboBoxStore_${comboBoxInfo.comboBoxName}_${menuIdentify} = new Ext.data.Store({
 					model:comboBoxDataModel${menuIdentify},
 					proxy: new Ext.data.HttpProxy({
 						url: '<%=basePath%>${controllerBaseUrl}/loadComboxData.do',
@@ -73,25 +72,23 @@ Ext.onReady(function() {
 					remoteSort: true
 				});
 				<c:choose>
-					<c:when test='${ !comboBoxInfo.isCascade || ( comboBoxInfo.isCascade && comboBoxInfo.comboBoxOrder==1 )}'>
-						comboBoxStore${comboBoxInfo.comboBoxName}${menuIdentify}.on("beforeload",function(){
-							Ext.apply(comboBoxStore${comboBoxInfo.comboBoxName}${menuIdentify}.proxy.extraParams, {"loadDataMethodName":"${comboBoxInfo.loadDataMethodName}","value":"1"});
+					<c:when test='${ !comboBoxInfo.isCascade || ( comboBoxInfo.isCascade && comboBoxInfo.isFirst )}'>
+						comboBoxStore_${comboBoxInfo.comboBoxName}_${menuIdentify}.on("beforeload",function(){
+							Ext.apply(comboBoxStore_${comboBoxInfo.comboBoxName}_${menuIdentify}.proxy.extraParams, {"loadDataMethodName":"${comboBoxInfo.loadDataMethodName}","value":"${comboBoxInfo.firstComboBoxParamValue}"});
 						});
-						comboBoxStore${comboBoxInfo.comboBoxName}${menuIdentify}.load();
+						comboBoxStore_${comboBoxInfo.comboBoxName}_${menuIdentify}.load();
 					</c:when>
 				</c:choose>
-				//var var${comboBoxInfo.comboBoxName}${menuIdentify} = ${comboBoxInfo.isCascade};
-				//var var${comboBoxInfo.comboBoxName}${menuIdentify}2 = ${comboBoxInfo.isLast};
 			</c:when>
 
 			<c:otherwise>
 			</c:otherwise>
 		</c:choose>
 		
-		var  comboBox${comboBoxInfo.comboBoxName}${menuIdentify} = Ext.create('Ext.form.ComboBox', {
+		var  comboBox_${comboBoxInfo.comboBoxName}_${menuIdentify} = Ext.create('Ext.form.ComboBox', {
 						id:'comboBoxId${comboBoxInfo.comboBoxName}${menuIdentify}',
 						xtype: 'combobox',
-						store: comboBoxStore${comboBoxInfo.comboBoxName}${menuIdentify},
+						store: comboBoxStore_${comboBoxInfo.comboBoxName}_${menuIdentify},
 						triggerAction: 'all',
 						//queryMode: 'local',
 						displayField: 'name',
@@ -105,11 +102,15 @@ Ext.onReady(function() {
 		
 		<c:choose>
 			<c:when test='${ comboBoxInfo.loadDataImplModel=="sql" && comboBoxInfo.isCascade && !comboBoxInfo.isLast }'>
-				comboBox${comboBoxInfo.comboBoxName}${menuIdentify}.on('select', function() {
-					
-					comboBox${comboBoxInfo.childComboBox}${menuIdentify}.reset();
-					Ext.apply(comboBoxStore${comboBoxInfo.childComboBox}${menuIdentify}.proxy.extraParams, {"loadDataMethodName":"loadComboboxData","value":comboBox${comboBoxInfo.comboBoxName}${menuIdentify}.getValue()});
-					comboBoxStore${comboBoxInfo.childComboBox}${menuIdentify}.load();
+				comboBox_${comboBoxInfo.comboBoxName}_${menuIdentify}.on('select', function() {
+					<c:forEach items="${comboBoxInfo.cascadeList}" var="cascadeComboBoxInfo" varStatus="cascadeComboBoxStatus">
+						comboBox_${cascadeComboBoxInfo.comboBoxName}_${menuIdentify}.clearValue();
+						comboBox_${cascadeComboBoxInfo.comboBoxName}_${menuIdentify}.reset();
+						
+						comboBoxStore_${cascadeComboBoxInfo.comboBoxName}_${menuIdentify}.removeAll();
+					</c:forEach>
+					Ext.apply(comboBoxStore_${comboBoxInfo.childComboBox}_${menuIdentify}.proxy.extraParams, {"loadDataMethodName":"loadComboboxData","value":comboBox_${comboBoxInfo.comboBoxName}_${menuIdentify}.getValue()});
+					comboBoxStore_${comboBoxInfo.childComboBox}_${menuIdentify}.load();
 					
 				}); 
 			</c:when>
@@ -117,6 +118,92 @@ Ext.onReady(function() {
 		
 	</c:forEach>
 	<%-- 下拉框初始化数据结束 --%>
+	
+	<%-- 生成所有字段表单元素开始 --%>
+	<c:forEach items="${validFieldList}" var="validFieldInfo" varStatus="validFieldStatus">
+		var  field_${validFieldInfo.name}_${menuIdentify} =
+		<c:choose>
+			<%-- 单选按钮开始 --%>
+			<c:when test='${validFieldInfo.xtype=="radiogroup"}'>
+			Ext.create({
+				xtype: '${validFieldInfo.xtype}',
+				fieldLabel: '${validFieldInfo.fieldLabel}',
+				labelStyle:'vertical-align: middle;',
+				width:210,
+				columns: 10,
+				vertical: true,
+				items: [
+					<c:forEach items="${validFieldInfo.sysEnFieldAttr.radioList}" var="radioFieldInfo" varStatus="radioFieldStatus">
+						{ boxLabel: '${radioFieldInfo.boxLabel}', name: '${validFieldInfo.name}',
+							inputValue: '${radioFieldInfo.inputValue}',width:60 }
+						<c:choose>
+							<c:when test="${radioFieldStatus.last}"></c:when>
+							<c:otherwise>,</c:otherwise>
+						</c:choose>
+					</c:forEach>
+				]
+			});
+			</c:when>
+			<%-- 单选按钮结束 --%>
+			<%-- 多选按钮开始 --%>
+			<c:when test='${validFieldInfo.xtype=="checkboxgroup"}'>
+			 Ext.create({
+				xtype: '${validFieldInfo.xtype}',
+				fieldLabel: '${validFieldInfo.fieldLabel}',
+				labelStyle:'vertical-align: middle;',
+				width:250,
+				columns: 10,
+				vertical: true,
+				items: [
+					<c:forEach items="${validFieldInfo.sysEnFieldAttr.checkboxList}" var="checkboxFieldInfo" varStatus="checkboxFieldStatus">
+							{ boxLabel: '${checkboxFieldInfo.boxLabel}', name: '${validFieldInfo.name}',
+								inputValue: '${checkboxFieldInfo.inputValue}',width:60 }
+						<c:choose>
+							<c:when test="${checkboxFieldStatus.last}"></c:when>
+							<c:otherwise>,</c:otherwise>
+						</c:choose>
+					</c:forEach>
+				]
+			});
+			</c:when>
+			<%-- 多选按钮结束 --%>
+			<%-- 下拉框开始 --%>
+			<c:when test='${validFieldInfo.xtype=="combobox"}'>
+			Ext.create({
+				xtype: 'fieldcontainer',
+				fieldLabel: '${validFieldInfo.fieldLabel}',
+				labelStyle:'vertical-align: middle;',
+				width:450,
+				layout: 'hbox',
+				items:[
+					<c:forEach items="${validFieldInfo.sysEnFieldAttr.comboBoxList}" var="comboBoxFieldInfo" varStatus="comboBoxFieldStatus">
+						comboBox_${comboBoxFieldInfo.comboBoxName}_${menuIdentify}
+						<c:choose>
+							<c:when test="${comboBoxFieldStatus.last}"></c:when>
+							<c:otherwise>,</c:otherwise>
+						</c:choose>
+					</c:forEach>
+				]
+			});
+			</c:when>
+			<%-- 下拉框结束 --%>
+			<%-- 表单元素开始 --%>
+			<c:otherwise>
+			Ext.create({
+				 xtype: '${validFieldInfo.xtype}',
+				 id:'field_${validFieldInfo.name}_${menuIdentify}',
+				 name: '${validFieldInfo.name}',
+				 fieldLabel: '${validFieldInfo.fieldLabel}'
+				 <c:if test='${validFieldInfo.sysEnFieldAttr!=null}'>
+					,${validFieldInfo.sysEnFieldAttr.configs}
+				 </c:if>
+			});
+			</c:otherwise>
+			<%-- 表单元素结束 --%>
+		</c:choose>
+	</c:forEach>
+	<%-- 生成所有字段表单元素结束 --%>
+	
 
 	var  addPanel${menuIdentify}=new Ext.FormPanel({
 		id:'addPanel${menuIdentify}',
@@ -128,7 +215,7 @@ Ext.onReady(function() {
 		url: '<%=basePath%>${controllerBaseUrl}/save.do',
 		defaultType: 'textfield',
 		fieldDefaults: {
-			labelWidth: 60,
+			labelWidth: 100,
 			labelAlign: "right",
 			width:200,
 			flex: 0,//每项item的宽度权重。值为0或未设置此属性时，item的width值才起作用。
@@ -136,79 +223,7 @@ Ext.onReady(function() {
 		},
 		items: [
 				<c:forEach items="${addFieldList}" var="fieldInfo" varStatus="fieldStatus">
-					<c:choose>
-						<%-- 单选按钮开始 --%>
-						<c:when test='${fieldInfo.xtype=="radiogroup"}'>
-							{
-								xtype: '${fieldInfo.xtype}',
-								fieldLabel: '${fieldInfo.fieldLabel}',
-								labelStyle:'vertical-align: middle;',
-								width:210,
-								columns: 2,
-								vertical: true,
-								items: [
-									<c:forEach items="${fieldInfo.sysEnFormFieldAttr.radioList}" var="radioFieldInfo" varStatus="radioFieldStatus">
-										{ boxLabel: '${radioFieldInfo.name}', name: '${fieldInfo.name}',
-											inputValue: '${radioFieldInfo.value}',width:60 }
-										<c:choose>
-											<c:when test="${radioFieldStatus.last}"></c:when>
-											<c:otherwise>,</c:otherwise>
-										</c:choose>
-									</c:forEach>
-								]
-							},
-						</c:when>
-						<%-- 单选按钮结束 --%>
-						<%-- 多选按钮开始 --%>
-						<c:when test='${fieldInfo.xtype=="checkboxgroup"}'>
-						{
-							xtype: '${fieldInfo.xtype}',
-							fieldLabel: '${fieldInfo.fieldLabel}',
-							labelStyle:'vertical-align: middle;',
-							width:250,
-							columns: 3,
-							vertical: true,
-							items: [
-								<c:forEach items="${fieldInfo.sysEnFormFieldAttr.checkboxList}" var="checkboxFieldInfo" varStatus="checkboxFieldStatus">
-										{ boxLabel: '${checkboxFieldInfo.name}', name: '${fieldInfo.name}',
-											inputValue: '${checkboxFieldInfo.value}',width:60 }
-									<c:choose>
-									<c:when test="${checkboxFieldStatus.last}"></c:when>
-									<c:otherwise>,</c:otherwise>
-									</c:choose>
-								</c:forEach>
-							]
-						},
-						</c:when>
-						<%-- 多选按钮结束 --%>
-						<%-- 下拉框开始 --%>
-						<c:when test='${fieldInfo.xtype=="combobox"}'>
-						{
-							xtype: 'fieldcontainer',
-							fieldLabel: '${fieldInfo.fieldLabel}',
-							labelStyle:'vertical-align: middle;',
-							width:350,
-							layout: 'hbox',
-							items:[
-								<c:forEach items="${fieldInfo.sysEnFormFieldAttr.comboBoxList}" var="comboBoxFieldInfo" varStatus="comboBoxFieldStatus">
-									comboBox${comboBoxFieldInfo.comboBoxName}${menuIdentify}
-									<c:choose>
-										<c:when test="${comboBoxFieldStatus.last}"></c:when>
-										<c:otherwise>,</c:otherwise>
-									</c:choose>
-								</c:forEach>
-							]
-						},
-						</c:when>
-						<%-- 下拉框结束 --%>
-						<c:otherwise>
-							{ id:'${menuIdentify}${fieldInfo.name}Add',fieldLabel: '${fieldInfo.fieldLabel}',name: '${fieldInfo.name}',
-								type: '${fieldInfo.type}'
-								<c:if test='${fieldInfo.xtype!=null}'>,xtype: '${fieldInfo.xtype}'</c:if>
-							}
-						</c:otherwise>
-					</c:choose>
-
+					field_${fieldInfo.name}_${menuIdentify}
 					<c:choose>
 						<c:when test="${fieldStatus.last}"></c:when>
 						<c:otherwise>,</c:otherwise>
@@ -265,8 +280,10 @@ Ext.onReady(function() {
 	var addWindow${menuIdentify} = new Ext.Window({
 		id:'addWindow${menuIdentify}',
 		title: '添加窗口',
-		width:400,
-		autoHeight:true,
+		width:600,
+		maxHeight:500,
+		scrollable:true,
+		//autoHeight:true,
 		resizable:false,
 		bodyStyle : 'padding:0px 0px 0px 0px',
 		closeAction : 'hide',
@@ -312,10 +329,10 @@ Ext.onReady(function() {
 				,hidden:true
 			  </c:if>
             }
-            <c:choose>
-            <c:when test="${fieldStatus.last}"></c:when>
-            <c:otherwise>,</c:otherwise>
-            </c:choose>
+				<c:choose>
+					<c:when test="${fieldStatus.last}"></c:when>
+					<c:otherwise>,</c:otherwise>
+				</c:choose>
             </c:forEach>
         ],
 

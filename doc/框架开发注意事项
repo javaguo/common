@@ -1,1 +1,3 @@
 向后台传id值时，只能传整数。po类中id定义为int类型。
+1.bean中的int、double等基本类型的字段要用Integer、Double类声明。使用基本类型去声明时，请求提交数据时抱400错误，无法正确解析基本类型。
+2.如果jsp页面要获取bean对象中的boolean类型值，要设置boolean类型字段的get方法。

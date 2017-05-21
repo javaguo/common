@@ -1,9 +1,9 @@
-package com.tgw.bean.system;
+package com.tgw.bean.system.form.field;
 
 /**
- * Created by zjg on 2017/5/7.
+ * Created by zjg on 2017/5/14.
  */
-public class SysEnFieldRadio extends SysEnFormField{
+public class SysEnFieldComboBoxOption extends SysEnFieldBase {
     private String name;
     private String value;
 
@@ -15,10 +15,12 @@ public class SysEnFieldRadio extends SysEnFormField{
         this.name = name;
     }
 
+    @Override
     public String getValue() {
         return value;
     }
 
+    @Override
     public void setValue(String value) {
         this.value = value;
     }

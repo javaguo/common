@@ -41,16 +41,17 @@ public class ExampleBean extends AbstractBaseBean{
     private Date baseTimestampObj;
     private Date baseDateTimeObj;
 
-    private String formText;
-    private String formTextArea;
-    private String formCheckbox;
-    private String formRadio;
-    private String formComboBox;
     private String formHidden;
+    private String formText;
+    private String formPassword;
+    private String formTextArea;
+    private Integer formNumber;
     private String formDate;
     private String formTime;
+    private String formRadio;
+    private String formCheckbox;
+    private String formComboBox;
     private String formDisplay;
-    private int  formNumber;
 
 
     public Integer getId() {
@@ -221,12 +222,28 @@ public class ExampleBean extends AbstractBaseBean{
         this.baseDateTimeObj = baseDateTimeObj;
     }
 
+    public String getFormHidden() {
+        return formHidden;
+    }
+
+    public void setFormHidden(String formHidden) {
+        this.formHidden = formHidden;
+    }
+
     public String getFormText() {
         return formText;
     }
 
     public void setFormText(String formText) {
         this.formText = formText;
+    }
+
+    public String getFormPassword() {
+        return formPassword;
+    }
+
+    public void setFormPassword(String formPassword) {
+        this.formPassword = formPassword;
     }
 
     public String getFormTextArea() {
@@ -237,36 +254,12 @@ public class ExampleBean extends AbstractBaseBean{
         this.formTextArea = formTextArea;
     }
 
-    public String getFormCheckbox() {
-        return formCheckbox;
+    public Integer getFormNumber() {
+        return formNumber;
     }
 
-    public void setFormCheckbox(String formCheckbox) {
-        this.formCheckbox = formCheckbox;
-    }
-
-    public String getFormRadio() {
-        return formRadio;
-    }
-
-    public void setFormRadio(String formRadio) {
-        this.formRadio = formRadio;
-    }
-
-    public String getFormComboBox() {
-        return formComboBox;
-    }
-
-    public void setFormComboBox(String formComboBox) {
-        this.formComboBox = formComboBox;
-    }
-
-    public String getFormHidden() {
-        return formHidden;
-    }
-
-    public void setFormHidden(String formHidden) {
-        this.formHidden = formHidden;
+    public void setFormNumber(Integer formNumber) {
+        this.formNumber = formNumber;
     }
 
     public String getFormDate() {
@@ -285,19 +278,35 @@ public class ExampleBean extends AbstractBaseBean{
         this.formTime = formTime;
     }
 
+    public String getFormRadio() {
+        return formRadio;
+    }
+
+    public void setFormRadio(String formRadio) {
+        this.formRadio = formRadio;
+    }
+
+    public String getFormCheckbox() {
+        return formCheckbox;
+    }
+
+    public void setFormCheckbox(String formCheckbox) {
+        this.formCheckbox = formCheckbox;
+    }
+
+    public String getFormComboBox() {
+        return formComboBox;
+    }
+
+    public void setFormComboBox(String formComboBox) {
+        this.formComboBox = formComboBox;
+    }
+
     public String getFormDisplay() {
         return formDisplay;
     }
 
     public void setFormDisplay(String formDisplay) {
         this.formDisplay = formDisplay;
-    }
-
-    public int getFormNumber() {
-        return formNumber;
-    }
-
-    public void setFormNumber(int formNumber) {
-        this.formNumber = formNumber;
     }
 }
