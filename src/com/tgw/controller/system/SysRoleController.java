@@ -20,9 +20,9 @@ public class SysRoleController extends BaseController {
      */
     {
         //构造字段
-        this.addField("id","ID","string");
+       /* this.addField("id","ID","string");
         this.addField("roleName","名称","string");
-        this.addField("roleStatus","编码","string");
+        this.addField("roleStatus","编码","string");*/
     }
 
 	@Resource

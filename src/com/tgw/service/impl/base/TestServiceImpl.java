@@ -28,6 +28,11 @@ public class TestServiceImpl extends BaseServiceImpl implements TestService {
     @Resource
     private BaseConstantMapper baseEnConstantMapper;
 
+    @Override
+    public void initMapper() {
+        super.setBaseModelMapper( this.getBaseModelMapper() );
+    }
+
     /**
      * 测试分页
      */
@@ -133,12 +138,6 @@ public class TestServiceImpl extends BaseServiceImpl implements TestService {
         }catch (Exception e){
             e.printStackTrace();
         }
-    }
-
-
-    @Override
-    public void initSearchData(int pageNum, int pageSize, Object object) {
-        super.setBaseModelMapper( this.getTestMapper() );
     }
 
     public TestMapper getTestMapper() {

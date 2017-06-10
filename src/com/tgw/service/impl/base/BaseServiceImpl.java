@@ -28,15 +28,20 @@ public class BaseServiceImpl  implements BaseService,Serializable {
     private BaseModelMapper baseModelMapper;
 
     @Override
-    public void initSearchData(int pageNum, int pageSize, Object object) {
+    public void initMapper() {
 
     }
+
+   /* @Override
+    public void initSearchData(int pageNum, int pageSize, Object object) {
+
+    }*/
 
     @Override
     public Object searchData(int pageNum, int pageSize,Object object) {
         System.out.println("----------------- 父类BaseServiceImpl --> searchData-----------------");
 
-        this.initSearchData(pageNum,pageSize,object);
+        //this.initSearchData(pageNum,pageSize,object);
 
         //分页查询数据
         PageHelper.startPage(pageNum,pageSize);

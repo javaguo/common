@@ -18,8 +18,14 @@ public class BaseConstantServiceImpl extends BaseServiceImpl implements BaseCons
     private BaseConstantMapper baseEnConstantMapper;
 
     @Override
-    public void initSearchData(int pageNum, int pageSize, Object object) {
-        super.setBaseModelMapper( this.getBaseEnConstantMapper() );
+    public void initMapper() {
+        System.out.println("ExampleBeanServiceImpl-->initMapper()");
+        /**
+         * 具体业务层必须调用
+         */
+        if( null!=baseEnConstantMapper ){
+            super.setBaseModelMapper( this.getBaseEnConstantMapper() );
+        }
     }
 
     public BaseConstantMapper getBaseEnConstantMapper() {

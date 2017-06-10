@@ -16,11 +16,6 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
     @Autowired
     private SysUserMapper sysUserMapper;
 
-    @Override
-    public void initSearchData(int pageNum, int pageSize, Object object) {
-        super.setBaseModelMapper( this.getSysUserMapper() );
-    }
-
     public SysUserMapper getSysUserMapper() {
         return sysUserMapper;
     }

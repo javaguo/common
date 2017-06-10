@@ -4,11 +4,13 @@ Ext.Loader.setConfig({
 	enabled : true,
 	paths:{
 		'Ext':'resource/js/extjs/extjs5/examples',
+		'app':'resource/js/extjs/extjs5/examples',
 		'Common.app':'resource/js/privateExt/manage/app',//与具体业务相关的定义
 		'Common.auth':'resource/js/privateExt/manage/auth'//权限相关的定义
 	}
 });
 Ext.require([ 'Ext.ux.IFrame']);
+Ext.require([ 'app.ux.DateTimeField']);//自定义扩展的日期时间控件
 
 Ext.onReady(function() {
 	/**onReady开始*/

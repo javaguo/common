@@ -34,6 +34,7 @@ String browserLang=request.getLocale().toString();
 
 	<script type="text/javascript"
 		 	src="resource/js/platform/manage/app/indexShare.js"></script>
+
   </head>
   <body>
   	<div id="head-region-container">

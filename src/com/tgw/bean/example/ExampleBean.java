@@ -1,6 +1,7 @@
 package com.tgw.bean.example;
 
 import com.tgw.bean.base.AbstractBaseBean;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -17,40 +18,35 @@ public class ExampleBean extends AbstractBaseBean{
     @GeneratedValue(generator = "JDBC")
     private Integer id;
 
-    private byte baseByte;
-    private short baseShort;
-    private int baseInt;
-    private long baseLong;
-    private float baseFloat;
-    private double baseDouble;
-    private boolean baseBoolean;
     //org.mybatis.spring.MyBatisSystemException: nested exception is org.apache.ibatis.builder.BuilderException: Error resolving class. Cause: org.apache.ibatis.type.TypeException: Could not resolve type alias 'char'.  Cause: java.lang.ClassNotFoundException: Cannot find class: char
     //private char baseChar;
-
-    private Byte baseByteObj;
-    private Short baseShortObj;
-    private Integer baseIntegerObj;
-    private Long baseLongObj;
-    private Float baseFloatObj;
-    private Double baseDoubleObj;
-    private Boolean baseBooleanObj;
-    private String baseStrObj;
-    private Date baseDateObj;
-    private Date baseTimeObj;
-    private Date baseYearObj;
-    private Date baseTimestampObj;
-    private Date baseDateTimeObj;
-
     private String formHidden;
     private String formText;
     private String formPassword;
     private String formTextArea;
-    private Integer formNumber;
-    private String formDate;
-    private String formTime;
+    private Short formNumberShort;
+    private short formNumberShortBase;
+    private Integer formNumberInteger;
+    private int formNumberIntBase;
+    private Long formNumberLong;
+    private long formNumberLongBase;
+    private Float  formNumberFloat;
+    private float formNumberFloatBase;
+    private Double formNumberDouble;
+    private double formNumberDoubleBase;
+    private Boolean formBoolean;
+    private boolean formBooleanBase;
+    private String formDateString;
+//    @DateTimeFormat(pattern="yyyy-MM-dd")
+    private Date formDateDate;
+    private String formDatetimeString;
+    private Date formDatetimeDate;
+    private String formComboBox;
+    private String formComboBoxCascade1;
+    private String formComboBoxCascade2;
+    private String formComboBoxCascade3;
     private String formRadio;
     private String formCheckbox;
-    private String formComboBox;
     private String formDisplay;
 
 
@@ -60,166 +56,6 @@ public class ExampleBean extends AbstractBaseBean{
 
     public void setId(Integer id) {
         this.id = id;
-    }
-
-    public byte getBaseByte() {
-        return baseByte;
-    }
-
-    public void setBaseByte(byte baseByte) {
-        this.baseByte = baseByte;
-    }
-
-    public short getBaseShort() {
-        return baseShort;
-    }
-
-    public void setBaseShort(short baseShort) {
-        this.baseShort = baseShort;
-    }
-
-    public int getBaseInt() {
-        return baseInt;
-    }
-
-    public void setBaseInt(int baseInt) {
-        this.baseInt = baseInt;
-    }
-
-    public long getBaseLong() {
-        return baseLong;
-    }
-
-    public void setBaseLong(long baseLong) {
-        this.baseLong = baseLong;
-    }
-
-    public float getBaseFloat() {
-        return baseFloat;
-    }
-
-    public void setBaseFloat(float baseFloat) {
-        this.baseFloat = baseFloat;
-    }
-
-    public double getBaseDouble() {
-        return baseDouble;
-    }
-
-    public void setBaseDouble(double baseDouble) {
-        this.baseDouble = baseDouble;
-    }
-
-    public boolean isBaseBoolean() {
-        return baseBoolean;
-    }
-
-    public void setBaseBoolean(boolean baseBoolean) {
-        this.baseBoolean = baseBoolean;
-    }
-
-    public Byte getBaseByteObj() {
-        return baseByteObj;
-    }
-
-    public void setBaseByteObj(Byte baseByteObj) {
-        this.baseByteObj = baseByteObj;
-    }
-
-    public Short getBaseShortObj() {
-        return baseShortObj;
-    }
-
-    public void setBaseShortObj(Short baseShortObj) {
-        this.baseShortObj = baseShortObj;
-    }
-
-    public Integer getBaseIntegerObj() {
-        return baseIntegerObj;
-    }
-
-    public void setBaseIntegerObj(Integer baseIntegerObj) {
-        this.baseIntegerObj = baseIntegerObj;
-    }
-
-    public Long getBaseLongObj() {
-        return baseLongObj;
-    }
-
-    public void setBaseLongObj(Long baseLongObj) {
-        this.baseLongObj = baseLongObj;
-    }
-
-    public Float getBaseFloatObj() {
-        return baseFloatObj;
-    }
-
-    public void setBaseFloatObj(Float baseFloatObj) {
-        this.baseFloatObj = baseFloatObj;
-    }
-
-    public Double getBaseDoubleObj() {
-        return baseDoubleObj;
-    }
-
-    public void setBaseDoubleObj(Double baseDoubleObj) {
-        this.baseDoubleObj = baseDoubleObj;
-    }
-
-    public Boolean getBaseBooleanObj() {
-        return baseBooleanObj;
-    }
-
-    public void setBaseBooleanObj(Boolean baseBooleanObj) {
-        this.baseBooleanObj = baseBooleanObj;
-    }
-
-    public String getBaseStrObj() {
-        return baseStrObj;
-    }
-
-    public void setBaseStrObj(String baseStrObj) {
-        this.baseStrObj = baseStrObj;
-    }
-
-    public Date getBaseDateObj() {
-        return baseDateObj;
-    }
-
-    public void setBaseDateObj(Date baseDateObj) {
-        this.baseDateObj = baseDateObj;
-    }
-
-    public Date getBaseTimeObj() {
-        return baseTimeObj;
-    }
-
-    public void setBaseTimeObj(Date baseTimeObj) {
-        this.baseTimeObj = baseTimeObj;
-    }
-
-    public Date getBaseYearObj() {
-        return baseYearObj;
-    }
-
-    public void setBaseYearObj(Date baseYearObj) {
-        this.baseYearObj = baseYearObj;
-    }
-
-    public Date getBaseTimestampObj() {
-        return baseTimestampObj;
-    }
-
-    public void setBaseTimestampObj(Date baseTimestampObj) {
-        this.baseTimestampObj = baseTimestampObj;
-    }
-
-    public Date getBaseDateTimeObj() {
-        return baseDateTimeObj;
-    }
-
-    public void setBaseDateTimeObj(Date baseDateTimeObj) {
-        this.baseDateTimeObj = baseDateTimeObj;
     }
 
     public String getFormHidden() {
@@ -254,28 +90,164 @@ public class ExampleBean extends AbstractBaseBean{
         this.formTextArea = formTextArea;
     }
 
-    public Integer getFormNumber() {
-        return formNumber;
+    public Short getFormNumberShort() {
+        return formNumberShort;
     }
 
-    public void setFormNumber(Integer formNumber) {
-        this.formNumber = formNumber;
+    public void setFormNumberShort(Short formNumberShort) {
+        this.formNumberShort = formNumberShort;
     }
 
-    public String getFormDate() {
-        return formDate;
+    public short getFormNumberShortBase() {
+        return formNumberShortBase;
     }
 
-    public void setFormDate(String formDate) {
-        this.formDate = formDate;
+    public void setFormNumberShortBase(short formNumberShortBase) {
+        this.formNumberShortBase = formNumberShortBase;
     }
 
-    public String getFormTime() {
-        return formTime;
+    public Integer getFormNumberInteger() {
+        return formNumberInteger;
     }
 
-    public void setFormTime(String formTime) {
-        this.formTime = formTime;
+    public void setFormNumberInteger(Integer formNumberInteger) {
+        this.formNumberInteger = formNumberInteger;
+    }
+
+    public int getFormNumberIntBase() {
+        return formNumberIntBase;
+    }
+
+    public void setFormNumberIntBase(int formNumberIntBase) {
+        this.formNumberIntBase = formNumberIntBase;
+    }
+
+    public Long getFormNumberLong() {
+        return formNumberLong;
+    }
+
+    public void setFormNumberLong(Long formNumberLong) {
+        this.formNumberLong = formNumberLong;
+    }
+
+    public long getFormNumberLongBase() {
+        return formNumberLongBase;
+    }
+
+    public void setFormNumberLongBase(long formNumberLongBase) {
+        this.formNumberLongBase = formNumberLongBase;
+    }
+
+    public Float getFormNumberFloat() {
+        return formNumberFloat;
+    }
+
+    public void setFormNumberFloat(Float formNumberFloat) {
+        this.formNumberFloat = formNumberFloat;
+    }
+
+    public float getFormNumberFloatBase() {
+        return formNumberFloatBase;
+    }
+
+    public void setFormNumberFloatBase(float formNumberFloatBase) {
+        this.formNumberFloatBase = formNumberFloatBase;
+    }
+
+    public Double getFormNumberDouble() {
+        return formNumberDouble;
+    }
+
+    public void setFormNumberDouble(Double formNumberDouble) {
+        this.formNumberDouble = formNumberDouble;
+    }
+
+    public double getFormNumberDoubleBase() {
+        return formNumberDoubleBase;
+    }
+
+    public void setFormNumberDoubleBase(double formNumberDoubleBase) {
+        this.formNumberDoubleBase = formNumberDoubleBase;
+    }
+
+    public Boolean getFormBoolean() {
+        return formBoolean;
+    }
+
+    public void setFormBoolean(Boolean formBoolean) {
+        this.formBoolean = formBoolean;
+    }
+
+    public boolean isFormBooleanBase() {
+        return formBooleanBase;
+    }
+
+    public void setFormBooleanBase(boolean formBooleanBase) {
+        this.formBooleanBase = formBooleanBase;
+    }
+
+    public String getFormDateString() {
+        return formDateString;
+    }
+
+    public void setFormDateString(String formDateString) {
+        this.formDateString = formDateString;
+    }
+
+    public Date getFormDateDate() {
+        return formDateDate;
+    }
+
+    public void setFormDateDate(Date formDateDate) {
+        this.formDateDate = formDateDate;
+    }
+
+    public String getFormDatetimeString() {
+        return formDatetimeString;
+    }
+
+    public void setFormDatetimeString(String formDatetimeString) {
+        this.formDatetimeString = formDatetimeString;
+    }
+
+    public Date getFormDatetimeDate() {
+        return formDatetimeDate;
+    }
+
+    public void setFormDatetimeDate(Date formDatetimeDate) {
+        this.formDatetimeDate = formDatetimeDate;
+    }
+
+    public String getFormComboBox() {
+        return formComboBox;
+    }
+
+    public void setFormComboBox(String formComboBox) {
+        this.formComboBox = formComboBox;
+    }
+
+    public String getFormComboBoxCascade1() {
+        return formComboBoxCascade1;
+    }
+
+    public void setFormComboBoxCascade1(String formComboBoxCascade1) {
+        this.formComboBoxCascade1 = formComboBoxCascade1;
+    }
+
+    public String getFormComboBoxCascade2() {
+        return formComboBoxCascade2;
+    }
+
+    public void setFormComboBoxCascade2(String formComboBoxCascade2) {
+        this.formComboBoxCascade2 = formComboBoxCascade2;
+    }
+
+    public String getFormComboBoxCascade3() {
+        return formComboBoxCascade3;
+    }
+
+    public void setFormComboBoxCascade3(String formComboBoxCascade3) {
+        this.formComboBoxCascade3 = formComboBoxCascade3;
     }
 
     public String getFormRadio() {
@@ -294,13 +266,6 @@ public class ExampleBean extends AbstractBaseBean{
         this.formCheckbox = formCheckbox;
     }
 
-    public String getFormComboBox() {
-        return formComboBox;
-    }
-
-    public void setFormComboBox(String formComboBox) {
-        this.formComboBox = formComboBox;
-    }
 
     public String getFormDisplay() {
         return formDisplay;

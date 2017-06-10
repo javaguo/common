@@ -1,19 +1,26 @@
 package com.tgw.service.base;
 
 import com.tgw.bean.base.AbstractBaseBean;
+import com.tgw.dao.base.BaseModelMapper;
 import com.tgw.exception.PlatformException;
 
 import java.util.List;
 
 public interface BaseService {
     /**
-     * 初始化查询列表数据方法
+     * 为满足框架需要，具体业务层的service一定要调用此方法。
+     * 将具体业务的mapper赋值给baseModelMapper
+     */
+    public abstract void initMapper();
+
+    /*
+     * 初始化查询列表数据方法，目前暂时用不着
      * @param pageNum
      * @param pageSize
      * @param object
-     */
-    public abstract  void initSearchData(int pageNum,int pageSize,Object object);
 
+    public abstract  void initSearchData(int pageNum,int pageSize,Object object);
+*/
     /**
      * 根据条件分页查询列表数据接口
      * @param pageNum

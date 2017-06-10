@@ -20,9 +20,9 @@ public class SysUserController extends BaseController<SysEnUser> {
 	 */
 	{
 		//构造字段
-		this.addField("id","ID","string");
+		/*this.addField("id","ID","string");
 		this.addField("loginName","登录名","string");
-		this.addField("password","密码","string");
+		this.addField("password","密码","string");*/
 	}
 
 	@Resource

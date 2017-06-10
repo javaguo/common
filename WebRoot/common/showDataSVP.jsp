@@ -29,6 +29,7 @@ String browserLang=request.getLocale().toString();
 	<script type="text/javascript"
 		 	src="resource/js/extjs/extjs5/locale/ext-lang-<%=browserLang%>.js"></script>	 --%>
 	
+	 
 	<script type="text/javascript">
 Ext.onReady(function() {
 	/**onReady开始*/	
@@ -87,6 +88,7 @@ Ext.onReady(function() {
 		
 		var  comboBox_${comboBoxInfo.comboBoxName}_${menuIdentify} = Ext.create('Ext.form.ComboBox', {
 						id:'comboBoxId${comboBoxInfo.comboBoxName}${menuIdentify}',
+						name:'${comboBoxInfo.comboBoxName}',
 						xtype: 'combobox',
 						store: comboBoxStore_${comboBoxInfo.comboBoxName}_${menuIdentify},
 						triggerAction: 'all',
@@ -98,6 +100,9 @@ Ext.onReady(function() {
 						emptyText: "请选择",
 						mode: "local",
 						typeAhead: true  //延时查询
+						<c:if test='${comboBoxInfo.configs!=null}'>
+							,${comboBoxInfo.configs}
+						</c:if>
 		});
 		
 		<c:choose>
@@ -135,13 +140,20 @@ Ext.onReady(function() {
 				items: [
 					<c:forEach items="${validFieldInfo.sysEnFieldAttr.radioList}" var="radioFieldInfo" varStatus="radioFieldStatus">
 						{ boxLabel: '${radioFieldInfo.boxLabel}', name: '${validFieldInfo.name}',
-							inputValue: '${radioFieldInfo.inputValue}',width:60 }
+						  inputValue: '${radioFieldInfo.inputValue}',width:60
+						   <c:if test='${radioFieldInfo.configs!=null}'>
+								,${radioFieldInfo.configs}
+						   </c:if>
+						}
 						<c:choose>
 							<c:when test="${radioFieldStatus.last}"></c:when>
 							<c:otherwise>,</c:otherwise>
 						</c:choose>
 					</c:forEach>
 				]
+				<c:if test='${validFieldInfo.sysEnFieldAttr!=null}'>
+					,${validFieldInfo.sysEnFieldAttr.configs}
+				</c:if>
 			});
 			</c:when>
 			<%-- 单选按钮结束 --%>
@@ -157,13 +169,20 @@ Ext.onReady(function() {
 				items: [
 					<c:forEach items="${validFieldInfo.sysEnFieldAttr.checkboxList}" var="checkboxFieldInfo" varStatus="checkboxFieldStatus">
 							{ boxLabel: '${checkboxFieldInfo.boxLabel}', name: '${validFieldInfo.name}',
-								inputValue: '${checkboxFieldInfo.inputValue}',width:60 }
+								inputValue: '${checkboxFieldInfo.inputValue}',width:60
+								<c:if test='${checkboxFieldInfo.configs!=null}'>
+									,${checkboxFieldInfo.configs}
+								</c:if>
+							}
 						<c:choose>
 							<c:when test="${checkboxFieldStatus.last}"></c:when>
 							<c:otherwise>,</c:otherwise>
 						</c:choose>
 					</c:forEach>
 				]
+				<c:if test='${validFieldInfo.sysEnFieldAttr!=null}'>
+					,${validFieldInfo.sysEnFieldAttr.configs}
+				</c:if>
 			});
 			</c:when>
 			<%-- 多选按钮结束 --%>
@@ -184,6 +203,9 @@ Ext.onReady(function() {
 						</c:choose>
 					</c:forEach>
 				]
+				<c:if test='${validFieldInfo.sysEnFieldAttr!=null}'>
+					,${validFieldInfo.sysEnFieldAttr.configs}
+				</c:if>
 			});
 			</c:when>
 			<%-- 下拉框结束 --%>

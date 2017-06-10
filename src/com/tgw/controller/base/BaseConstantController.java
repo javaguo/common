@@ -23,15 +23,15 @@ public class BaseConstantController extends BaseController<BaseEnConstant>{
      */
     {
         //构造字段
-        this.addField("id","ID","string",null,true,false,false,false,false,null,null);
+        /*this.addField("id","ID","string",null,true,false,false,false,false,null,null);
         this.addField("name","名称","string",null,true,true,true,true,true,null,null);
         this.addField("code","编码","string",null,true,true,true,true,true,null,null);
         this.addField("namespace","命名空间","string",null,true,true,false,true,true,null,null);
-        this.addField("note","备注","string",null,true,true,true,true,true,null,null);
+        this.addField("note","备注","string",null,true,true,true,true,true,null,null);*/
 
-        this.addFunction("menu1","通过","baseConstant/pass.do",2,true,null,1);
+       /* this.addFunction("menu1","通过","baseConstant/pass.do",2,true,null,1);
         this.addFunction("menu2","不通过","baseConstant/notPass.do",2,false,"Applicationgo",2);
-        this.addFunction("menu3","当前活动批次","baseConstant/activity.do",2,true,"Applicationput",3);
+        this.addFunction("menu3","当前活动批次","baseConstant/activity.do",2,true,"Applicationput",3);*/
     }
 
     @Resource

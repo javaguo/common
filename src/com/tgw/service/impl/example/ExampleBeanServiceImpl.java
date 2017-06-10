@@ -2,6 +2,7 @@ package com.tgw.service.impl.example;
 
 import com.github.pagehelper.Page;
 import com.tgw.bean.base.AbstractBaseBean;
+import com.tgw.dao.base.BaseModelMapper;
 import com.tgw.dao.example.ExampleBeanMapper;
 import com.tgw.exception.PlatformException;
 import com.tgw.service.example.ExampleBeanService;
@@ -24,24 +25,15 @@ public class ExampleBeanServiceImpl extends BaseServiceImpl implements ExampleBe
     private ExampleBeanMapper exampleBeanMapper;
 
     @Override
-    public void initSearchData(int pageNum, int pageSize, Object object) {
-        System.out.println("----------------- ExampleBeanServiceImpl --> initSearchData-----------------");
-        super.setBaseModelMapper( this.getExampleBeanMapper() );
+    public void initMapper() {
+        System.out.println("ExampleBeanServiceImpl-->initMapper()");
+        /**
+         * 具体业务层必须调用
+         */
+        if( null!=exampleBeanMapper ){
+            super.setBaseModelMapper( this.getExampleBeanMapper() );
+        }
     }
-
-    /*@Override
-    public Object loadComboboxData() throws PlatformException {
-        List<Map<String,Object>> queryResList =this.getExampleBeanMapper().loadComboboxData();
-        //Page queryResPage = (Page) queryResList.;
-        //List items = queryResPage.getResult();
-
-        //组装查询结果
-        JSONObject jo = JSONObject.fromObject("{}");
-        //jo.put("total",queryResList );
-        jo.put("comboboxData", queryResList );
-        String temp = jo.toString();
-        return temp;
-    }*/
 
     public ExampleBeanMapper getExampleBeanMapper() {
         return exampleBeanMapper;
