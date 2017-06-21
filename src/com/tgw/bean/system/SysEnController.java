@@ -452,6 +452,17 @@ public class SysEnController extends AbstractBaseBean {
         this.getSysEnControllerFieldList().add(sysEnControllerField);
     }
 
+    public void addFieldComboBoxTree(String name, String fieldLabel, boolean isValid, boolean isAllowAdd, boolean isAllowUpdate, boolean isAllowSearch, boolean isAllowBlank,String configs,String loadDataUrl){
+        SysEnControllerField  sysEnControllerField = new SysEnControllerField(name,fieldLabel,PlatformSysConstant.FORM_XTYPE_COMBOBOXTREE,isValid,isAllowAdd,isAllowUpdate,isAllowSearch,isAllowBlank);
+
+        SysEnFieldComboBoxTree fieldComboBoxTree = new SysEnFieldComboBoxTree();
+        fieldComboBoxTree.setConfigs( configs );
+        fieldComboBoxTree.setUrl( loadDataUrl );
+
+        sysEnControllerField.setSysEnFieldAttr( fieldComboBoxTree );
+        this.getSysEnControllerFieldList().add( sysEnControllerField );
+    }
+
     public void addFieldDisplay(String name, String fieldLabel, boolean isValid, boolean isAllowAdd, boolean isAllowUpdate, boolean isAllowSearch,String configs){
         SysEnControllerField  sysEnControllerField = new SysEnControllerField(name,fieldLabel,PlatformSysConstant.FORM_XTYPE_DISPLAY,isValid,isAllowAdd,isAllowUpdate,isAllowSearch,true);
 

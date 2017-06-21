@@ -29,10 +29,340 @@
     <script type="text/javascript"
              src="resource/js/extjs/extjs5/locale/ext-lang-<%=browserLang%>.js"></script>	 --%>
 
+
     <script type="text/javascript">
         Ext.onReady(function() {
             /**onReady开始*/
             Ext.tip.QuickTipManager.init();
+
+
+            <%-- 下拉框初始化数据开始 --%>
+            Ext.define('comboBoxDataModel${menuIdentify}', {
+                extend: 'Ext.data.Model',
+                fields: ['id', 'name']
+            });
+            <c:forEach items="${comboBoxList}" var="comboBoxInfo" varStatus="comboBoxStatus">
+            <c:choose>
+
+            <c:when test='${comboBoxInfo.loadDataImplModel=="json"}'>
+            var comboBoxStore_${comboBoxInfo.comboBoxName}_${menuIdentify} = Ext.create('Ext.data.Store', {
+                fields: ['id', 'name'],
+                data : [
+                    <c:forEach items="${comboBoxInfo.comboBoxOptionList}" var="comboBoxOptionInfo" varStatus="comboBoxOptionStatus">
+                    {"id":"${comboBoxOptionInfo.value}", "name":"${comboBoxOptionInfo.name}"}
+                    <c:choose>
+                    <c:when test="${comboBoxOptionStatus.last}"></c:when>
+                    <c:otherwise>,</c:otherwise>
+                    </c:choose>
+                    </c:forEach>
+                ]
+            });
+            </c:when>
+
+            <c:when test='${comboBoxInfo.loadDataImplModel=="sql"}'>
+            var comboBoxStore_${comboBoxInfo.comboBoxName}_${menuIdentify} = new Ext.data.Store({
+                model:comboBoxDataModel${menuIdentify},
+                proxy: new Ext.data.HttpProxy({
+                    url: '<%=basePath%>${controllerBaseUrl}/loadComboxData.do',
+                    noCache:false,
+                    reader:{
+                        type:'json',
+                        rootProperty: 'comboboxData'
+                    }
+                }),
+                remoteSort: true
+            });
+            <c:choose>
+            <c:when test='${ !comboBoxInfo.isCascade || ( comboBoxInfo.isCascade && comboBoxInfo.isFirst )}'>
+            comboBoxStore_${comboBoxInfo.comboBoxName}_${menuIdentify}.on("beforeload",function(){
+                Ext.apply(comboBoxStore_${comboBoxInfo.comboBoxName}_${menuIdentify}.proxy.extraParams, {"loadDataMethodName":"${comboBoxInfo.loadDataMethodName}","value":"${comboBoxInfo.firstComboBoxParamValue}"});
+            });
+            comboBoxStore_${comboBoxInfo.comboBoxName}_${menuIdentify}.load();
+            </c:when>
+            </c:choose>
+            </c:when>
+
+            <c:otherwise>
+            </c:otherwise>
+            </c:choose>
+
+            var  comboBox_${comboBoxInfo.comboBoxName}_${menuIdentify} = Ext.create('Ext.form.ComboBox', {
+                id:'comboBoxId${comboBoxInfo.comboBoxName}${menuIdentify}',
+                name:'${comboBoxInfo.comboBoxName}',
+                xtype: 'combobox',
+                store: comboBoxStore_${comboBoxInfo.comboBoxName}_${menuIdentify},
+                triggerAction: 'all',
+                //queryMode: 'local',
+                displayField: 'name',
+                valueField: 'id',
+                width:80,
+                loadingText: 'loading...',
+                emptyText: "请选择",
+                mode: "local",
+                typeAhead: true  //延时查询
+                <c:if test='${comboBoxInfo.configs!=null}'>
+                ,${comboBoxInfo.configs}
+                </c:if>
+            });
+
+            <c:choose>
+            <c:when test='${ comboBoxInfo.loadDataImplModel=="sql" && comboBoxInfo.isCascade && !comboBoxInfo.isLast }'>
+            comboBox_${comboBoxInfo.comboBoxName}_${menuIdentify}.on('select', function() {
+                <c:forEach items="${comboBoxInfo.cascadeList}" var="cascadeComboBoxInfo" varStatus="cascadeComboBoxStatus">
+                comboBox_${cascadeComboBoxInfo.comboBoxName}_${menuIdentify}.clearValue();
+                comboBox_${cascadeComboBoxInfo.comboBoxName}_${menuIdentify}.reset();
+
+                comboBoxStore_${cascadeComboBoxInfo.comboBoxName}_${menuIdentify}.removeAll();
+                </c:forEach>
+                Ext.apply(comboBoxStore_${comboBoxInfo.childComboBox}_${menuIdentify}.proxy.extraParams, {"loadDataMethodName":"loadComboboxData","value":comboBox_${comboBoxInfo.comboBoxName}_${menuIdentify}.getValue()});
+                comboBoxStore_${comboBoxInfo.childComboBox}_${menuIdentify}.load();
+
+            });
+            </c:when>
+            </c:choose>
+
+            </c:forEach>
+            <%-- 下拉框初始化数据结束 --%>
+
+            <%-- 生成所有字段表单元素开始 --%>
+            <c:forEach items="${validFieldList}" var="validFieldInfo" varStatus="validFieldStatus">
+            var  field_${validFieldInfo.name}_${menuIdentify} =
+                    <c:choose>
+                    <%-- 单选按钮开始 --%>
+                    <c:when test='${validFieldInfo.xtype=="radiogroup"}'>
+                    Ext.create({
+                        xtype: '${validFieldInfo.xtype}',
+                        fieldLabel: '${validFieldInfo.fieldLabel}',
+                        labelStyle:'vertical-align: middle;',
+                        width:210,
+                        columns: 10,
+                        vertical: true,
+                        items: [
+                            <c:forEach items="${validFieldInfo.sysEnFieldAttr.radioList}" var="radioFieldInfo" varStatus="radioFieldStatus">
+                            { boxLabel: '${radioFieldInfo.boxLabel}', name: '${validFieldInfo.name}',
+                                inputValue: '${radioFieldInfo.inputValue}',width:60
+                                <c:if test='${radioFieldInfo.configs!=null}'>
+                                ,${radioFieldInfo.configs}
+                                </c:if>
+                            }
+                            <c:choose>
+                            <c:when test="${radioFieldStatus.last}"></c:when>
+                            <c:otherwise>,</c:otherwise>
+                            </c:choose>
+                            </c:forEach>
+                        ]
+                        <c:if test='${validFieldInfo.sysEnFieldAttr!=null}'>
+                        ,${validFieldInfo.sysEnFieldAttr.configs}
+                        </c:if>
+                    });
+            </c:when>
+            <%-- 单选按钮结束 --%>
+            <%-- 多选按钮开始 --%>
+            <c:when test='${validFieldInfo.xtype=="checkboxgroup"}'>
+            Ext.create({
+                xtype: '${validFieldInfo.xtype}',
+                fieldLabel: '${validFieldInfo.fieldLabel}',
+                labelStyle:'vertical-align: middle;',
+                width:250,
+                columns: 10,
+                vertical: true,
+                items: [
+                    <c:forEach items="${validFieldInfo.sysEnFieldAttr.checkboxList}" var="checkboxFieldInfo" varStatus="checkboxFieldStatus">
+                    { boxLabel: '${checkboxFieldInfo.boxLabel}', name: '${validFieldInfo.name}',
+                        inputValue: '${checkboxFieldInfo.inputValue}',width:60
+                        <c:if test='${checkboxFieldInfo.configs!=null}'>
+                        ,${checkboxFieldInfo.configs}
+                        </c:if>
+                    }
+                    <c:choose>
+                    <c:when test="${checkboxFieldStatus.last}"></c:when>
+                    <c:otherwise>,</c:otherwise>
+                    </c:choose>
+                    </c:forEach>
+                ]
+                <c:if test='${validFieldInfo.sysEnFieldAttr!=null}'>
+                ,${validFieldInfo.sysEnFieldAttr.configs}
+                </c:if>
+            });
+            </c:when>
+            <%-- 多选按钮结束 --%>
+            <%-- 下拉框开始 --%>
+            <c:when test='${validFieldInfo.xtype=="combobox"}'>
+            Ext.create({
+                xtype: 'fieldcontainer',
+                fieldLabel: '${validFieldInfo.fieldLabel}',
+                labelStyle:'vertical-align: middle;',
+                width:450,
+                layout: 'hbox',
+                items:[
+                    <c:forEach items="${validFieldInfo.sysEnFieldAttr.comboBoxList}" var="comboBoxFieldInfo" varStatus="comboBoxFieldStatus">
+                    comboBox_${comboBoxFieldInfo.comboBoxName}_${menuIdentify}
+                    <c:choose>
+                    <c:when test="${comboBoxFieldStatus.last}"></c:when>
+                    <c:otherwise>,</c:otherwise>
+                    </c:choose>
+                    </c:forEach>
+                ]
+                <c:if test='${validFieldInfo.sysEnFieldAttr!=null}'>
+                ,${validFieldInfo.sysEnFieldAttr.configs}
+                </c:if>
+            });
+            </c:when>
+            <%-- 下拉框结束 --%>
+            <%-- 下拉树开始 --%>
+            <c:when test='${validFieldInfo.xtype=="comboboxtree"}'>
+            Ext.create("Ext.ux.ComboBoxTree",{
+                id:'field_${validFieldInfo.name}_${menuIdentify}',
+                name: '${validFieldInfo.name}',
+                fieldLabel: '${validFieldInfo.fieldLabel}',
+                editable: false,
+                loadUrl:'<%=basePath%>${validFieldInfo.sysEnFieldAttr.url};
+                store : Ext.create('Ext.data.TreeStore',{
+                    proxy:{
+                        type:'ajax',
+                        //json路径要对
+                        url:'<%=basePath%>${validFieldInfo.sysEnFieldAttr.url}',
+                        reader: {
+                            type: 'json'
+                        }
+                    },
+                    listeners: {
+                        load: function(store, records, successful, operation, node, eOpts ) {
+
+                            field_${validFieldInfo.name}_${menuIdentify}.setValue("abcd");
+                            var ids = "A11,A12,A131,B4,B41,B43,C,C2,C3";
+                            var idArr = ids.split( ",");
+                            //alert( "getTotalCount()总数："+store.getTotalCount() );
+                            //alert("idArr.length："+idArr.length + "     ids："+ids);
+                            for( var i=0;i< idArr.length;i++ ){
+                                var temp = store.getNodeById( idArr[i] );
+                                //alert( "text-->"+temp.text )
+                                //alert(temp.get("text",true)+"-->"+temp.getConfig("id",true)+"-->"+temp.getConfig("checked",true));
+                                if( temp ){
+                                    //alert(i+"："+temp.get("text")+"-->"+temp.get("id")+"-->"+temp.get("checked"));
+
+                                    temp.set("checked",true);
+
+
+                                }else{
+                                    //alert(i+"：没有找到此节点");
+                                }
+
+                            }
+
+
+                            /*alert( " records总数："+records.length );
+                             for(var i=0;i< records.length;i++){
+                             //只能获取一级节点
+                             var temp = records[i];
+                             alert(temp.get("text")+"-->"+temp.get("id")+"-->"+temp.get("checked"));
+                             }*/
+
+
+                            //alert( "store总数："+store.getCount() );
+                            /*store.each(function(record){
+                             //只能遍历到部分节点
+                             alert( record.get("text")+"-->"+record.get("id")+"-->"+record.get("checked") );
+                             });*/
+
+
+//							//var aa = Ext.encode( store.getData() );
+                            //alert( "Data-->"+store.getData() );
+                            <%--field_${validFieldInfo.name}_${menuIdentify}.setValue( aa );--%>
+                            //alert("aaaaa");
+                            //testComboTree.setValue("Go jogging,Take a nap");//
+                            /*if(testComboTree.getValue().length > 0){
+                             //alert();
+                             var b = testComboTree.getValue().split(',');
+                             for(var x=0;x<b.length;x++){
+                             //i<3,3是有几个父类文件夹，有几个就是小于几，前提是就一个级联，多个级联的话，用浏览器调试就能找到
+                             for(var i=0;i<3;i++){
+                             //下面这些很长的东西都是在浏览器测试时慢慢找的，很简单的东西
+                             for(var m=0;m<this.tree.root.childNodes[i].childNodes.length;m++){
+                             var a = this.tree.root.childNodes[i].childNodes[m].get('text');
+                             if(a==b[x]){
+                             this.tree.root.childNodes[i].childNodes[m].set('checked',true);
+                             }
+                             }
+                             }
+                             }
+                             }*/
+                        }
+                    }
+                })
+                <c:if test='${validFieldInfo.sysEnFieldAttr!=null}'>
+                ,${validFieldInfo.sysEnFieldAttr.configs}
+                </c:if>
+            });
+            </c:when>
+            <%-- 下拉树结束 --%>
+            <%-- 表单元素开始 --%>
+            <c:otherwise>
+            Ext.create({
+                xtype: '${validFieldInfo.xtype}',
+                id:'field_${validFieldInfo.name}_${menuIdentify}',
+                name: '${validFieldInfo.name}',
+
+                fieldLabel: '${validFieldInfo.fieldLabel}'
+                <c:if test='${validFieldInfo.sysEnFieldAttr!=null}'>
+                ,${validFieldInfo.sysEnFieldAttr.configs}
+                </c:if>
+            });
+            </c:otherwise>
+            <%-- 表单元素结束 --%>
+            </c:choose>
+            </c:forEach>
+            <%-- 生成所有字段表单元素结束 --%>
+
+
+            //实例化store作为数据源
+            var store = Ext.create('Ext.data.TreeStore',{
+                proxy:{
+                    type:'ajax',
+                    //json路径要对
+                    url:'<%=basePath%>resource/js/extjs/plugin/tree2.json',
+                    reader: {
+                        type: 'json'
+                    }
+                }
+
+            });
+
+            //数据加载完之后，再判断输入框中的值，然后对应选中
+            store.on('load', function(store, records, options) {
+                ctree.setValue("B一级");//
+                /*if(ctree.getValue().length > 0){
+                 //alert();
+                 var b = ctree.getValue().split(',');
+                 for(var x=0;x<b.length;x++){
+                 //i<3,3是有几个父类文件夹，有几个就是小于几，前提是就一个级联，多个级联的话，用浏览器调试就能找到
+                 for(var i=0;i<3;i++){
+                 //下面这些很长的东西都是在浏览器测试时慢慢找的，很简单的东西
+                 for(var m=0;m<this.tree.root.childNodes[i].childNodes.length;m++){
+                 var a = this.tree.root.childNodes[i].childNodes[m].get('text');
+                 if(a==b[x]){
+                 this.tree.root.childNodes[i].childNodes[m].set('checked',true);
+                 }
+                 }
+                 }
+                 }
+                 }*/
+            });
+
+            var ctree =Ext.create("Ext.ux.ComboBoxTree", {
+                fieldLabel : '经营范围',
+                id:'c_tree',
+                name:'c_tree',
+                store :store,
+                editable: false,
+                //multiCascade属性不写默认是true,代表多选时是否级联选择;设定为false时不级联选择;
+                multiCascade:false,
+                //multiSelect属性不写默认是false，是单选;设定为true时是多选;
+                multiSelect :true,
+                labelWidth : 60,
+                width : 400,
+                //renderTo : Ext.getBody()
+            });
 
             var  addPanel${menuIdentify}=new Ext.FormPanel({
                 id:'addPanel${menuIdentify}',
@@ -44,15 +374,15 @@
                 url: '<%=basePath%>${controllerBaseUrl}/save.do',
                 defaultType: 'textfield',
                 fieldDefaults: {
-                    labelWidth: 60,
+                    labelWidth: 100,
                     labelAlign: "right",
                     width:200,
                     flex: 0,//每项item的宽度权重。值为0或未设置此属性时，item的width值才起作用。
                     margin: 8
                 },
-                items: [
+                items: [ctree,
                     <c:forEach items="${addFieldList}" var="fieldInfo" varStatus="fieldStatus">
-                    { fieldLabel: '${fieldInfo.fieldLabel}',name: '${fieldInfo.name}', type: '${fieldInfo.type}' }
+                    field_${fieldInfo.name}_${menuIdentify}
                     <c:choose>
                     <c:when test="${fieldStatus.last}"></c:when>
                     <c:otherwise>,</c:otherwise>
@@ -109,20 +439,22 @@
             var addWindow${menuIdentify} = new Ext.Window({
                 id:'addWindow${menuIdentify}',
                 title: '添加窗口',
-                width:400,
-                autoHeight:true,
+                width:600,
+                maxHeight:500,
+                scrollable:true,
+                //autoHeight:true,
                 resizable:false,
                 bodyStyle : 'padding:0px 0px 0px 0px',
                 closeAction : 'hide',
                 modal : true,
                 plain:false,
-                listeners   : {'hide':{fn: closeAddWindow}},
+                listeners   : {'hide':{fn: closeAddWindow${menuIdentify}}},
                 items: [
                     addPanel${menuIdentify}
                 ]
             });
 
-            function closeAddWindow(){
+            function closeAddWindow${menuIdentify}(){
                 /**
                  添加编辑都用到此方法
                  * 关闭窗口事件，空方法即可
@@ -150,7 +482,7 @@
                 },
                 items: [
                     <c:forEach items="${updateFieldList}" var="fieldInfo" varStatus="fieldStatus">
-                    { id:'edit${fieldInfo.name}',fieldLabel: '${fieldInfo.fieldLabel}',
+                    { id:'${menuIdentify}${fieldInfo.name}Edit',fieldLabel: '${fieldInfo.fieldLabel}',
                         name: '${fieldInfo.name}', type: '${fieldInfo.type}'
                         <c:if test='${fieldInfo.name=="id"}'>
                         ,hidden:true
@@ -219,7 +551,7 @@
                 closeAction : 'hide',
                 modal : true,
                 plain:false,
-                listeners   : {'hide':{fn: closeAddWindow}},
+                listeners   : {'hide':{fn: closeAddWindow${menuIdentify}}},
                 items: [
                     editPanel${menuIdentify}
                 ]
@@ -278,14 +610,14 @@
                         },
                         items: [
                             </c:if>
-                            { xtype: "textfield", name: "${fieldInfo.name}", fieldLabel: "${fieldInfo.fieldLabel}" }<c:if test="${!searIsLastColspan}">,</c:if>
+                            {id:"${fieldInfo.name}Sear${menuIdentify}", xtype: "textfield", name: "${fieldInfo.name}", fieldLabel: "${fieldInfo.fieldLabel}" }<c:if test="${!searIsLastColspan}">,</c:if>
                             <c:if test="${fieldStatus.last}">,
 
                             { id:'searReset${menuIdentify}', xtype: 'button',text:'清空',width:60,height:25,
                                 margin:'0 10 0 10',
                                 listeners: {
                                     click: function() {
-                                        searReset();
+                                        searReset${menuIdentify}();
                                     }
                                 }
                             },
@@ -293,7 +625,7 @@
                                 margin:'0 10 0 10',
                                 listeners: {
                                     click: function() {
-                                        searSubmit();
+                                        searSubmit${menuIdentify}();
                                     }
                                 }
                             }
@@ -307,19 +639,19 @@
                 ]
             });
 
-            function searReset() {
+            function searReset${menuIdentify}() {
                 var searForm = 	searPanel${menuIdentify}.getForm( );
                 searForm.reset( false );
             }
 
-            function searSubmit() {
+            function searSubmit${menuIdentify}() {
                 //相当于点击分页栏的首页按钮
                 platformPageBar${menuIdentify}.moveFirst( );
                 //直接重新加载stroe无法刷新分页栏及Ext.grid.RowNumberer()的值
                 //gridPanel${menuIdentify}.getStore().load({params:{page:1,start:0,limit:${pageSize}}});
             }
 
-            var sm = new Ext.selection.CheckboxModel({checkOnly: false});
+            var sm${menuIdentify} = new Ext.selection.CheckboxModel({checkOnly: false});
 
             Ext.define("Platform.model.Entity${menuIdentify}", {
                 extend: "Ext.data.Model",
@@ -388,7 +720,7 @@
             var operateMenu${menuIdentify} = [
                 <c:forEach items="${functionBarList}" var="functionInfo" varStatus="functionStatus">
                 {
-                    id:'${functionInfo.identify}',
+                    id:'${functionInfo.identify}${menuIdentify}',
                     text:'${functionInfo.name}',
                     xtype: 'button',
                     iconCls: '${functionInfo.iconCls}',
@@ -542,7 +874,7 @@
                                     //Ext.Msg.alert('提示', '操作成功！' );
                                     var updateBean = responseJsonObj.bean;
                                     <c:forEach items="${updateFieldList}" var="fieldInfo" varStatus="fieldStatus">
-                                    Ext.getCmp("edit${fieldInfo.name}").setValue( updateBean.${fieldInfo.name} );
+                                    Ext.getCmp("${menuIdentify}${fieldInfo.name}Edit").setValue( updateBean.${fieldInfo.name} );
                                     </c:forEach>
 
                                     editWindow${menuIdentify}.show();

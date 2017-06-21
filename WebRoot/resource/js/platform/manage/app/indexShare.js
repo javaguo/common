@@ -10,6 +10,8 @@ Ext.Loader.setConfig({
 	}
 });
 Ext.require([ 'Ext.ux.IFrame']);
+Ext.require([ 'Ext.ux.TreePicker']);
+Ext.require([ 'Ext.ux.ComboBoxTree']);//自定义扩展的多选下拉树控件
 Ext.require([ 'app.ux.DateTimeField']);//自定义扩展的日期时间控件
 
 Ext.onReady(function() {

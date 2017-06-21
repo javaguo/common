@@ -45,6 +45,9 @@ public class ExampleBean extends AbstractBaseBean{
     private String formComboBoxCascade1;
     private String formComboBoxCascade2;
     private String formComboBoxCascade3;
+    private String formComboBoxTree1;
+    private String formComboBoxTree2;
+    private String formComboBoxTree3;
     private String formRadio;
     private String formCheckbox;
     private String formDisplay;
@@ -182,6 +185,8 @@ public class ExampleBean extends AbstractBaseBean{
         return formBooleanBase;
     }
 
+    /*public boolean getFormBooleanBase(){ return formBooleanBase; }*//*public boolean getFormBooleanBase(){ return formBooleanBase; }*/
+
     public void setFormBooleanBase(boolean formBooleanBase) {
         this.formBooleanBase = formBooleanBase;
     }
@@ -248,6 +253,30 @@ public class ExampleBean extends AbstractBaseBean{
 
     public void setFormComboBoxCascade3(String formComboBoxCascade3) {
         this.formComboBoxCascade3 = formComboBoxCascade3;
+    }
+
+    public String getFormComboBoxTree1() {
+        return formComboBoxTree1;
+    }
+
+    public void setFormComboBoxTree1(String formComboBoxTree1) {
+        this.formComboBoxTree1 = formComboBoxTree1;
+    }
+
+    public String getFormComboBoxTree2() {
+        return formComboBoxTree2;
+    }
+
+    public void setFormComboBoxTree2(String formComboBoxTree2) {
+        this.formComboBoxTree2 = formComboBoxTree2;
+    }
+
+    public String getFormComboBoxTree3() {
+        return formComboBoxTree3;
+    }
+
+    public void setFormComboBoxTree3(String formComboBoxTree3) {
+        this.formComboBoxTree3 = formComboBoxTree3;
     }
 
     public String getFormRadio() {

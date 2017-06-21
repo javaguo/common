@@ -7,6 +7,8 @@ import com.tgw.bean.system.SysEnControllerField;
 import com.tgw.controller.base.BaseController;
 import com.tgw.service.example.ExampleBeanService;
 import com.tgw.utils.config.PlatformSysConstant;
+import net.sf.json.JSONArray;
+import net.sf.json.JSONObject;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
@@ -51,14 +53,12 @@ public class ExampleBeanController extends BaseController<ExampleBean>{
 
         /**
          * 将具体的业务的service对象赋值给baseservice，必须的操作。
+         * service层需要将具体业务的mapper赋值给BaseModelMapper
          * 要点：
          * 1.BaseController会调用统一的searchData()接口查询具体的业务数据。
-         * 2.业务层的service需要覆写baseservice的searchData()接口
-         * 3.覆写接口时需要将具体业务的mapper赋值给BaseModelMapper
-         * 4.具体业务的mapper文件中实现searchData查询语句
+         * 2.具体业务的mapper文件中实现searchData查询语句
          */
         if( null!=this.getExampleBeanService() ){
-//            super.setBaseService( this.getExampleBeanService() );
             super.initService(  this.getExampleBeanService()  );
         }else{
 
@@ -89,7 +89,9 @@ public class ExampleBeanController extends BaseController<ExampleBean>{
         String formComboboxGroup1ComConfigs = "emptyText:'请选择',width:100";
         String formComboboxGroup2Configs = "labelWidth:100,width:600";
         String formComboboxGroup2ComConfigs = "emptyText:'请选择...',width:100";
-
+        String formComboBoxTreeConfigs1 = "labelWidth:100,width:400,multiSelect:true,multiCascade:true,selectedIds:'A,A1,A2,A13'";
+        String formComboBoxTreeConfigs2 = "labelWidth:100,width:400,multiSelect:true,multiCascade:false,selectedIds:'A,A2,A132,B1,B4a,C'";
+        String formComboBoxTreeConfigs3 = "labelWidth:100,width:400,multiSelect:false";
 
         String formRadioGroupConfigs = "labelWidth:100,width:500";
         String formRadioConfigs = "width:80";//,style:{margin-right:'0px'}
@@ -98,9 +100,12 @@ public class ExampleBeanController extends BaseController<ExampleBean>{
 
         //构造字段
         controller.addFieldId("id","ID",null);
+        String url=  "resource/js/extjs/plugin/tree2.json";
+
+
         controller.addFieldHidden( "formHidden","form隐藏域",true,true,true,formHiddenConfigs );
         controller.addFieldText("formText","文本文本",true,true,true,true,true,formTextConfigs);
-        controller.addFieldPassword("formPassword","密码b",true,true,false,false,true,formPasswordConfigs);
+        /*controller.addFieldPassword("formPassword","密码b",true,true,false,false,true,formPasswordConfigs);
         controller.addFieldTextArea("formTextArea","文本域c",true,true,true,true,true,formTextAreaConfigs);
 
         controller.addFieldNumber("formNumberShort","Short",true,true,true,true,true,formNumberIntConfigs);
@@ -124,18 +129,22 @@ public class ExampleBeanController extends BaseController<ExampleBean>{
         controller.addFieldComboBoxBySQL("formComBoxSql","下拉框(sql)",true,true,false,false,true,"loadComboboxData",null,null,formComBoxSqlConfigs);
         controller.addFieldComboBoxCascadeBySQL("二级级联",true,true,false,false,true,"formComboboxGroup1","10",new String[] {"cascade1a","cascade1b"},new String[] {"loadComboboxData","loadComboboxData"},formComboboxGroup1Configs,formComboboxGroup1ComConfigs);
         controller.addFieldComboBoxCascadeBySQL("三级级联",true,true,false,false,true,"formComboboxGroup2","1",new String[] {"formComboBoxCascade1","formComboBoxCascade2","formComboBoxCascade3"},new String[] {"loadComboboxData","loadComboboxData","loadComboboxData"},formComboboxGroup2Configs,formComboboxGroup2ComConfigs);
+*/
+        controller.addFieldComboBoxTree( "formComboBoxTree1","树(多选级联)",true,true,false,false,true,formComboBoxTreeConfigs1,url );
+        controller.addFieldComboBoxTree( "formComboBoxTree2","树(多选不级联)",true,true,false,false,true,formComboBoxTreeConfigs2,url );
+        controller.addFieldComboBoxTree( "formComboBoxTree3","树(单选)",true,true,false,false,true,formComboBoxTreeConfigs3,url );
 
 //        String radioJson = "[{name:'优秀',value:'90'},{name:'良好',value:'80'},{name:'中等',value:'70'},{name:'及格',value:'60'},{name:'差',value:'50'}]";
-        String radioJson = "[{name:'优秀',value:'90'},{name:'良好',value:'80'},{name:'中等',value:'70'}]";
+       /* String radioJson = "[{name:'优秀',value:'90'},{name:'良好',value:'80'},{name:'中等',value:'70'}]";
         controller.addFieldRadioInitDataByJson("formRadio","单选",true,true,true,true,true,radioJson,formRadioGroupConfigs,formRadioConfigs);
         String booleanJson = "[{name:'是',value:'true'},{name:'否',value:'false'}]";
         controller.addFieldRadioInitDataByJson("formBoolean","Boolean",true,true,true,false,true,booleanJson,formRadioGroupConfigs,formRadioConfigs);
-        controller.addFieldRadioInitDataByJson("formBooleanBase","boolean",true,true,true,false,true,booleanJson,formRadioGroupConfigs,formRadioConfigs);
-
+        controller.addFieldRadioInitDataByJson("formBooleanBase","boolean",true,true,false,false,true,booleanJson,formRadioGroupConfigs,formRadioConfigs);
+*/
 //        String checkboxJson = "[{name:'读书',value:'readbook'},{name:'跑步',value:'running'},{name:'游泳',value:'swimming'},{name:'编程',value:'programme'},{name:'游戏',value:'game'}]";
-        String checkboxJson = "[{name:'读书',value:'readbook'},{name:'跑步',value:'running'},{name:'游泳',value:'swimming'}]";
+       /* String checkboxJson = "[{name:'读书',value:'readbook'},{name:'跑步',value:'running'},{name:'游泳',value:'swimming'}]";
         controller.addFieldCheckboxInitDataByJson("formCheckbox","多选",true,true,true,true,true,checkboxJson,formCheckboxGroupConfigs,formCheckboxConfigs);
-
+*/
         controller.addFieldDisplay("formDisplay","form面板",true,true,true,true,formDisplayConfigs);
     }
 
@@ -144,6 +153,20 @@ public class ExampleBeanController extends BaseController<ExampleBean>{
         controller.addFunction("menu1","新功能","baseConstant/pass.do",2,true,null,1);
         controller.addFunction("menu2","功能2","baseConstant/notPass.do",2,false,"Applicationgo",2);
     }
+
+    @RequestMapping("/treeJson.do")
+    public ModelAndView querytreeJson(HttpServletRequest request,HttpServletResponse response){
+        ModelAndView modelAndView = new ModelAndView();
+/*        JSONArray ja = new JSONArray();
+
+        JSONObject jo1 = new JSONObject();
+        jo1.put("TEXT","01");
+        jo1.put("VALUE","01");
+        jo1.put("PID","01");
+        modelAndView.addObject("datasource", jsonArray.get(0).toString() );*/
+        return modelAndView;
+    }
+
 
     public ExampleBeanService getExampleBeanService() {
         return exampleBeanService;

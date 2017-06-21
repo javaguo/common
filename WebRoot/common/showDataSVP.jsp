@@ -209,12 +209,29 @@ Ext.onReady(function() {
 			});
 			</c:when>
 			<%-- 下拉框结束 --%>
+			<%-- 下拉树开始 --%>
+			<c:when test='${validFieldInfo.xtype=="comboboxtree"}'>
+			Ext.create("Ext.ux.ComboBoxTree",{
+				id:'field_${validFieldInfo.name}_${menuIdentify}',
+				name: '${validFieldInfo.name}',
+				fieldLabel: '${validFieldInfo.fieldLabel}',
+				editable: false,
+				loadTreeDataUrl:'<%=basePath%>${validFieldInfo.sysEnFieldAttr.url}'
+				
+				
+				<c:if test='${validFieldInfo.sysEnFieldAttr!=null}'>
+					,${validFieldInfo.sysEnFieldAttr.configs}
+				 </c:if>
+			});
+			</c:when>
+			<%-- 下拉树结束 --%>
 			<%-- 表单元素开始 --%>
 			<c:otherwise>
 			Ext.create({
 				 xtype: '${validFieldInfo.xtype}',
 				 id:'field_${validFieldInfo.name}_${menuIdentify}',
 				 name: '${validFieldInfo.name}',
+				 
 				 fieldLabel: '${validFieldInfo.fieldLabel}'
 				 <c:if test='${validFieldInfo.sysEnFieldAttr!=null}'>
 					,${validFieldInfo.sysEnFieldAttr.configs}
@@ -225,7 +242,56 @@ Ext.onReady(function() {
 		</c:choose>
 	</c:forEach>
 	<%-- 生成所有字段表单元素结束 --%>
+		
 	
+			//实例化store作为数据源
+    var store = Ext.create('Ext.data.TreeStore',{
+		proxy:{
+			type:'ajax',
+			//json路径要对
+			url:'<%=basePath%>resource/js/extjs/plugin/tree2.json',
+			reader: {
+				type: 'json'
+			}
+		}
+		
+	});     
+	
+		//数据加载完之后，再判断输入框中的值，然后对应选中
+		store.on('load', function(store, records, options) {
+			ctree.setValue("B一级");//
+    		/*if(ctree.getValue().length > 0){
+					//alert();
+					var b = ctree.getValue().split(',');
+				for(var x=0;x<b.length;x++){
+					//i<3,3是有几个父类文件夹，有几个就是小于几，前提是就一个级联，多个级联的话，用浏览器调试就能找到
+					for(var i=0;i<3;i++){
+						//下面这些很长的东西都是在浏览器测试时慢慢找的，很简单的东西
+						for(var m=0;m<this.tree.root.childNodes[i].childNodes.length;m++){
+							var a = this.tree.root.childNodes[i].childNodes[m].get('text');
+							if(a==b[x]){
+								this.tree.root.childNodes[i].childNodes[m].set('checked',true);
+							}
+						}
+					}
+				}
+    		}*/
+		});
+	
+	/*var ctree =Ext.create("Ext.ux.ComboBoxTree", {
+		fieldLabel : '经营范围', 
+        id:'c_tree',
+        name:'c_tree',
+        store :store,
+		editable: false,
+		//multiCascade属性不写默认是true,代表多选时是否级联选择;设定为false时不级联选择;
+		multiCascade:false,
+		//multiSelect属性不写默认是false，是单选;设定为true时是多选;
+		multiSelect :true,
+		labelWidth : 60,
+        width : 400,
+		//renderTo : Ext.getBody()
+	});*/
 
 	var  addPanel${menuIdentify}=new Ext.FormPanel({
 		id:'addPanel${menuIdentify}',
