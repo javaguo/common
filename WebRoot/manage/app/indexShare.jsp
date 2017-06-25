@@ -20,6 +20,8 @@ String browserLang=request.getLocale().toString();
 	<!--
 	<link rel="stylesheet" type="text/css" href="styles.css">
 	-->
+	<link rel="stylesheet" type="text/css"
+			href="resource/css/platform/common.css">
 	<link rel="stylesheet" type="text/css" 
 			href="resource/css/platform/manage/app/index.css">
 	<link rel="stylesheet" type="text/css" 

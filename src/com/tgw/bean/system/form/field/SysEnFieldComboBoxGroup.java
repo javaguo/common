@@ -20,6 +20,10 @@ public class SysEnFieldComboBoxGroup extends SysEnFieldCheckboxGroup {
         this.comboBoxGroupName = comboBoxGroupName;
     }
 
+    public boolean getIsCascade(){
+        return isCascade;
+    }
+
     public boolean isCascade() {
         return isCascade;
     }

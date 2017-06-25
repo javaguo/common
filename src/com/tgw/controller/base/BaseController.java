@@ -572,13 +572,17 @@ public class BaseController<T extends AbstractBaseBean> implements Serializable 
 		binder.registerCustomEditor(Date.class, new PlatformCustomDateEditor());
 
 		/**
-		 * 基本类型可以正常解析，暂不需要进行类型转换处理
+		 * 基本类型可以正常解析，暂不需要进行类型转换处理   201705
+		 *
+		 * 基本类型无法正常解析，加上转换器也不起作用   20170621
+		 * java类型是基本类型的时候，页面参数为空或非数字时，无法进行类型转换，请求页面时报400错误。
+		 *
 		 */
-		/*binder.registerCustomEditor(short.class,new ShortEditor());
+		binder.registerCustomEditor(short.class,new ShortEditor());
 		binder.registerCustomEditor(int.class, new IntEditor());
 		binder.registerCustomEditor(long.class, new LongEditor());
 		binder.registerCustomEditor(float.class, new FloatEditor());
-		binder.registerCustomEditor(double.class, new DoubleEditor());*/
+		binder.registerCustomEditor(double.class, new DoubleEditor());
 	}
 
 	public T getBean() {
