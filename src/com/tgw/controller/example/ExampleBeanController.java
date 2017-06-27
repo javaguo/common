@@ -107,19 +107,20 @@ public class ExampleBeanController extends BaseController<ExampleBean>{
         controller.addFieldPassword("formPassword","密码b",true,true,false,false,false,formPasswordConfigs);
         controller.addFieldTextArea("formTextArea","文本域c",true,true,true,true,false,formTextAreaConfigs);
 
-        controller.addFieldNumber("formNumberShort","Short",true,true,true,true,true,formNumberIntConfigs);
         //controller.addFieldNumber("formNumberShortBase","short",true,true,true,false,true,formNumberIntConfigs);
-        controller.addFieldNumber("formNumberInteger","Integer",true,true,true,true,true,formNumberIntConfigs);
 //        controller.addFieldNumber("formNumberIntBase","int",true,true,true,false,false,formNumberIntConfigs);
-        controller.addFieldNumber("formNumberLong","Long",true,true,true,true,true,formNumberIntConfigs);
 //        controller.addFieldNumber("formNumberLongBase","long",true,true,true,false,true,formNumberIntConfigs);
-        controller.addFieldNumber("formNumberFloat","Float",true,true,true,true,true,formNumberDoubleConfigs);
 //        controller.addFieldNumber("formNumberFloatBase","float",true,true,true,false,true,formNumberDoubleConfigs);
-        controller.addFieldNumber("formNumberDouble","Double",true,true,true,true,true,formNumberDoubleConfigs);
 //        controller.addFieldNumber("formNumberDoubleBase","double",true,true,true,false,true,formNumberDoubleConfigs);
+//        controller.addFieldRadioInitDataByJson("formBooleanBase","boolean",true,true,false,false,false,booleanJson,formRadioGroupConfigs,formRadioConfigs);
+
+        controller.addFieldNumber("formNumberShort","Short",true,true,true,true,true,formNumberIntConfigs);
+        controller.addFieldNumber("formNumberInteger","Integer",true,true,true,true,true,formNumberIntConfigs);
+        controller.addFieldNumber("formNumberLong","Long",true,true,true,true,true,formNumberIntConfigs);
+        controller.addFieldNumber("formNumberFloat","Float",true,true,true,true,true,formNumberDoubleConfigs);
+        controller.addFieldNumber("formNumberDouble","Double",true,true,true,true,true,formNumberDoubleConfigs);
         String booleanJson = "[{name:'是',value:'true'},{name:'否',value:'false'}]";
         controller.addFieldRadioInitDataByJson("formBoolean","Boolean",true,true,true,false,true,booleanJson,formRadioGroupConfigs,formRadioConfigs);
-//        controller.addFieldRadioInitDataByJson("formBooleanBase","boolean",true,true,false,false,false,booleanJson,formRadioGroupConfigs,formRadioConfigs);
 
         controller.addFieldDate("formDateString","日期(String)",true,true,true,true,false,formDateConfigs);
         controller.addFieldDate("formDateDate","日期(Date)",true,true,true,false,true,formDateConfigs);
