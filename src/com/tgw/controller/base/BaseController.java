@@ -6,8 +6,10 @@ import com.tgw.bean.system.form.field.*;
 import com.tgw.exception.PlatformException;
 import com.tgw.platform.propertyeditors.PlatformCustomDateEditor;
 import com.tgw.service.base.BaseService;
+import com.tgw.utils.PlatformInfo;
 import com.tgw.utils.PlatformUtils;
 import com.tgw.utils.config.PlatformSysConstant;
+import com.tgw.utils.file.PlatformFileUtils;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
@@ -16,18 +18,23 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.MultipartHttpServletRequest;
+import org.springframework.web.multipart.commons.CommonsMultipartResolver;
 import org.springframework.web.servlet.ModelAndView;
 import sun.beans.editors.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.File;
 import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 
 @Controller
@@ -54,7 +61,7 @@ public class BaseController<T extends AbstractBaseBean> implements Serializable 
 		this.getBaseService().initMapper();
 	}
 
-	public void initSearch(HttpServletRequest request, HttpServletResponse response, T bean,ModelAndView modelAndView){
+	public void initSearch(HttpServletRequest request, HttpServletResponse response,ModelAndView modelAndView,SysEnController controller, T bean){
 		System.out.println("----------------- BaseController  initSearch -----------------");
 	}
 
@@ -91,14 +98,21 @@ public class BaseController<T extends AbstractBaseBean> implements Serializable 
 	 */
 	@RequestMapping("/search.do")
 	public ModelAndView search(HttpServletRequest request, HttpServletResponse response, T bean){
+		ModelAndView modelAndView = new ModelAndView();
+
+		try{
+
 		this.beforeSearch(request,response,bean);
 		System.out.println("----------------- BaseController  search -----------------");
-		ModelAndView modelAndView = new ModelAndView();
-		this.initSearch(request,response,bean,modelAndView);
-
 		SysEnController controller = new SysEnController();
+
+		this.initSearch(request,response,modelAndView,controller,bean);
 		this.initField( controller );
 		this.initFunction( controller );
+
+		//初始化页面添加、编辑窗口配置
+		//modelAndView.addObject("updateFieldList",updateFieldList );
+
 
 		//初始化页面上的字段信息开始
         if( null!=controller.getSysEnControllerFieldList() && controller.getSysEnControllerFieldList().size()>0 ){
@@ -143,7 +157,9 @@ public class BaseController<T extends AbstractBaseBean> implements Serializable 
                     searFieldList.add( conField );
                 }
 
-                showFieldList.add( conField );
+				if( conField.isShowList() ){
+                	showFieldList.add( conField );
+				}
 
 				if( PlatformSysConstant.FORM_XTYPE_COMBOBOX.equals( conField.getXtype() ) ){
 					SysEnFieldComboBoxGroup comboBoxGroup = (SysEnFieldComboBoxGroup)conField.getSysEnFieldAttr();
@@ -181,6 +197,7 @@ public class BaseController<T extends AbstractBaseBean> implements Serializable 
         }
 		//初始化页面上的字段信息结束
 
+
 		//初始化页面上的菜单按钮信息开始
 		List<SysEnControllerFunction> sysEnControllerFunctionList = new ArrayList<SysEnControllerFunction>();
 		SysEnControllerFunction addFunction = new SysEnControllerFunction("baseAdd","添加","",1,true,"Add",-100);
@@ -193,9 +210,36 @@ public class BaseController<T extends AbstractBaseBean> implements Serializable 
 		//初始化页面上的菜单按钮信息结束
 
 		modelAndView.addObject("pageSize", PlatformSysConstant.PAGE_SIZE );
+		if( StringUtils.isNotBlank( controller.getIdentifier() ) ){
+			modelAndView.addObject("identifier",controller.getIdentifier() );// 每一个列表页面的唯一身份id
+		}else{
+			throw new PlatformException("controller配置错误，没有配置identifier");
+		}
+
+		if( StringUtils.isNotBlank( controller.getLoadDataUrl() ) ){
+			modelAndView.addObject("loadDataUrl",controller.getLoadDataUrl());
+		}else{
+			throw new PlatformException("controller配置错误，没有配置identifier");
+		}
+
+		if( StringUtils.isNotBlank( controller.getControllerBaseUrl() ) ){
+			modelAndView.addObject("controllerBaseUrl",controller.getControllerBaseUrl() );
+		}else{
+			throw new PlatformException("controller配置错误，没有配置controllerBaseUrl");
+		}
+		modelAndView.addObject("controller",controller );
+
 
 		modelAndView.setViewName("common/showDataSVP");
 		this.afterSearch(request,response,bean);
+
+		}catch( PlatformException e ){
+			e.printStackTrace();
+		}
+		catch( Exception e ){
+			e.printStackTrace();
+		}
+
 		return  modelAndView;
 	}
 
@@ -218,6 +262,15 @@ public class BaseController<T extends AbstractBaseBean> implements Serializable 
 	public ModelAndView searchData(HttpServletRequest request, HttpServletResponse response, T bean){
 		System.out.println("----------------- BaseController  searchData -----------------");
 		ModelAndView modelAndView = new ModelAndView();
+
+		/*try{
+			String renameFileName = PlatformFileUtils.renameFileNameByTimeRandom( "简历.doc" );
+			String path= PlatformInfo.getAbsolutePath(request,"/upload/pic");
+			System.out.println("renameFileName-->"+renameFileName);
+			System.out.println("path-->"+path);
+		}catch( Exception e ){
+			e.printStackTrace();
+		}*/
 
 		try {
             /**
@@ -271,17 +324,125 @@ public class BaseController<T extends AbstractBaseBean> implements Serializable 
         ModelAndView modelAndView = new ModelAndView();
         JSONObject jo = JSONObject.fromObject("{}");
 
+
+
         /**
          * extjs的form表单提交后根据返回值中的success值判断走success回调函数或failure函数
          */
         try{
+			/**
+			 * 查找上传的文件，将文件保存到指定路径中，将路径地址保存到数据库中。
+			 */
+		    //处理附件开始
+			/*
+			//自己实现的查找文件类型字段
+			Class beanClass = bean.getClass();
+			Field[] tempFields = beanClass.getDeclaredFields();
+			Class multipartFileClass = MultipartFile.class;
+			for( int i =0;i<tempFields.length;i++ ){
+				Class fieldClass = tempFields[i].getType();
+				if( fieldClass.equals( multipartFileClass ) ){//字段是文件类型
+					String fieldName = tempFields[i].getName();
+					Method method = beanClass.getDeclaredMethod("get"+PlatformUtils.firstLetterToUpperCase(fieldName));
+					MultipartFile temp = (MultipartFile)method.invoke(bean);
+				}
+			}*/
+
+			//使用spring mvc 自带的方法查找上传的附件
+			//将当前上下文初始化给  CommonsMutipartResolver （多部分解析器）
+			CommonsMultipartResolver multipartResolver=new CommonsMultipartResolver( request.getSession().getServletContext() );
+			//检查form中是否有enctype="multipart/form-data"
+			if(multipartResolver.isMultipart(request)){
+				//将request变成多部分request
+				MultipartHttpServletRequest multiRequest=(MultipartHttpServletRequest)request;
+				//获取multiRequest 中所有的文件名
+				Iterator iter=multiRequest.getFileNames();
+
+				while(iter.hasNext())
+				{
+					//一次遍历所有文件
+					MultipartFile file=multiRequest.getFile(iter.next().toString());
+					if(file!=null)
+					{
+
+						/**
+						* 页面上有文件表单字段时，即使用户在浏览器中没有选择附件，MultipartFile也不为空。但其实文件内容是空的。
+						 * 在此通过判断文件名是否为空来判断是否上传了文件 。
+					 	*/
+						if( StringUtils.isBlank( file.getOriginalFilename() ) ){
+							continue;
+						}
+						//获取文件保存路径
+						String savePath = request.getParameter( file.getName()+"savePathHidden" );
+						if( StringUtils.isBlank( savePath ) ){
+							throw new PlatformException("没有获取到上传文件的保存路径！");
+						}
+
+						//路径修正
+						savePath = savePath.replace("/",File.separator);
+						savePath = savePath.replace("\\",File.separator);
+						if( !savePath.startsWith( File.separator ) ){
+							savePath = File.separator+savePath;
+						}
+						//所有上传的文件都放在项目根目录下的atta目录中
+						savePath = File.separator+"atta"+savePath;
+
+						//创建目录
+						String realPath= PlatformInfo.getAbsolutePath(request,savePath);
+						File fileDir = new File(realPath);
+						if( !fileDir.exists() ){
+							boolean mkdirRes = fileDir.mkdirs();
+							if( !mkdirRes ){
+								throw new PlatformException("创建上传的文件保存目录失败！");
+							}
+						}
+
+						//重命名文件名
+						String renameFileName = PlatformFileUtils.renameFileNameByTimeRandom( file.getOriginalFilename() );
+						if( realPath.endsWith( File.separator ) ){
+							realPath = realPath+renameFileName;
+						}else{
+							realPath = realPath+File.separator+renameFileName;
+						}
+
+						File objFile = new File(realPath);
+						//保存文件
+						file.transferTo( objFile );
+
+						//将文件的存储路径及原文件名保存到数据库中
+						if( savePath.endsWith( File.separator ) ){
+							savePath = savePath+renameFileName;
+						}else{
+							savePath = savePath+File.separator+renameFileName;
+						}
+						try{
+							Class beanClass = bean.getClass();
+							Method fileUrlMethod = beanClass.getDeclaredMethod( "set"+PlatformUtils.firstLetterToUpperCase(file.getName()+"Url"),String.class );
+							Method fileNameMethod = beanClass.getDeclaredMethod( "set"+PlatformUtils.firstLetterToUpperCase(file.getName()+"OrigFileName"),String.class );
+							fileUrlMethod.invoke(bean,savePath);
+							fileNameMethod.invoke(bean,file.getOriginalFilename());
+						}catch (NoSuchMethodException e){
+							e.printStackTrace();
+							throw new PlatformException("上传附件配置错误，缺少相关字段！");
+						}
+
+					}
+
+				}
+
+			}
+			//处理附件结束
+
             this.getBaseService().saveBean(bean);
             jo.put("success",true);
             jo.put("msg","保存成功！");
-        }catch (Exception e){
+        }catch( PlatformException e){
+			jo.put("success",false);
+			jo.put("msg","保存失败！"+e.getMsg() );
+		}catch (Exception e){
             e.printStackTrace();
             jo.put("success",false);
-            jo.put("msg","保存失败！");
+            jo.put("msg","保存失败，发生异常！");
         }
 
         modelAndView.addObject( PlatformSysConstant.JSONSTR, jo.toString() );

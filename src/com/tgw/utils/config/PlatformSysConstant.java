@@ -7,7 +7,7 @@ package com.tgw.utils.config;
 public class PlatformSysConstant {
     public static int LAYOUT_NUM_HORI_SEARCH_CONDITION=3;
 
-    public static int PAGE_SIZE=2;
+    public static int PAGE_SIZE=5;
 
     public static String JSONSTR = "jsonStr";
 

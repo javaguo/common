@@ -37,6 +37,8 @@ String browserLang=request.getLocale().toString();
 	<script type="text/javascript"
 		 	src="resource/js/platform/manage/app/indexShare.js"></script>
 
+	<script type="text/javascript"
+			  src="resource/js/platform/common/platformValidate.js"></script>
   </head>
   <body>
   	<div id="head-region-container">

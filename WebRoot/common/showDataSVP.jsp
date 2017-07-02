@@ -28,6 +28,8 @@ String browserLang=request.getLocale().toString();
 	<!-- 语言包要在ext-all.js之后引入才能生效 -->	
 	<script type="text/javascript"
 		 	src="resource/js/extjs/extjs5/locale/ext-lang-<%=browserLang%>.js"></script>	 --%>
+			
+
 	
 	 
 	<script type="text/javascript">
@@ -36,20 +38,21 @@ Ext.onReady(function() {
 	Ext.tip.QuickTipManager.init();
 
 	<%-- 定义下拉框数据模型 --%>
-	Ext.define('comboBoxDataModel${menuIdentify}', {
+	Ext.define('comboBoxDataModel${identifier}', {
 			extend: 'Ext.data.Model',
 			fields: ['id', 'name']
 	});
 	
 	<%-- 添加窗口方法开始 --%>
-	function openAddWindow(){
+	function openAddWindow${identifier}(){
+		
 		<%-- 下拉框初始化数据开始 --%>
 		<c:forEach items="${comboBoxList}" var="comboBoxInfo" varStatus="comboBoxStatus">
 			<%-- 定义下拉框store开始 --%>
 			<c:choose>
 				<%-- 使用json串初始化下拉框数据 --%>
 				<c:when test='${comboBoxInfo.loadDataImplModel=="json"}'>
-					var comboBoxStore_${comboBoxInfo.comboBoxName}_${menuIdentify} = Ext.create('Ext.data.Store', {
+					var comboBoxStore_${comboBoxInfo.comboBoxName}_${identifier} = Ext.create('Ext.data.Store', {
 						fields: ['id', 'name'],
 						data : [
 							<c:forEach items="${comboBoxInfo.comboBoxOptionList}" var="comboBoxOptionInfo" varStatus="comboBoxOptionStatus">
@@ -64,8 +67,8 @@ Ext.onReady(function() {
 				</c:when>
 				<%-- 请求后台查询数据库初始化下拉框数据 --%>
 				<c:when test='${comboBoxInfo.loadDataImplModel=="sql"}'>
-					var comboBoxStore_${comboBoxInfo.comboBoxName}_${menuIdentify} = new Ext.data.Store({
-						model:comboBoxDataModel${menuIdentify},
+					var comboBoxStore_${comboBoxInfo.comboBoxName}_${identifier} = new Ext.data.Store({
+						model:comboBoxDataModel${identifier},
 						proxy: new Ext.data.HttpProxy({
 							url: '<%=basePath%>${controllerBaseUrl}/loadComboxData.do',
 							noCache:false,
@@ -79,10 +82,10 @@ Ext.onReady(function() {
 					<c:choose>
 						<%-- 加载第一个下拉框的数据(级联有多个下拉框，非级联只有一个下拉框) --%>
 						<c:when test='${ !comboBoxInfo.isCascade || ( comboBoxInfo.isCascade && comboBoxInfo.isFirst )}'>
-							comboBoxStore_${comboBoxInfo.comboBoxName}_${menuIdentify}.on("beforeload",function(){
-								Ext.apply(comboBoxStore_${comboBoxInfo.comboBoxName}_${menuIdentify}.proxy.extraParams, {"loadDataMethodName":"${comboBoxInfo.loadDataMethodName}","value":"${comboBoxInfo.firstComboBoxParamValue}"});
+							comboBoxStore_${comboBoxInfo.comboBoxName}_${identifier}.on("beforeload",function(){
+								Ext.apply(comboBoxStore_${comboBoxInfo.comboBoxName}_${identifier}.proxy.extraParams, {"loadDataMethodName":"${comboBoxInfo.loadDataMethodName}","value":"${comboBoxInfo.firstComboBoxParamValue}"});
 							});
-							comboBoxStore_${comboBoxInfo.comboBoxName}_${menuIdentify}.load();
+							comboBoxStore_${comboBoxInfo.comboBoxName}_${identifier}.load();
 						</c:when>
 					</c:choose>
 				</c:when>
@@ -93,11 +96,11 @@ Ext.onReady(function() {
 			<%-- 定义下拉框store结束 --%>
 			
 			<%-- 定义下拉框 --%>
-			var  comboBox_${comboBoxInfo.comboBoxName}_${menuIdentify} = Ext.create('Ext.form.ComboBox', {
-							id:'comboBoxId${comboBoxInfo.comboBoxName}${menuIdentify}',
+			var  comboBox_${comboBoxInfo.comboBoxName}_${identifier} = Ext.create('Ext.form.ComboBox', {
+							id:'comboBoxId${comboBoxInfo.comboBoxName}${identifier}',
 							name:'${comboBoxInfo.comboBoxName}',
 							xtype: 'combobox',
-							store: comboBoxStore_${comboBoxInfo.comboBoxName}_${menuIdentify},
+							store: comboBoxStore_${comboBoxInfo.comboBoxName}_${identifier},
 							triggerAction: 'all',
 							//queryMode: 'local',
 							displayField: 'name',
@@ -115,15 +118,15 @@ Ext.onReady(function() {
 			<c:choose>
 				<%-- 绑定下拉框级联事件 --%>
 				<c:when test='${ comboBoxInfo.loadDataImplModel=="sql" && comboBoxInfo.isCascade && !comboBoxInfo.isLast }'>
-					comboBox_${comboBoxInfo.comboBoxName}_${menuIdentify}.on('select', function() {
+					comboBox_${comboBoxInfo.comboBoxName}_${identifier}.on('select', function() {
 						<c:forEach items="${comboBoxInfo.cascadeList}" var="cascadeComboBoxInfo" varStatus="cascadeComboBoxStatus">
-							comboBox_${cascadeComboBoxInfo.comboBoxName}_${menuIdentify}.clearValue();
-							comboBox_${cascadeComboBoxInfo.comboBoxName}_${menuIdentify}.reset();
+							comboBox_${cascadeComboBoxInfo.comboBoxName}_${identifier}.clearValue();
+							comboBox_${cascadeComboBoxInfo.comboBoxName}_${identifier}.reset();
 							
-							comboBoxStore_${cascadeComboBoxInfo.comboBoxName}_${menuIdentify}.removeAll();
+							comboBoxStore_${cascadeComboBoxInfo.comboBoxName}_${identifier}.removeAll();
 						</c:forEach>
-						Ext.apply(comboBoxStore_${comboBoxInfo.childComboBox}_${menuIdentify}.proxy.extraParams, {"loadDataMethodName":"loadComboboxData","value":comboBox_${comboBoxInfo.comboBoxName}_${menuIdentify}.getValue()});
-						comboBoxStore_${comboBoxInfo.childComboBox}_${menuIdentify}.load();
+						Ext.apply(comboBoxStore_${comboBoxInfo.childComboBox}_${identifier}.proxy.extraParams, {"loadDataMethodName":"loadComboboxData","value":comboBox_${comboBoxInfo.comboBoxName}_${identifier}.getValue()});
+						comboBoxStore_${comboBoxInfo.childComboBox}_${identifier}.load();
 						
 					}); 
 				</c:when>
@@ -134,7 +137,7 @@ Ext.onReady(function() {
 		
 		<%-- 生成所有字段表单元素开始 --%>
 		<c:forEach items="${validFieldList}" var="validFieldInfo" varStatus="validFieldStatus">
-			var  field_${validFieldInfo.name}_${menuIdentify} =
+			var  field_${validFieldInfo.name}_${identifier} =
 			<c:choose>
 				<%-- 单选按钮开始 --%>
 				<c:when test='${validFieldInfo.xtype=="radiogroup"}'>
@@ -211,7 +214,7 @@ Ext.onReady(function() {
 							layout: 'hbox',
 							items:[
 								<c:forEach items="${validFieldInfo.sysEnFieldAttr.comboBoxList}" var="comboBoxFieldInfo" varStatus="comboBoxFieldStatus">
-									comboBox_${comboBoxFieldInfo.comboBoxName}_${menuIdentify}
+									comboBox_${comboBoxFieldInfo.comboBoxName}_${identifier}
 									<c:choose>
 										<c:when test="${comboBoxFieldStatus.last}"></c:when>
 										<c:otherwise>,</c:otherwise>
@@ -229,10 +232,10 @@ Ext.onReady(function() {
 					<c:if test='${!validFieldInfo.sysEnFieldAttr.isCascade}'>
 						<%-- 非级联下拉框comboBoxList的size一定为1 --%>
 						<c:forEach items="${validFieldInfo.sysEnFieldAttr.comboBoxList}" var="comboBoxFieldInfo" varStatus="comboBoxFieldStatus">
-							comboBox_${comboBoxFieldInfo.comboBoxName}_${menuIdentify};
-							comboBox_${comboBoxFieldInfo.comboBoxName}_${menuIdentify}.fieldLabel='${validFieldInfo.fieldLabel}';
+							comboBox_${comboBoxFieldInfo.comboBoxName}_${identifier};
+							comboBox_${comboBoxFieldInfo.comboBoxName}_${identifier}.fieldLabel='${validFieldInfo.fieldLabel}';
 							<c:if test='${!validFieldInfo.isAllowBlank}'>
-								comboBox_${comboBoxFieldInfo.comboBoxName}_${menuIdentify}.beforeLabelTextTpl= ['<span class="required">*</span>'];
+								comboBox_${comboBoxFieldInfo.comboBoxName}_${identifier}.beforeLabelTextTpl= ['<span class="required">*</span>'];
 							</c:if>
 						</c:forEach>
 					</c:if>
@@ -242,7 +245,7 @@ Ext.onReady(function() {
 				<%-- 下拉树开始 --%>
 				<c:when test='${validFieldInfo.xtype=="comboboxtree"}'>
 				Ext.create("Ext.ux.ComboBoxTree",{
-					id:'field_${validFieldInfo.name}_${menuIdentify}',
+					id:'field_${validFieldInfo.name}_${identifier}',
 					name: '${validFieldInfo.name}',
 					fieldLabel: '${validFieldInfo.fieldLabel}',
 					editable: false,
@@ -257,11 +260,39 @@ Ext.onReady(function() {
 				});
 				</c:when>
 				<%-- 下拉树结束 --%>
+				<%-- 附件开始 --%>
+				<c:when test='${validFieldInfo.xtype=="filefield"}'>
+				Ext.create({
+					xtype: '${validFieldInfo.xtype}',
+					id:'field_${validFieldInfo.name}_${identifier}',
+					name: '${validFieldInfo.name}',
+					fieldLabel: '${validFieldInfo.fieldLabel}',
+					buttonText:'选择文件',
+					validator: function(value){
+						<c:if test='${validFieldInfo.sysEnFieldAttr!=null}'>
+							return validateSuffix(value,'${validFieldInfo.sysEnFieldAttr.allowFileType}');
+						</c:if>
+						
+						<c:if test='${validFieldInfo.sysEnFieldAttr==null}'>
+							return "文件格式校验失败！缺少文件格式校验配置";
+						</c:if>
+					}
+					//afterLabelTextTpl:['<font color=red>*</font>']
+					<c:if test='${!validFieldInfo.isAllowBlank}'>
+						,beforeLabelTextTpl: ['<span class="required">*</span>']
+					</c:if>
+					
+					<c:if test='${validFieldInfo.sysEnFieldAttr!=null}'>
+						,${validFieldInfo.sysEnFieldAttr.configs}
+					</c:if>
+				});
+				</c:when>
+				<%-- 附件结束 --%>
 				<%-- 表单元素开始 --%>
 				<c:otherwise>
 				Ext.create({
 					xtype: '${validFieldInfo.xtype}',
-					id:'field_${validFieldInfo.name}_${menuIdentify}',
+					id:'field_${validFieldInfo.name}_${identifier}',
 					name: '${validFieldInfo.name}',
 					fieldLabel: '${validFieldInfo.fieldLabel}'
 					//afterLabelTextTpl:['<font color=red>*</font>']
@@ -281,8 +312,8 @@ Ext.onReady(function() {
 			
 		
 	
-		var  addPanel_${menuIdentify}=new Ext.FormPanel({
-			id:'addPanel_${menuIdentify}',
+		var  addPanel_${identifier}=new Ext.FormPanel({
+			id:'addPanel_${identifier}',
 			frame : true,
 			bodyBorder:false,
 			bodyStyle : 'padding:0px 0px 0px 0px',
@@ -293,13 +324,13 @@ Ext.onReady(function() {
 			fieldDefaults: {
 				labelWidth: 100,
 				labelAlign: "right",
-				width:200,
+				width:300,
 				flex: 0,//每项item的宽度权重。值为0或未设置此属性时，item的width值才起作用。
 				margin: 8
 			},
 			items: [
 					<c:forEach items="${addFieldList}" var="fieldInfo" varStatus="fieldStatus">
-						field_${fieldInfo.name}_${menuIdentify}
+						field_${fieldInfo.name}_${identifier}
 						<c:choose>
 							<c:when test="${fieldStatus.last}"></c:when>
 							<c:otherwise>,</c:otherwise>
@@ -332,15 +363,15 @@ Ext.onReady(function() {
 									icon: Ext.Msg.INFO,
 									fn: function(btn) {
 										//重置表单不起作用
-										//var searForm = 	searPanel${menuIdentify}.getForm( );
+										//var searForm = 	searPanel${identifier}.getForm( );
 										//searForm.reset( false );
 	
 										//关闭添加窗口
-										addWindow${menuIdentify}.close();
+										addWindow${identifier}.close();
 	
 										//重新加载列表页面数据
-										//dataStore${menuIdentify}.load({params:{page:1,start:0,limit:${pageSize}}});
-										dataStore${menuIdentify}.load();//刷新当前页面
+										//dataStore${identifier}.load({params:{page:1,start:0,limit:${pageSize}}});
+										dataStore${identifier}.load();//刷新当前页面
 									}
 	
 								});
@@ -355,8 +386,8 @@ Ext.onReady(function() {
 			}]
 		});
 	
-		var addWindow${menuIdentify} = new Ext.Window({
-			id:'addWindow${menuIdentify}',
+		var addWindow${identifier} = new Ext.Window({
+			id:'addWindow${identifier}',
 			title: '添加窗口',
 			width:600,
 			maxHeight:500,
@@ -368,20 +399,23 @@ Ext.onReady(function() {
 			//closeAction : 'hide',   默认为destroy
 			modal : true,
 			plain:false,
-			//listeners   : {'hide':{fn: closeAddWindow${menuIdentify}}},
+			//listeners   : {'hide':{fn: closeAddWindow${identifier}}},
 			items: [
-				addPanel_${menuIdentify}
+				addPanel_${identifier}
 			]
+			<c:if test='${controller.addWindowConfigs!=null}'>
+				,${controller.addWindowConfigs}
+			</c:if>
 		});
 		
 		
-		addWindow${menuIdentify}.show();
+		addWindow${identifier}.show();
 		
   }
   <%-- 添加窗口方法结束 --%>
 	
 	
-	function closeAddWindow${menuIdentify}(){
+	function closeAddWindow${identifier}(){
 		/**
 		  添加编辑都用到此方法
 		 * 关闭窗口事件，空方法即可
@@ -390,9 +424,14 @@ Ext.onReady(function() {
 		 * */
 	}
 
+	<%-- 编辑窗口方法开始 --%>
+	function openEditWindow${identifier}(){
+		
+	}
+	<%-- 编辑窗口方法结束 --%>
 
-    var  editPanel${menuIdentify}=new Ext.FormPanel({
-        id:'editPanel${menuIdentify}',
+    var  editPanel${identifier}=new Ext.FormPanel({
+        id:'editPanel${identifier}',
         frame : true,
         bodyBorder:false,
         bodyStyle : 'padding:0px 0px 0px 0px',
@@ -409,7 +448,7 @@ Ext.onReady(function() {
         },
         items: [
             <c:forEach items="${updateFieldList}" var="fieldInfo" varStatus="fieldStatus">
-            { id:'${menuIdentify}${fieldInfo.name}Edit',fieldLabel: '${fieldInfo.fieldLabel}',
+            { id:'${identifier}${fieldInfo.name}Edit',fieldLabel: '${fieldInfo.fieldLabel}',
 			  name: '${fieldInfo.name}', type: '${fieldInfo.type}'
 			  <c:if test='${fieldInfo.name=="id"}'>
 				,hidden:true
@@ -445,15 +484,15 @@ Ext.onReady(function() {
                                 icon: Ext.Msg.INFO,
                                 fn: function(btn) {
                                     //重置表单不起作用
-                                    //var searForm = 	searPanel${menuIdentify}.getForm( );
+                                    //var searForm = 	searPanel${identifier}.getForm( );
                                     //searForm.reset( false );
 
                                     //关闭编辑窗口
-                                    editWindow${menuIdentify}.close();
+                                    editWindow${identifier}.close();
 
                                     //重新加载列表页面数据
-                                    //dataStore${menuIdentify}.load({params:{page:1,start:0,limit:${pageSize}}});
-                                    dataStore${menuIdentify}.load();//刷新当前页面
+                                    //dataStore${identifier}.load({params:{page:1,start:0,limit:${pageSize}}});
+                                    dataStore${identifier}.load();//刷新当前页面
                                 }
 
                             });
@@ -468,8 +507,8 @@ Ext.onReady(function() {
         }]
     });
 
-    var editWindow${menuIdentify} = new Ext.Window({
-        id:'editWindow${menuIdentify}',
+    var editWindow${identifier} = new Ext.Window({
+        id:'editWindow${identifier}',
         title: '编辑窗口',
         width:400,
         autoHeight:true,
@@ -478,16 +517,16 @@ Ext.onReady(function() {
         closeAction : 'hide',
         modal : true,
         plain:false,
-        listeners   : {'hide':{fn: closeAddWindow${menuIdentify}}},
+        listeners   : {'hide':{fn: closeAddWindow${identifier}}},
         items: [
-            editPanel${menuIdentify}
+            editPanel${identifier}
         ]
     });
 
 
 
-	var searPanel${menuIdentify}=new Ext.FormPanel({
-        id:'searPanel${menuIdentify}',
+	var searPanel${identifier}=new Ext.FormPanel({
+        id:'searPanel${identifier}',
 		title:'查询条件',
         collapsible:true,
         region: 'north',
@@ -537,22 +576,22 @@ Ext.onReady(function() {
 						},
 						items: [
 				</c:if>
-								{id:"${fieldInfo.name}Sear${menuIdentify}", xtype: "textfield", name: "${fieldInfo.name}", fieldLabel: "${fieldInfo.fieldLabel}" }<c:if test="${!searIsLastColspan}">,</c:if>
+								{id:"${fieldInfo.name}Sear${identifier}", xtype: "textfield", name: "${fieldInfo.name}", fieldLabel: "${fieldInfo.fieldLabel}" }<c:if test="${!searIsLastColspan}">,</c:if>
 								<c:if test="${fieldStatus.last}">,
 
-								{ id:'searReset${menuIdentify}', xtype: 'button',text:'清空',width:60,height:25,
+								{ id:'searReset${identifier}', xtype: 'button',text:'清空',width:60,height:25,
 									margin:'0 10 0 10',
 									listeners: {
 										click: function() {
-											searReset${menuIdentify}();
+											searReset${identifier}();
 										}
 									}
 								},
-								{ id:'searSubmit${menuIdentify}', xtype: 'button',text:'查询',width:60,height:25,
+								{ id:'searSubmit${identifier}', xtype: 'button',text:'查询',width:60,height:25,
 									margin:'0 10 0 10',
 									listeners: {
 										click: function() {
-											searSubmit${menuIdentify}();
+											searSubmit${identifier}();
 										}
 									}
 								}
@@ -566,21 +605,21 @@ Ext.onReady(function() {
         ]
 	});
 
-	function searReset${menuIdentify}() {
-		var searForm = 	searPanel${menuIdentify}.getForm( );
+	function searReset${identifier}() {
+		var searForm = 	searPanel${identifier}.getForm( );
 		searForm.reset( false );
 	}
 
-	function searSubmit${menuIdentify}() {
+	function searSubmit${identifier}() {
 		//相当于点击分页栏的首页按钮
-		platformPageBar${menuIdentify}.moveFirst( );
+		platformPageBar${identifier}.moveFirst( );
 		//直接重新加载stroe无法刷新分页栏及Ext.grid.RowNumberer()的值
-		//gridPanel${menuIdentify}.getStore().load({params:{page:1,start:0,limit:${pageSize}}});
+		//gridPanel${identifier}.getStore().load({params:{page:1,start:0,limit:${pageSize}}});
 	}
 
-	var sm${menuIdentify} = new Ext.selection.CheckboxModel({checkOnly: false});
+	var sm${identifier} = new Ext.selection.CheckboxModel({checkOnly: false});
 
-	Ext.define("Platform.model.Entity${menuIdentify}", {
+	Ext.define("Platform.model.Entity${identifier}", {
     	extend: "Ext.data.Model",
     	fields: [
        		 <c:forEach items="${showFieldList}" var="fieldInfo" varStatus="fieldStatus">
@@ -593,8 +632,8 @@ Ext.onReady(function() {
   		]
 	});
 
-	var dataStore${menuIdentify} = new Ext.data.Store({
-    	model:"Platform.model.Entity${menuIdentify}",
+	var dataStore${identifier} = new Ext.data.Store({
+    	model:"Platform.model.Entity${identifier}",
 		pageSize: ${pageSize},
     	proxy: {
         	type: 'ajax',
@@ -611,20 +650,20 @@ Ext.onReady(function() {
     	remoteSort: true
     });
 
-	dataStore${menuIdentify}.on("beforeload",function(){
+	dataStore${identifier}.on("beforeload",function(){
 		//示例
-		<%--Ext.apply(dataStore${menuIdentify}.proxy.extraParams, {"id":"11","name":"name","namespace":"命名空间","note":"备注","code":"codevalue"});--%>
+		<%--Ext.apply(dataStore${identifier}.proxy.extraParams, {"id":"11","name":"name","namespace":"命名空间","note":"备注","code":"codevalue"});--%>
 
-		var searForm = 	searPanel${menuIdentify}.getForm( );//获取表单
+		var searForm = 	searPanel${identifier}.getForm( );//获取表单
 		var formFieldsValues = searForm.getFieldValues();//获取表单中的字段及对应的值
 		/*var formJsonStr = Ext.JSON.encode(formFieldsValues);
 		 var formJsonObj = Ext.JSON.decode( formJsonStr );*/
 
 		//extraParams参数可以传formFieldsValues，也可以传formJsonObj
-		Ext.apply(dataStore${menuIdentify}.proxy.extraParams, formFieldsValues );
+		Ext.apply(dataStore${identifier}.proxy.extraParams, formFieldsValues );
 	});
 
-	var columnsHead${menuIdentify} = [
+	var columnsHead${identifier} = [
 	       			new Ext.grid.RowNumberer(),
 					<c:forEach items="${showFieldList}" var="fieldInfo" varStatus="fieldStatus">
 						{ header:'${fieldInfo.fieldLabel}',
@@ -632,8 +671,8 @@ Ext.onReady(function() {
 						  sortable:true,
 						  hidden:
 							<c:choose>
-								<c:when test='${fieldInfo.name=="id"}'>true</c:when>
-								<c:otherwise>false</c:otherwise>
+								<c:when test='${fieldInfo.isShowList}'>false</c:when>
+								<c:otherwise>true</c:otherwise>
 							</c:choose>
 						}
 						<c:choose>
@@ -644,10 +683,10 @@ Ext.onReady(function() {
 	           ];
 	
 	
-	var operateMenu${menuIdentify} = [
+	var operateMenu${identifier} = [
 		<c:forEach items="${functionBarList}" var="functionInfo" varStatus="functionStatus">
 			{
-				id:'${functionInfo.identify}${menuIdentify}',
+				id:'${functionInfo.identify}${identifier}',
 				text:'${functionInfo.name}',
 				xtype: 'button',
 				iconCls: '${functionInfo.iconCls}',
@@ -655,11 +694,11 @@ Ext.onReady(function() {
 					click: function(){
 						<c:choose>
 						<c:when test='${functionInfo.typeNum=="1"}'>
-							//addWindow${menuIdentify}.show();
-							openAddWindow();
+							//addWindow${identifier}.show();
+							openAddWindow${identifier}();
 						</c:when>
 						<c:when test='${functionInfo.typeNum=="2"}'>
-						var selection = gridPanel${menuIdentify}.getSelection( );
+						var selection = gridPanel${identifier}.getSelection( );
 						//alert("单击事件：selection-->"+selection+"      selection size-->"+selection.length);
 
 						if( selection.length==0 ){
@@ -712,7 +751,7 @@ Ext.onReady(function() {
 
 										if( responseJsonObj.success ){
 											Ext.Msg.alert('提示', '操作成功！' );
-											gridPanel${menuIdentify}.getStore().load();
+											gridPanel${identifier}.getStore().load();
 										}else{
 											Ext.Msg.alert('提示', '操作失败！'+responseJsonObj.msg );
 										}
@@ -744,24 +783,24 @@ Ext.onReady(function() {
 		</c:forEach>
     ];
 	
-	var pagingBarMenu${menuIdentify} = [{
+	var pagingBarMenu${identifier} = [{
     	text:'每页显示${pageSize}条',
     },{
     	text:'导出',
     }];
 	
-	var platformPageBar${menuIdentify} = new Ext.PagingToolbar({
-        store: dataStore${menuIdentify},
+	var platformPageBar${identifier} = new Ext.PagingToolbar({
+        store: dataStore${identifier},
         displayInfo: true,
         padding: "0 20 0 20",
-        items: pagingBarMenu${menuIdentify}
+        items: pagingBarMenu${identifier}
     });
 	
-	var gridPanel${menuIdentify} = new Ext.grid.GridPanel({
+	var gridPanel${identifier} = new Ext.grid.GridPanel({
 		title:'查询结果',
 		region: 'center',
-		store: dataStore${menuIdentify},
-        columns: columnsHead${menuIdentify},
+		store: dataStore${identifier},
+        columns: columnsHead${identifier},
         selModel: {
             injectCheckbox: 1,
             mode: "SIMPLE",     //"SINGLE"/"SIMPLE"/"MULTI"
@@ -774,8 +813,8 @@ Ext.onReady(function() {
         viewConfig:{
         	forceFit:true
         },
-        tbar: operateMenu${menuIdentify} ,
-        bbar: platformPageBar${menuIdentify},
+        tbar: operateMenu${identifier} ,
+        bbar: platformPageBar${identifier},
 		listeners:{
 			itemdblclick:function (dataview, record, item, index, e, eOpts) {
                 var tempModel = record.getData();
@@ -802,10 +841,10 @@ Ext.onReady(function() {
                             //Ext.Msg.alert('提示', '操作成功！' );
                             var updateBean = responseJsonObj.bean;
                             <c:forEach items="${updateFieldList}" var="fieldInfo" varStatus="fieldStatus">
-                                Ext.getCmp("${menuIdentify}${fieldInfo.name}Edit").setValue( updateBean.${fieldInfo.name} );
+                                Ext.getCmp("${identifier}${fieldInfo.name}Edit").setValue( updateBean.${fieldInfo.name} );
                             </c:forEach>
 
-                            editWindow${menuIdentify}.show();
+                            editWindow${identifier}.show();
 
                         }else{
                             Ext.Msg.alert('提示', '操作失败！'+responseJsonObj.msg );
@@ -823,9 +862,9 @@ Ext.onReady(function() {
 
     });
     
-    var pagePanel${menuIdentify} =new Ext.container.Container({
-        id:'pagePanel${menuIdentify}',  
-        //renderTo:'pageContainer${menuIdentify}',
+    var pagePanel${identifier} =new Ext.container.Container({
+        id:'pagePanel${identifier}',  
+        //renderTo:'pageContainer${identifier}',
 		region: 'center',
         layout:'border',
 		resizable:true, 
@@ -836,10 +875,10 @@ Ext.onReady(function() {
 		    background: '#aa312f2'
 		},
         //contentEl: 'containerId',
-        items:[searPanel${menuIdentify},gridPanel${menuIdentify}]
+        items:[searPanel${identifier},gridPanel${identifier}]
     });
 	
-    dataStore${menuIdentify}.load({params:{page:1,start:0,limit:${pageSize}}});
+    dataStore${identifier}.load({params:{page:1,start:0,limit:${pageSize}}});
     
 
     /*Ext.on('resize', function abc(){
@@ -853,7 +892,7 @@ Ext.onReady(function() {
 	 * 解决方法：
 	 * 			pagePanel不指定renderTo属性，使用Ext.getCmp(parentId).add( pagePanel )方法加载页面
 	 */
-	Ext.getCmp('right_tab_${menuIdentify}').add( pagePanel${menuIdentify} );
+	Ext.getCmp('right_tab_${identifier}').add( pagePanel${identifier} );
 
 	/**onReady结束*/
 }); 	

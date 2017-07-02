@@ -2,6 +2,7 @@ package com.tgw.controller.base;
 
 import com.tgw.bean.base.BaseEnConstant;
 import com.tgw.bean.example.ExampleBean;
+import com.tgw.bean.system.SysEnController;
 import com.tgw.service.base.BaseConstantService;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -39,7 +40,7 @@ public class BaseConstantController extends BaseController<BaseEnConstant>{
 
 
     @Override
-    public void initSearch(HttpServletRequest request, HttpServletResponse response, BaseEnConstant bean, ModelAndView modelAndView) {
+    public void initSearch(HttpServletRequest request, HttpServletResponse response, ModelAndView modelAndView, SysEnController controller, BaseEnConstant bean) {
         if( null!=this.getBaseConstantService() ){
             super.setBaseService( this.getBaseConstantService() );
         }else{

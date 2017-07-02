@@ -5,18 +5,30 @@ import com.tgw.bean.example.ExampleBean;
 import com.tgw.bean.system.SysEnController;
 import com.tgw.bean.system.SysEnControllerField;
 import com.tgw.controller.base.BaseController;
+import com.tgw.exception.PlatformException;
 import com.tgw.service.example.ExampleBeanService;
+import com.tgw.utils.PlatformInfo;
+import com.tgw.utils.PlatformUtils;
 import com.tgw.utils.config.PlatformSysConstant;
+import com.tgw.utils.file.PlatformFileUtils;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.MultipartHttpServletRequest;
+import org.springframework.web.multipart.commons.CommonsMultipartResolver;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.File;
+import java.lang.reflect.Method;
+import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -47,7 +59,7 @@ public class ExampleBeanController extends BaseController<ExampleBean>{
 
 
     @Override
-    public void initSearch(HttpServletRequest request, HttpServletResponse response, ExampleBean bean,ModelAndView modelAndView) {
+    public void initSearch(HttpServletRequest request, HttpServletResponse response,ModelAndView modelAndView,SysEnController controller, ExampleBean bean ) {
         //覆写了initSearch方法，则只调用覆写的initSearch方法
         System.out.println("----------------- ExampleBeanController  initSearch  -----------------");
 
@@ -64,10 +76,13 @@ public class ExampleBeanController extends BaseController<ExampleBean>{
 
         }
 
-        modelAndView.addObject("menuIdentify","ExampleBeanList");// 每一个列表页面的唯一身份id
-        modelAndView.addObject("loadDataUrl","exampleBean/searchData.do");//加载列表页面数据的方法
-        modelAndView.addObject("controllerBaseUrl","exampleBean");//控制器的请求地址
+        controller.setIdentifier( "ExampleBeanList" );// 每一个列表页面的唯一身份id
+        controller.setLoadDataUrl( "exampleBean/searchData.do" );//加载列表页面数据的方法
+        controller.setControllerBaseUrl( "exampleBean" );//控制器的请求地址
 
+        //此处的配置会覆盖jsp页面中默认的配置
+        String addWindowConfigs = "title: '添加窗口标题'";
+        controller.setAddWindowConfigs( addWindowConfigs );
     }
 
     @Override
@@ -99,13 +114,29 @@ public class ExampleBeanController extends BaseController<ExampleBean>{
         String formCheckboxGroupConfigs = "labelWidth:100,width:500";
         String formCheckboxConfigs = "width:100";//,style:{margin-right:'0px'}
 
+        String formFileConfigs = "labelWidth:100,width:400,emptyText:'请选择附件...'";
+        //上传附件的serviceConfigs为必须项，savePath和allowFileType必须配置
+        /**
+         * 以下格式的路径都可以，框架会自动处理修正。例：/upload/pic/,/upload/pic,upload/pic/。
+         */
+        String formFileServiceConfigs1 = "savePath:'/upload/doc/',allowFileType:'doc,docx'";
+        String formFileServiceConfigs2 = "savePath:'/upload/txt',allowFileType:'txt'";
+        String formFileServiceConfigs3 = "savePath:'upload/pdf',allowFileType:'pdf'";
+
         //构造字段
         controller.addFieldId("id","ID",null);
 
         controller.addFieldHidden( "formHidden","form隐藏域",true,true,true,formHiddenConfigs );
-        controller.addFieldText("formText","文本文本",true,true,true,true,false,formTextConfigs);
+        controller.addFieldText("formText","文本文本",true,true,true,true,true,false,formTextConfigs);
         controller.addFieldPassword("formPassword","密码b",true,true,false,false,false,formPasswordConfigs);
         controller.addFieldTextArea("formTextArea","文本域c",true,true,true,true,false,formTextAreaConfigs);
+        /**
+         * extjs会自动判断提交的表单是否包含有附件（判断表单中是否有inputType="file"类型的表单元素，与是否选择了文件无关）
+         * ，以此决定是否使用enctype="multipart/form-data"提交表单
+         */
+        controller.addFieldFile("formFile1","附件1",true,true,true,true,formFileConfigs,formFileServiceConfigs1);
+        controller.addFieldFile("formFile2","附件2",true,true,true,true,formFileConfigs,formFileServiceConfigs2);
+        controller.addFieldFile("formFile3","附件3",true,true,true,true,formFileConfigs,formFileServiceConfigs3);
 
         //controller.addFieldNumber("formNumberShortBase","short",true,true,true,false,true,formNumberIntConfigs);
 //        controller.addFieldNumber("formNumberIntBase","int",true,true,true,false,false,formNumberIntConfigs);
@@ -114,7 +145,7 @@ public class ExampleBeanController extends BaseController<ExampleBean>{
 //        controller.addFieldNumber("formNumberDoubleBase","double",true,true,true,false,true,formNumberDoubleConfigs);
 //        controller.addFieldRadioInitDataByJson("formBooleanBase","boolean",true,true,false,false,false,booleanJson,formRadioGroupConfigs,formRadioConfigs);
 
-        controller.addFieldNumber("formNumberShort","Short",true,true,true,true,true,formNumberIntConfigs);
+       /* controller.addFieldNumber("formNumberShort","Short",true,true,true,true,true,formNumberIntConfigs);
         controller.addFieldNumber("formNumberInteger","Integer",true,true,true,true,true,formNumberIntConfigs);
         controller.addFieldNumber("formNumberLong","Long",true,true,true,true,true,formNumberIntConfigs);
         controller.addFieldNumber("formNumberFloat","Float",true,true,true,true,true,formNumberDoubleConfigs);
@@ -144,7 +175,13 @@ public class ExampleBeanController extends BaseController<ExampleBean>{
         String checkboxJson = "[{name:'读书',value:'readbook'},{name:'跑步',value:'running'},{name:'游泳',value:'swimming'}]";
         controller.addFieldCheckboxInitDataByJson("formCheckbox","多选",true,true,true,true,false,checkboxJson,formCheckboxGroupConfigs,formCheckboxConfigs);
 
-        controller.addFieldDisplay("formDisplay","form面板",true,true,true,true,formDisplayConfigs);
+        controller.addFieldDisplay("formDisplay","form面板",true,true,true,true,formDisplayConfigs);*/
+
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        String insertTimeConfigs = "value:'"+sdf.format( new Date() )+"'";
+        String updateTimeConfigs = "value:'"+sdf.format( new Date() )+"'";
+        controller.addFieldDatetime("insertTime","添加时间",true,true,false,false,false,insertTimeConfigs);
+        controller.addFieldDatetime("updateTime","更新时间",true,true,true,false,false,updateTimeConfigs);
     }
 
     @Override
@@ -152,6 +189,37 @@ public class ExampleBeanController extends BaseController<ExampleBean>{
         controller.addFunction("menu1","新功能","baseConstant/pass.do",2,true,null,1);
         controller.addFunction("menu2","功能2","baseConstant/notPass.do",2,false,"Applicationgo",2);
     }
+
+    /**
+     *具体的业务controller可以覆写BaseController的方法，
+     * 以此来自己实现save或update等操作。
+     */
+   /* @RequestMapping("/save.do")
+    public ModelAndView save( HttpServletRequest request, HttpServletResponse response, ExampleBean bean ){
+        this.beforeSave();
+
+        ModelAndView modelAndView = new ModelAndView();
+        JSONObject jo = JSONObject.fromObject("{}");
+
+        try{
+
+            jo.put("success",true);
+            jo.put("msg","保存成功（子类覆写的save方法）！");
+        }catch( PlatformException e){
+            jo.put("success",false);
+            jo.put("msg","保存失败（子类覆写的save方法）！"+e.getMsg() );
+        }catch (Exception e){
+            e.printStackTrace();
+            jo.put("success",false);
+            jo.put("msg","保存失败（子类覆写的save方法），发生异常！");
+        }
+
+        modelAndView.addObject( PlatformSysConstant.JSONSTR, jo.toString() );
+        modelAndView.setViewName( this.getJsonView() );
+
+        this.afterSave();
+        return  modelAndView;
+    }*/
 
     @RequestMapping("/treeJson.do")
     public ModelAndView querytreeJson(HttpServletRequest request,HttpServletResponse response){

@@ -5,5 +5,13 @@ package com.tgw.bean.system.form.field;
  */
 public class SysEnFieldFile extends SysEnFieldText {
 
+    private String allowFileType;
 
+    public String getAllowFileType() {
+        return allowFileType;
+    }
+
+    public void setAllowFileType(String allowFileType) {
+        this.allowFileType = allowFileType;
+    }
 }

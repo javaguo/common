@@ -1,5 +1,6 @@
 package com.tgw.controller.system;
 
+import com.tgw.bean.system.SysEnController;
 import com.tgw.bean.system.SysEnUser;
 import com.tgw.controller.base.BaseController;
 import com.tgw.service.system.SysUserService;
@@ -29,7 +30,7 @@ public class SysUserController extends BaseController<SysEnUser> {
 	private SysUserService sysUserService;
 
 	@Override
-	public void initSearch(HttpServletRequest request, HttpServletResponse response, SysEnUser bean, ModelAndView modelAndView) {
+	public void initSearch(HttpServletRequest request, HttpServletResponse response, ModelAndView modelAndView, SysEnController controller, SysEnUser bean) {
 		super.setBaseService( this.getSysUserService() );
 
 		modelAndView.addObject("menuIdentify","SysEnUserList");

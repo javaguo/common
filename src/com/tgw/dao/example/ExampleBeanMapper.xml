@@ -6,9 +6,12 @@
 
 select exam.id,exam.form_text formText,exam.form_text_area formTextArea,
 				exam.form_checkbox formCheckbox,exam.form_radio formRadio,exam.form_combo_box formComboBox,
-			exam.form_hidden formHidden,exam.form_display formDisplay
+			exam.form_hidden formHidden,exam.form_display formDisplay,
+		  exam.form_file1_orig_file_name formFile1OrigFileName,
+			exam.form_file2_orig_file_name formFile2OrigFileName,
+			exam.form_file3_orig_file_name formFile3OrigFileName
 		  from example_bean exam
-
+		order by exam.update_time desc
 	</select>
 
 	<select id="loadComboboxData"  resultType="map">

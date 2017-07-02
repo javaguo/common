@@ -2,12 +2,14 @@ package com.tgw.bean.example;
 
 import com.tgw.bean.base.AbstractBaseBean;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import java.util.Date;
-
+import java.io.File;
 /**
  * Created by zhaojg on 2017/03/24.
  */
@@ -51,7 +53,29 @@ public class ExampleBean extends AbstractBaseBean{
     private String formRadio;
     private String formCheckbox;
     private String formDisplay;
+    /**
+     * 使用框架配置上传文件时，MultipartFile变量不是必须字段。
+     * 只需要定义附件Url及OrigFileName即可。
+     *
+     * url：相对地址   格式：附件名+Url
+     * OrigFileName：原始文件名   格式：附件名+OrigFileName
+     * 变量的附件名自己起，Url及OrigFileName为固定写法
+     *
+     * 附件变量定义请参考formFile3Url及formFile3OrigFileName
+     */
+    @Transient
+    private MultipartFile formFile1;
+    private String formFile1Url;
+    private String formFile1OrigFileName;
+    @Transient
+    private MultipartFile formFile2;
+    private String formFile2Url;
+    private String formFile2OrigFileName;
+    private String formFile3Url;
+    private String formFile3OrigFileName;
 
+    private Date insertTime;
+    private Date updateTime;
 
     public Integer getId() {
         return id;
@@ -302,5 +326,85 @@ public class ExampleBean extends AbstractBaseBean{
 
     public void setFormDisplay(String formDisplay) {
         this.formDisplay = formDisplay;
+    }
+
+    public MultipartFile getFormFile1() {
+        return formFile1;
+    }
+
+    public void setFormFile1(MultipartFile formFile1) {
+        this.formFile1 = formFile1;
+    }
+
+    public MultipartFile getFormFile2() {
+        return formFile2;
+    }
+
+    public void setFormFile2(MultipartFile formFile2) {
+        this.formFile2 = formFile2;
+    }
+
+    public String getFormFile1Url() {
+        return formFile1Url;
+    }
+
+    public void setFormFile1Url(String formFile1Url) {
+        this.formFile1Url = formFile1Url;
+    }
+
+    public String getFormFile1OrigFileName() {
+        return formFile1OrigFileName;
+    }
+
+    public void setFormFile1OrigFileName(String formFile1OrigFileName) {
+        this.formFile1OrigFileName = formFile1OrigFileName;
+    }
+
+    public String getFormFile2Url() {
+        return formFile2Url;
+    }
+
+    public void setFormFile2Url(String formFile2Url) {
+        this.formFile2Url = formFile2Url;
+    }
+
+    public String getFormFile2OrigFileName() {
+        return formFile2OrigFileName;
+    }
+
+    public void setFormFile2OrigFileName(String formFile2OrigFileName) {
+        this.formFile2OrigFileName = formFile2OrigFileName;
+    }
+
+    public String getFormFile3Url() {
+        return formFile3Url;
+    }
+
+    public void setFormFile3Url(String formFile3Url) {
+        this.formFile3Url = formFile3Url;
+    }
+
+    public String getFormFile3OrigFileName() {
+        return formFile3OrigFileName;
+    }
+
+    public void setFormFile3OrigFileName(String formFile3OrigFileName) {
+        this.formFile3OrigFileName = formFile3OrigFileName;
+    }
+
+    public Date getInsertTime() {
+        return insertTime;
+    }
+
+    public Date getUpdateTime() {
+        return updateTime;
+    }
+
+    public void setInsertTime(Date insertTime) {
+        this.insertTime = insertTime;
+    }
+
+    public void setUpdateTime(Date updateTime) {
+        this.updateTime = updateTime;
     }
 }

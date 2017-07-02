@@ -17,4 +17,14 @@ public class PlatformInfo {
 						  "/";
 		return basePath;
 	}
+
+	/**
+	 * 返回绝对路径
+	 * @param request
+	 * @param savePath
+     * @return
+     */
+	public static String getAbsolutePath(HttpServletRequest request,String savePath){
+		return request.getServletContext().getRealPath( savePath );
+	}
 }

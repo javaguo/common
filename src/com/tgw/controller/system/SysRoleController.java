@@ -1,6 +1,7 @@
 package com.tgw.controller.system;
 
 import com.tgw.bean.base.AbstractBaseBean;
+import com.tgw.bean.system.SysEnController;
 import com.tgw.controller.base.BaseController;
 import com.tgw.service.system.SysEnMenuService;
 import org.springframework.stereotype.Controller;
@@ -30,7 +31,7 @@ public class SysRoleController extends BaseController {
 
 
     @Override
-    public void initSearch(HttpServletRequest request, HttpServletResponse response, AbstractBaseBean bean, ModelAndView modelAndView) {
+    public void initSearch(HttpServletRequest request, HttpServletResponse response, ModelAndView modelAndView, SysEnController controller, AbstractBaseBean bean) {
         super.setBaseService( this.getSysEnMenuService() );
 
         modelAndView.addObject("menuIdentify","SysRoleList");
