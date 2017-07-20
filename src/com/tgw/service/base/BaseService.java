@@ -5,6 +5,7 @@ import com.tgw.dao.base.BaseModelMapper;
 import com.tgw.exception.PlatformException;
 
 import java.util.List;
+import java.util.Map;
 
 public interface BaseService {
     /**
@@ -59,11 +60,20 @@ public interface BaseService {
     public abstract void deleteBatchBean(List<Object>  beanList) throws PlatformException;
 
     /**
-     * 查询数据
+     * 查询下拉框数据
      * @param  loadDataMethodName Mapper查询数据的方法名
      * @param  value  查询条件值，下拉框父value
      * @return
      * @throws PlatformException
      */
     public abstract Object loadComboboxData(String loadDataMethodName,Object value) throws PlatformException;
+
+    /**
+     * 暂时放弃次方法。
+     * 查询树节点数据
+     * @return
+     * @throws PlatformException
+     */
+    public abstract List<Map<String,Object>> loadTreeNodeDataMap(String loadDataMethodName)  throws PlatformException;
+
 }

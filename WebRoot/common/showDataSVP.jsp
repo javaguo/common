@@ -288,6 +288,24 @@ Ext.onReady(function() {
 				});
 				</c:when>
 				<%-- 附件结束 --%>
+				<%-- 富文本编辑器开始 --%>
+				<c:when test='${validFieldInfo.xtype=="htmleditor"}'>
+				Ext.create({
+					xtype: '${validFieldInfo.xtype}',
+					id:'field_${validFieldInfo.name}_${identifier}',
+					name: '${validFieldInfo.name}',
+					fieldLabel: '${validFieldInfo.fieldLabel}',
+					fontFamilies :['宋体','隶书','黑体','Arial', 'Courier New', 'Tahoma', 'Times New Roman', 'Verdana']
+					<c:if test='${!validFieldInfo.isAllowBlank}'>
+						,beforeLabelTextTpl: ['<span class="required">*</span>']
+					</c:if>
+					
+					<c:if test='${validFieldInfo.sysEnFieldAttr!=null}'>
+						,${validFieldInfo.sysEnFieldAttr.configs}
+					</c:if>
+				});
+				</c:when>
+				<%-- 富文本编辑器结束 --%>
 				<%-- 表单元素开始 --%>
 				<c:otherwise>
 				Ext.create({

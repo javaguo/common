@@ -493,6 +493,48 @@ public class SysEnController extends AbstractBaseBean {
     }
 
     /**
+     * 添加一个富文本编辑器字段   isShowList：true   isAllowSearch:false
+     * @param name
+     * @param fieldLabel
+     * @param isValid
+     * @param isAllowAdd
+     * @param isAllowUpdate
+     * @param isAllowBlank
+     * @param extConfigs
+     */
+    public void addFieldHtmlEditor( String name, String fieldLabel, boolean isValid, boolean isAllowAdd, boolean isAllowUpdate, boolean isAllowBlank,String extConfigs){
+        this.addFieldHtmlEditor( name,fieldLabel,isValid,isAllowAdd,isAllowUpdate,true,false,isAllowBlank, extConfigs);
+    }
+
+    /**
+     * 添加一个富文本编辑器字段
+     * @param name
+     * @param fieldLabel
+     * @param isValid
+     * @param isAllowAdd
+     * @param isAllowUpdate
+     * @param isShowList
+     * @param isAllowSearch
+     * @param isAllowBlank
+     * @param extConfigs
+     */
+    public void addFieldHtmlEditor( String name, String fieldLabel, boolean isValid, boolean isAllowAdd, boolean isAllowUpdate,boolean isShowList, boolean isAllowSearch, boolean isAllowBlank,String extConfigs){
+        SysEnControllerField  sysEnControllerField = new SysEnControllerField(name,fieldLabel,PlatformSysConstant.FORM_XTYPE_HTML_EDITOR,isValid,isAllowAdd,isAllowUpdate,isShowList,isAllowSearch,isAllowBlank);
+
+        SysEnFieldHtmlEditor formField = new SysEnFieldHtmlEditor();
+        if( StringUtils.isNotBlank(extConfigs) ){
+            extConfigs = "allowBlank:"+isAllowBlank+","+ extConfigs;
+        }else{
+            extConfigs = "allowBlank:"+isAllowBlank;
+        }
+
+        formField.setConfigs(extConfigs);
+
+        sysEnControllerField.setSysEnFieldAttr( formField );
+        this.getSysEnControllerFieldList().add( sysEnControllerField );
+    }
+
+    /**
      * 添加一组复选框。  isShowList：true
      * 通过json初始化数据
      * @param name
@@ -915,6 +957,15 @@ public class SysEnController extends AbstractBaseBean {
         }else{
             configs = "allowBlank:"+isAllowBlank;
         }
+
+        /*if( StringUtils.isNotBlank( configs ) ){
+            JSONObject jo = JSONObject.fromObject( "{"+configs+"}" );
+            Object multiSelect = jo.get("multiSelect");
+            if( null!=multiSelect ){
+                loadDataUrl = loadDataUrl+"&multiSelect="+multiSelect.toString();
+                fieldComboBoxTree.setUrl( loadDataUrl );
+            }
+        }*/
 
         fieldComboBoxTree.setConfigs( configs );
 

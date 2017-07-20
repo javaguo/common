@@ -22,6 +22,7 @@ public class PlatformSysConstant {
     public static String FORM_XTYPE_DATE = "datefield";
     public static String FORM_XTYPE_TIME = "timefield";
     public static String FORM_XTYPE_DATE_TIME = "datetimefield";//extjs未提供datetimefield组件，此组件是自定义扩展的组件
+    public static String FORM_XTYPE_HTML_EDITOR = "htmleditor";
     public static String FORM_XTYPE_RADIO = "radiofield";
     public static String FORM_XTYPE_RADIOGROUP = "radiogroup";
     public static String FORM_XTYPE_CHECKBOX = "checkboxfield";

@@ -111,6 +111,25 @@ public class BaseServiceImpl  implements BaseService,Serializable {
         return resultStr;
     }
 
+    @Override
+    public List<Map<String,Object>> loadTreeNodeDataMap(String loadDataMethodName) throws PlatformException {
+        List<Map<String,Object>> queryResList = null;
+
+        Class baseModelMapperClass = this.getBaseModelMapper().getClass();
+        try{
+            Method method = baseModelMapperClass.getDeclaredMethod(loadDataMethodName );
+           queryResList = (List<Map<String,Object>>)method.invoke(  this.getBaseModelMapper() );
+        }catch (NoSuchMethodException e){
+            e.printStackTrace();
+            throw new PlatformException("没有找到查询Tree数据的方法。");
+        }catch (Exception e){
+            e.printStackTrace();
+            throw new PlatformException("查询Tree数据出错。");
+        }
+
+        return queryResList;
+    }
+
     public BaseModelMapper getBaseModelMapper() {
         return baseModelMapper;
     }

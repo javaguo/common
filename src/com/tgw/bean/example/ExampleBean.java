@@ -26,6 +26,7 @@ public class ExampleBean extends AbstractBaseBean{
     private String formText;
     private String formPassword;
     private String formTextArea;
+    private String formHtmlEditor;
     private Short formNumberShort;
     private short formNumberShortBase;
     private Integer formNumberInteger;
@@ -56,6 +57,7 @@ public class ExampleBean extends AbstractBaseBean{
     /**
      * 使用框架配置上传文件时，MultipartFile变量不是必须字段。
      * 只需要定义附件Url及OrigFileName即可。
+     * 自己实现文件上传时，需要定义MultipartFile变量接收上传的文件。
      *
      * url：相对地址   格式：附件名+Url
      * OrigFileName：原始文件名   格式：附件名+OrigFileName
@@ -115,6 +117,14 @@ public class ExampleBean extends AbstractBaseBean{
 
     public void setFormTextArea(String formTextArea) {
         this.formTextArea = formTextArea;
+    }
+
+    public String getFormHtmlEditor() {
+        return formHtmlEditor;
+    }
+
+    public void setFormHtmlEditor(String formHtmlEditor) {
+        this.formHtmlEditor = formHtmlEditor;
     }
 
     public Short getFormNumberShort() {

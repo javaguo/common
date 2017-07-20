@@ -21,4 +21,16 @@ public interface ExampleBeanMapper extends BaseModelMapper<ExampleBean> {
      */
     public abstract List<Map<String,Object>> loadComboboxData(Object value);
 
+    /**
+     * 查询行政区划树节点数据接口
+     * @return
+     */
+    public abstract List<Map<String,Object>> queryDistrictTreeMap();
+
+    /**
+     * 查询菜单树节点数据
+     * @return
+     */
+    public abstract List<Map<String,Object>> queryMenuTreeMap();
+
 }

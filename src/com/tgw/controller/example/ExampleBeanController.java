@@ -30,6 +30,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by zhaojg on 2017/03/25
@@ -37,6 +38,14 @@ import java.util.List;
 @Controller
 @RequestMapping("/exampleBean")
 public class ExampleBeanController extends BaseController<ExampleBean>{
+
+    public ExampleBeanController(){
+        if( this.getExampleBeanService()!=null ){
+            System.out.println("exampleBeanService存在-->"+exampleBeanService.toString());
+        }else{
+            System.out.println("exampleBeanService不存在！");
+        }
+    }
 
     @Resource
     private ExampleBeanService exampleBeanService;
@@ -91,7 +100,8 @@ public class ExampleBeanController extends BaseController<ExampleBean>{
         //,afterLabelTextTpl:['afterLabelTextTpl'],afterLabelTpl:['afterLabelTpl'],afterBodyEl:['afterBodyEl'],beforeBodyEl :['beforeBodyEl'],beforeLabelTextTpl :['beforeLabelTextTpl'],beforeLabelTpl:['beforeLabelTpl']
         String formTextConfigs = "labelWidth:100,width:400,emptyText:'文本提示信息'";
         String formPasswordConfigs = "labelWidth:100,width:300,emptyText:'密码提示信息'";
-        String formTextAreaConfigs = "labelWidth:100,width:400,height:80,emptyText:'文本域内容......',maxLength:50,maxLengthText:'最长为50个字',minLength:10,minLengthText:'最小为10个字'";
+        String formTextAreaConfigs = "labelWidth:100,width:400,height:80,emptyText:'文本域内容......',maxLength:50,maxLengthText:'最长为50个字',minLength:5,minLengthText:'最小为5个字'";
+        String formHtmlEditorConfigs = "labelWidth:100,width:500,height:200";
         String formNumberIntConfigs = "labelWidth:100,width:200,height:25,emptyText:'整数',allowDecimals:false,maxValue:20,maxText:'最大为20',minValue:6,minText:'最小为6'";
         String formNumberDoubleConfigs = "labelWidth:100,width:200,height:25,emptyText:'小数',maxValue:999.9,maxText:'最大为999.9',minValue:0.1,minText:'最小为0.1',step:100";
         String formDecimalConfigs = "labelWidth:100,width:200,height:25,emptyText:'得分',maxValue:99999.9,maxText:'最大为99999.9',minValue:0.1,minText:'最小为0.1',step:100";
@@ -105,9 +115,7 @@ public class ExampleBeanController extends BaseController<ExampleBean>{
         String formComboboxGroup1ComConfigs = "emptyText:'请选择',width:100";
         String formComboboxGroup2Configs = "labelWidth:100,width:600";
         String formComboboxGroup2ComConfigs = "emptyText:'请选择...',width:100";
-        String formComboBoxTreeConfigs1 = "labelWidth:100,width:400,multiSelect:true,multiCascade:true,selectedIds:'A,A1,A2,A13'";
-        String formComboBoxTreeConfigs2 = "labelWidth:100,width:400,multiSelect:true,multiCascade:false,selectedIds:'A,A2,A132,B1,B4a,C'";
-        String formComboBoxTreeConfigs3 = "labelWidth:100,width:400,multiSelect:false";
+
 
         String formRadioGroupConfigs = "labelWidth:100,width:500";
         String formRadioConfigs = "width:80";//,style:{margin-right:'0px'}
@@ -130,6 +138,8 @@ public class ExampleBeanController extends BaseController<ExampleBean>{
         controller.addFieldText("formText","文本文本",true,true,true,true,true,false,formTextConfigs);
         controller.addFieldPassword("formPassword","密码b",true,true,false,false,false,formPasswordConfigs);
         controller.addFieldTextArea("formTextArea","文本域c",true,true,true,true,false,formTextAreaConfigs);
+        //htmlEditor没有继承Ext.form.field.Base
+        controller.addFieldHtmlEditor("formHtmlEditor","编辑器",true,true,true,false,formHtmlEditorConfigs);
         /**
          * extjs会自动判断提交的表单是否包含有附件（判断表单中是否有inputType="file"类型的表单元素，与是否选择了文件无关）
          * ，以此决定是否使用enctype="multipart/form-data"提交表单
@@ -163,11 +173,26 @@ public class ExampleBeanController extends BaseController<ExampleBean>{
         controller.addFieldComboBoxBySQL("formComBoxSql","下拉框(sql)",true,true,false,false,true,"loadComboboxData",null,formComBoxSqlConfigs);
         controller.addFieldComboBoxCascadeBySQL("二级级联",true,true,false,false,true,"formComboboxGroup1","10",new String[] {"cascade1a","cascade1b"},new String[] {"loadComboboxData","loadComboboxData"},formComboboxGroup1Configs,formComboboxGroup1ComConfigs);
         controller.addFieldComboBoxCascadeBySQL("三级级联",true,true,false,false,false,"formComboboxGroup2","1",new String[] {"formComboBoxCascade1","formComboBoxCascade2","formComboBoxCascade3"},new String[] {"loadComboboxData","loadComboboxData","loadComboboxData"},formComboboxGroup2Configs,formComboboxGroup2ComConfigs);
+        */
 
-        String url=  "resource/js/extjs/plugin/tree2.json";
-        controller.addFieldComboBoxTree( "formComboBoxTree1","树(多选级联)",true,true,false,false,false,formComboBoxTreeConfigs1,url );
-        controller.addFieldComboBoxTree( "formComboBoxTree2","树(多选不级联)",true,true,false,false,true,formComboBoxTreeConfigs2,url );
-        controller.addFieldComboBoxTree( "formComboBoxTree3","树(单选)",true,true,false,false,true,formComboBoxTreeConfigs3,url );
+        String formComboBoxTreeConfigs1 = "labelWidth:100,width:400,multiSelect:true,multiCascade:true,selectedIds:'A,A1,A2,A13'";
+        String formComboBoxTreeConfigs2 = "labelWidth:100,width:400,multiSelect:true,multiCascade:false,selectedIds:'A,A2,A132,B1,B4a,C'";
+        String formComboBoxTreeConfigs3 = "labelWidth:100,width:400,multiSelect:false";
+        String formComboBoxTreeConfigs4 = "labelWidth:100,width:400,multiSelect:true,multiCascade:true";
+        String formComboBoxTreeConfigs5 = "labelWidth:100,width:400,multiSelect:true,multiCascade:false";
+        String formComboBoxTreeConfigs6 = "labelWidth:100,width:400,multiSelect:false";
+        String treeUrl1=  "resource/js/extjs/plugin/tree2.json";
+        String treeUrl2 = "resource/js/extjs/plugin/tree2.json";
+        String treeUrl3 = "sysMenu/queryMenuByUser.do";
+        String treeUrl4 = "exampleBean/loadTreeData.do?fieldMap=id:id,text:text,parentId:fk_parent_id&treeFlag=menu&resType=map&multiSelect=true";
+        String treeUrl5 = "exampleBean/loadTreeData.do?fieldMap=id:id,text:text,parentId:fk_parent_id&treeFlag=menu&resType=map&multiSelect=true";
+        String treeUrl6 = "exampleBean/loadTreeData.do?fieldMap=id:id,text:name,parentId:parent_id&treeFlag=district&resType=map&multiSelect=false";
+        controller.addFieldComboBoxTree( "formComboBoxTree1","树(多选级联)",true,true,false,false,false,formComboBoxTreeConfigs1,treeUrl1 );
+        controller.addFieldComboBoxTree( "formComboBoxTree2","树(多选不级联)",true,true,false,false,true,formComboBoxTreeConfigs2,treeUrl2 );
+        controller.addFieldComboBoxTree( "formComboBoxTree3","树(单选)",true,true,false,false,true,formComboBoxTreeConfigs3,treeUrl3 );
+        controller.addFieldComboBoxTree( "formComboBoxTree4","菜单树(多选级联)",true,true,false,false,true,formComboBoxTreeConfigs4,treeUrl4 );
+        controller.addFieldComboBoxTree( "formComboBoxTree5","菜单树(多选不级联)",true,true,false,false,true,formComboBoxTreeConfigs5,treeUrl5 );
+        controller.addFieldComboBoxTree( "formComboBoxTree6","行政区划树(单选)",true,true,false,false,true,formComboBoxTreeConfigs6,treeUrl6 );
 
         String radioJson = "[{name:'优秀',value:'90'},{name:'良好',value:'80'},{name:'中等',value:'70'}]";
         controller.addFieldRadioInitDataByJson("formRadio","单选",true,true,true,true,true,radioJson,formRadioGroupConfigs,formRadioConfigs);
@@ -175,7 +200,7 @@ public class ExampleBeanController extends BaseController<ExampleBean>{
         String checkboxJson = "[{name:'读书',value:'readbook'},{name:'跑步',value:'running'},{name:'游泳',value:'swimming'}]";
         controller.addFieldCheckboxInitDataByJson("formCheckbox","多选",true,true,true,true,false,checkboxJson,formCheckboxGroupConfigs,formCheckboxConfigs);
 
-        controller.addFieldDisplay("formDisplay","form面板",true,true,true,true,formDisplayConfigs);*/
+        controller.addFieldDisplay("formDisplay","form面板",true,true,true,true,formDisplayConfigs);
 
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         String insertTimeConfigs = "value:'"+sdf.format( new Date() )+"'";
@@ -220,18 +245,18 @@ public class ExampleBeanController extends BaseController<ExampleBean>{
         this.afterSave();
         return  modelAndView;
     }*/
+    @Override
+    public List<Map<String,Object>> loadTreeNodeDataMap(HttpServletRequest request, HttpServletResponse response, ExampleBean bean){
+        String treeFlag = request.getParameter("treeFlag");
+        List<Map<String,Object>> res = null;
 
-    @RequestMapping("/treeJson.do")
-    public ModelAndView querytreeJson(HttpServletRequest request,HttpServletResponse response){
-        ModelAndView modelAndView = new ModelAndView();
-/*        JSONArray ja = new JSONArray();
+        if( "district".equals( treeFlag ) ){//行政区划树
+            res = getExampleBeanService().queryDistrictTreeMap();
+        }else if( "menu".equals( treeFlag ) ){//菜单树
+            res = getExampleBeanService().queryMenuTreeMap();
+        }
 
-        JSONObject jo1 = new JSONObject();
-        jo1.put("TEXT","01");
-        jo1.put("VALUE","01");
-        jo1.put("PID","01");
-        modelAndView.addObject("datasource", jsonArray.get(0).toString() );*/
-        return modelAndView;
+        return res;
     }
 
 

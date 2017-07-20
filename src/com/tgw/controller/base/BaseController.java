@@ -3,6 +3,7 @@ package com.tgw.controller.base;
 import com.tgw.bean.base.AbstractBaseBean;
 import com.tgw.bean.system.*;
 import com.tgw.bean.system.form.field.*;
+import com.tgw.bean.system.tree.SysEnTreeNode;
 import com.tgw.exception.PlatformException;
 import com.tgw.platform.propertyeditors.PlatformCustomDateEditor;
 import com.tgw.service.base.BaseService;
@@ -10,6 +11,7 @@ import com.tgw.utils.PlatformInfo;
 import com.tgw.utils.PlatformUtils;
 import com.tgw.utils.config.PlatformSysConstant;
 import com.tgw.utils.file.PlatformFileUtils;
+import com.tgw.utils.tree.PlatformTreeUtils;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
@@ -32,10 +34,7 @@ import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 @Controller
 public class BaseController<T extends AbstractBaseBean> implements Serializable {
@@ -711,6 +710,72 @@ public class BaseController<T extends AbstractBaseBean> implements Serializable 
 		modelAndView.addObject( PlatformSysConstant.JSONSTR, json );
 		modelAndView.setViewName( this.getJsonView() );
 		return modelAndView;
+	}
+
+	/**
+	 * 加载树节点json串
+	 * @param request
+	 * @param response
+	 * @param bean
+     * @return
+     */
+	@RequestMapping("/loadTreeData.do")
+	public ModelAndView loadTreeData(HttpServletRequest request, HttpServletResponse response, T bean){
+		System.out.println("----------------- BaseController --> loadTreeData()   -----------------");
+		ModelAndView modelAndView = new ModelAndView();
+
+		try {
+			String fieldMap = request.getParameter("fieldMap");//查询结果字段与ext树节点属性对应关系
+			String resType = request.getParameter("resType");//sql查询结果集
+			String multiSelect = request.getParameter("multiSelect");//是否多选，多选时，树节点前有checkbox，单选没有
+
+			if( StringUtils.isBlank( fieldMap )  ){
+				throw new PlatformException("加载树节点请求参数错误！");
+			}
+
+			List<SysEnTreeNode> sysEnTreeNodeList = null;
+
+			if( StringUtils.isBlank( resType ) || "map".equals( resType ) ){
+				/**
+				 * sql查询结果集映射为List<Map<String,Object>>，然后对map进行处理。
+				 *
+				 * loadTreeNodeDataMap方法返回树节点数据。
+				 * 在具体业务controller中实现loadTreeNodeDataMap方法，
+				 */
+				List<Map<String,Object>> queryResList = this.loadTreeNodeDataMap(request,response,bean);
+				sysEnTreeNodeList = PlatformTreeUtils.copyMapValueToTreeNode( queryResList,fieldMap );
+			}else{
+				/**
+				 * sql查询结果集映射为List<Object>，后续再实现
+				 */
+				//sysEnTreeNodeList = PlatformTreeUtils.copyBeanProToTreeNode(null,fieldMap);
+			}
+			String treeNodeJson = PlatformTreeUtils.createExtTreeList( sysEnTreeNodeList,"true".equals( multiSelect )?true:false );
+
+			modelAndView.addObject("jsonStr", treeNodeJson );
+		} catch(Exception e) {
+			e.printStackTrace();
+			modelAndView.addObject("jsonStr", "[]" );
+		}
+
+		modelAndView.setViewName( this.getJsonView() );
+		return modelAndView;
+	}
+
+	/**
+	 * 查询树节点数据方法。
+	 *
+	 * 1.如果在具体业务的controller中覆写此方法，可以根据具体业务返回所需要的树节点数据。
+	 * 2.具体业务controller不覆写此方法，则调用BaseController类本身方法，走系统统一的接口查询树结点数据。此情况实现了一半，后续再实现。
+	 * @param request
+	 * @param response
+	 * @param bean
+     * @return
+     */
+	public List<Map<String,Object>> loadTreeNodeDataMap(HttpServletRequest request, HttpServletResponse response, T bean){
+		//List<Map<String,Object>> queryResList = this.getBaseService().loadTreeNodeDataMap("loadTreeNodeDataMap");
+		List<Map<String,Object>> queryResList = new ArrayList<Map<String,Object>>();
+		return queryResList;
 	}
 
 	/**

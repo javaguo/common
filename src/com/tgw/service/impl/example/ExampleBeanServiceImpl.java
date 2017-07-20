@@ -35,6 +35,16 @@ public class ExampleBeanServiceImpl extends BaseServiceImpl implements ExampleBe
         }
     }
 
+    @Override
+    public List<Map<String,Object>> queryDistrictTreeMap()  throws PlatformException{
+        return this.getExampleBeanMapper().queryDistrictTreeMap();
+    }
+
+    @Override
+    public List<Map<String, Object>> queryMenuTreeMap() throws PlatformException {
+        return this.getExampleBeanMapper().queryMenuTreeMap();
+    }
+
     public ExampleBeanMapper getExampleBeanMapper() {
         return exampleBeanMapper;
     }
