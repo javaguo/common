@@ -8,16 +8,17 @@ import java.util.List;
  */
 public class SysEnFieldComboBox extends SysEnFieldPicker {
 
+    private String comboBoxFlag;//下拉框获取数据唯一标识(在具体业务的controller中获取数据使用)
     private String comboBoxName;//下拉框名称
     /**
      * 加载下拉框数据的实现方式，两种实现方式：
-     * 1.通过sql查询数据库（mapper层写一个查询数据的方法，将mapper的接口方法名赋值给loadDataMethodName）
+     * 1.通过sql查询数据库（自己实现查询下拉框数据方法，覆写baseController中的方法）
      * 2.通过json字符串
      * 单个下拉框有两种实现方式获取数据
      * 级联下拉框只能通过sql查询数据库获取数据
      */
     private String loadDataImplModel;//值为sql或json
-    private String loadDataMethodName;//查询下拉框数据的Mapper方法名
+    private String loadDataMethodName;//查询下拉框数据的Mapper方法名(此属性废弃，不再通过此属性指定加载下拉框的方法，20170722)
     private String firstComboBoxParamValue;//初始化下拉框的参数值，loadDataImplModel值为sql时使用
     private List<SysEnFieldComboBoxOption> comboBoxOptionList = new ArrayList<SysEnFieldComboBoxOption>();
 
@@ -32,6 +33,14 @@ public class SysEnFieldComboBox extends SysEnFieldPicker {
     private boolean isFirst;
     private boolean isLast;
 
+
+    public String getComboBoxFlag() {
+        return comboBoxFlag;
+    }
+
+    public void setComboBoxFlag(String comboBoxFlag) {
+        this.comboBoxFlag = comboBoxFlag;
+    }
 
     public String getComboBoxName() {
         return comboBoxName;

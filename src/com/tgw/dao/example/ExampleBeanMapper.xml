@@ -24,6 +24,28 @@ select exam.id,exam.form_text formText,exam.form_text_area formTextArea,
 		</where>
 	</select>
 
+	<select id="queryMenuComboBoxMap"  resultType="map">
+		select menu.id,menu.text name
+		from sys_en_menu menu
+		<where>
+			<if test="value!=null">
+				menu.fk_parent_id = #{value}
+			</if>
+		</where>
+	</select>
+
+	<select id="queryDistrictComboBoxMap"  resultType="map">
+		select tree.id,tree.name
+		from example_bean_tree tree
+		<where>
+			<if test="value!=null">
+				tree.parent_id = #{value}
+			</if>
+			<if test="value==null">
+				tree.parent_id  is null
+			</if>
+		</where>
+	</select>
 
 	<select id="queryMenuTreeMap"  resultType="map">
 		select menu.id,menu.text,menu.fk_parent_id,

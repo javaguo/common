@@ -53,6 +53,9 @@ public class BaseController<T extends AbstractBaseBean> implements Serializable 
 	/**
 	 * 为满足框架结构的需要，一定要在具体的业务Controller调用此方法。
 	 * 作用：具体的业务Controller调用，将具体业务的service赋值给baseService
+	 *
+	 * 主要原因是BaseModelMapper在BaseServiceImpl中无法注入，导致baseService调用BaseModelMapper时报空指针异常。
+	 * BaseController中的方法调用BaseService的方法时会报错（在BaseService的方法使用了BaseModelMapper的情况下）。
 	 * @param baseService
      */
 	public void initService(BaseService baseService){
@@ -218,7 +221,7 @@ public class BaseController<T extends AbstractBaseBean> implements Serializable 
 		if( StringUtils.isNotBlank( controller.getLoadDataUrl() ) ){
 			modelAndView.addObject("loadDataUrl",controller.getLoadDataUrl());
 		}else{
-			throw new PlatformException("controller配置错误，没有配置identifier");
+			throw new PlatformException("controller配置错误，没有配置loadDataUrl");
 		}
 
 		if( StringUtils.isNotBlank( controller.getControllerBaseUrl() ) ){
@@ -693,15 +696,19 @@ public class BaseController<T extends AbstractBaseBean> implements Serializable 
 
 		String json;
 		try {
-			String loadDataMethodName = request.getParameter("loadDataMethodName");
+			//String loadDataMethodName = request.getParameter("loadDataMethodName");
 			String value = request.getParameter("value");
 			value = StringUtils.isBlank( value )?null:value.toString();
-			if( StringUtils.isBlank( loadDataMethodName )  ){
+			/*if( StringUtils.isBlank( loadDataMethodName )  ){
 				throw new PlatformException("加载下来框数据请求参数错误！");
-			}
+			}*/
 
 			//查询数据
-			json = (String)this.getBaseService().loadComboboxData(loadDataMethodName,value);
+			List<Map<String,Object>> resList = this.loadComboBoxDataMap(request,response,bean,value);
+
+			JSONObject jo = JSONObject.fromObject("{}");
+			jo.put("comboboxData", resList );
+			json = jo.toString();
 		} catch(Exception e) {
 			e.printStackTrace();
 			json = "{\"comboboxData\":[]}";
@@ -710,6 +717,22 @@ public class BaseController<T extends AbstractBaseBean> implements Serializable 
 		modelAndView.addObject( PlatformSysConstant.JSONSTR, json );
 		modelAndView.setViewName( this.getJsonView() );
 		return modelAndView;
+	}
+
+	/**
+	 * 查询下拉框数据方法
+	 *
+	 * 1.如果在具体业务的controller中覆写此方法，可以根据具体业务返回所需要的数据。
+	 * 2.具体业务controller不覆写此方法，则调用BaseController类本身方法，走系统统一的接口查询数据。此情况之前的实现方式过于依赖具体业务的service,暂时放弃，后续再实现。
+	 * @param request
+	 * @param response
+	 * @param bean
+	 * @param parentId
+     * @return
+     */
+	public List<Map<String,Object>> loadComboBoxDataMap(HttpServletRequest request, HttpServletResponse response, T bean,String parentId){
+		List<Map<String,Object>> queryResList = new ArrayList<Map<String,Object>>();
+		return queryResList;
 	}
 
 	/**

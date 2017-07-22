@@ -13,7 +13,7 @@ import java.util.Map;
 public interface ExampleBeanMapper extends BaseModelMapper<ExampleBean> {
 
     /**
-     * 查询列表数据接口
+     * 查询下拉框数据接口
      * @param  value  说明：value可以映数据库中的int和varchar类型。
      *                       sql中使用方式如下：[where menu.fk_parent_id = #{value}]或[where menu.qtip = #{value}]
      *                       fk_parent_id为int 类型，qtip为varchar类型。
@@ -22,13 +22,25 @@ public interface ExampleBeanMapper extends BaseModelMapper<ExampleBean> {
     public abstract List<Map<String,Object>> loadComboboxData(Object value);
 
     /**
+     * 查询行政区划下拉框数据接口
+     * @return
+     */
+    public abstract List<Map<String,Object>> queryDistrictComboBoxMap(Object value);
+
+    /**
+     * 查询菜单下拉框数据接口
+     * @return
+     */
+    public abstract List<Map<String,Object>> queryMenuComboBoxMap(Object value);
+
+    /**
      * 查询行政区划树节点数据接口
      * @return
      */
     public abstract List<Map<String,Object>> queryDistrictTreeMap();
 
     /**
-     * 查询菜单树节点数据
+     * 查询菜单树节点数据接口
      * @return
      */
     public abstract List<Map<String,Object>> queryMenuTreeMap();

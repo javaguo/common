@@ -21,5 +21,5 @@ public interface BaseModelMapper<T> extends Mapper<T>,MySqlMapper<T> {
      * 查询树节点
      * @return
      */
-    public abstract List loadTreeData();
+    /*public abstract List loadTreeData();*/
 }

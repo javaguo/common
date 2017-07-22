@@ -83,7 +83,7 @@ Ext.onReady(function() {
 						<%-- 加载第一个下拉框的数据(级联有多个下拉框，非级联只有一个下拉框) --%>
 						<c:when test='${ !comboBoxInfo.isCascade || ( comboBoxInfo.isCascade && comboBoxInfo.isFirst )}'>
 							comboBoxStore_${comboBoxInfo.comboBoxName}_${identifier}.on("beforeload",function(){
-								Ext.apply(comboBoxStore_${comboBoxInfo.comboBoxName}_${identifier}.proxy.extraParams, {"loadDataMethodName":"${comboBoxInfo.loadDataMethodName}","value":"${comboBoxInfo.firstComboBoxParamValue}"});
+								Ext.apply(comboBoxStore_${comboBoxInfo.comboBoxName}_${identifier}.proxy.extraParams, {"comboBoxFlag":"${comboBoxInfo.comboBoxFlag}","value":"${comboBoxInfo.firstComboBoxParamValue}"});
 							});
 							comboBoxStore_${comboBoxInfo.comboBoxName}_${identifier}.load();
 						</c:when>
@@ -125,7 +125,7 @@ Ext.onReady(function() {
 							
 							comboBoxStore_${cascadeComboBoxInfo.comboBoxName}_${identifier}.removeAll();
 						</c:forEach>
-						Ext.apply(comboBoxStore_${comboBoxInfo.childComboBox}_${identifier}.proxy.extraParams, {"loadDataMethodName":"loadComboboxData","value":comboBox_${comboBoxInfo.comboBoxName}_${identifier}.getValue()});
+						Ext.apply(comboBoxStore_${comboBoxInfo.childComboBox}_${identifier}.proxy.extraParams, {"comboBoxFlag":"${comboBoxInfo.comboBoxFlag}","value":comboBox_${comboBoxInfo.comboBoxName}_${identifier}.getValue()});
 						comboBoxStore_${comboBoxInfo.childComboBox}_${identifier}.load();
 						
 					}); 

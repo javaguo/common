@@ -8,7 +8,6 @@ import com.tgw.dao.base.BaseModelMapper;
 import com.tgw.exception.PlatformException;
 import com.tgw.service.base.BaseService;
 import net.sf.json.JSONObject;
-import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Service;
 
 import java.io.Serializable;
@@ -18,13 +17,19 @@ import java.util.Map;
 import java.util.Objects;
 
 @Service("baseService")
-public class BaseServiceImpl  implements BaseService,Serializable {
+public  class BaseServiceImpl  implements BaseService,Serializable {
 
 //	public Log logger = LogFactory.getLog(this.getClss());
 
     /**
-     * baseModelMapper目前没有实现注入，自动注入时报找不到bean
+     * baseModelMapper目前没有实现注入，自动注入时报找不到对应的bean。
+     *
+     * 注入时的报错信息
+     * No qualifying bean of type [com.tgw.dao.base.BaseModelMapper] is defined: expected single matching bean but found 5: baseConstantMapper,testMapper,exampleBeanMapper,sysEnMenuMapper,sysUserMapper
      */
+   // @Autowired
+//    @Autowired(required=false)
+//    @Resource(name="com.tgw.dao.base.BaseModelMapper")
     private BaseModelMapper baseModelMapper;
 
     @Override

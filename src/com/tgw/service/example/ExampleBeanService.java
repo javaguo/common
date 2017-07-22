@@ -11,6 +11,19 @@ import java.util.Map;
  */
 public interface ExampleBeanService extends BaseService{
 
+    /**
+     * 查询行政区划下拉框数据
+     * @return
+     * @throws PlatformException
+     */
+    public abstract List<Map<String,Object>> queryDistrictComboBoxMap(Object value)  throws PlatformException;
+
+    /**
+     * 查询菜单下拉框数据
+     * @return
+     * @throws PlatformException
+     */
+    public abstract List<Map<String,Object>> queryMenuComboBoxMap(Object value) throws PlatformException;
 
     /**
      * 查询行政区划树节点数据

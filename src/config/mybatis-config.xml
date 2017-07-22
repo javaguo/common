@@ -57,5 +57,8 @@
 	<mappers>
 		<mapper resource="com/tgw/bean/SsoUserMapper.xml" />
 	</mappers>
-	-->
+
+	<mappers>
+		<mapper class="com.tgw.dao.base.BaseModelMapper" />
+	</mappers>-->
 </configuration>  

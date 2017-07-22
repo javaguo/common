@@ -671,12 +671,12 @@ public class SysEnController extends AbstractBaseBean {
      * @param isAllowUpdate
      * @param isAllowSearch
      * @param isAllowBlank
-     * @param loadDataMethodName
+     * @param comboBoxFlag
      * @param firstComboBoxParamValue
      * @param comboBoxConfigs
      */
-    public void addFieldComboBoxBySQL( String name, String fieldLabel,  boolean isValid, boolean isAllowAdd, boolean isAllowUpdate, boolean isAllowSearch, boolean isAllowBlank,String loadDataMethodName,String firstComboBoxParamValue,String comboBoxConfigs){
-        this.addFieldComboBoxBySQL(name,fieldLabel,isValid,isAllowAdd,isAllowUpdate,true,isAllowSearch,isAllowBlank,loadDataMethodName,firstComboBoxParamValue,comboBoxConfigs);
+    public void addFieldComboBoxBySQL( String name, String fieldLabel,  boolean isValid, boolean isAllowAdd, boolean isAllowUpdate, boolean isAllowSearch, boolean isAllowBlank,String comboBoxFlag,String firstComboBoxParamValue,String comboBoxConfigs){
+        this.addFieldComboBoxBySQL(name,fieldLabel,isValid,isAllowAdd,isAllowUpdate,true,isAllowSearch,isAllowBlank,comboBoxFlag,firstComboBoxParamValue,comboBoxConfigs);
     }
 
     /**
@@ -689,17 +689,17 @@ public class SysEnController extends AbstractBaseBean {
      * @param isAllowUpdate
      * @param isAllowSearch
      * @param isAllowBlank
-     * @param loadDataMethodName
+     * @param comboBoxFlag
      * @param firstComboBoxParamValue
      * @param comboBoxConfigs
      */
-    public void addFieldComboBoxBySQL( String name, String fieldLabel,  boolean isValid, boolean isAllowAdd, boolean isAllowUpdate,boolean isShowList, boolean isAllowSearch, boolean isAllowBlank,String loadDataMethodName,String firstComboBoxParamValue,String comboBoxConfigs){
+    public void addFieldComboBoxBySQL( String name, String fieldLabel,  boolean isValid, boolean isAllowAdd, boolean isAllowUpdate,boolean isShowList, boolean isAllowSearch, boolean isAllowBlank,String comboBoxFlag,String firstComboBoxParamValue,String comboBoxConfigs){
         SysEnControllerField  sysEnControllerField = new SysEnControllerField(name,fieldLabel,PlatformSysConstant.FORM_XTYPE_COMBOBOX,isValid,isAllowAdd,isAllowUpdate,isShowList,isAllowSearch,isAllowBlank);
 
         SysEnFieldComboBox comboBox = new SysEnFieldComboBox();
         comboBox.setComboBoxName( name );
         comboBox.setLoadDataImplModel("sql");
-        comboBox.setLoadDataMethodName( loadDataMethodName );
+        comboBox.setComboBoxFlag( comboBoxFlag );
         comboBox.setFirstComboBoxParamValue( firstComboBoxParamValue );
         comboBox.setCascade(false);
 
@@ -805,13 +805,13 @@ public class SysEnController extends AbstractBaseBean {
      * @param comboBoxGroupName
      * @param firstComboBoxParamValue
      * @param comboBoxNames
-     * @param loadDataMethodNames
+     * @param comboBoxFlag
      * @param comboBoxGroupConfigs
      * @param comboBoxConfigs
      */
     public void addFieldComboBoxCascadeBySQL(  String fieldLabel,  boolean isValid, boolean isAllowAdd, boolean isAllowUpdate, boolean isAllowSearch, boolean isAllowBlank,
-                                               String comboBoxGroupName,String firstComboBoxParamValue,String[] comboBoxNames,String[] loadDataMethodNames,String comboBoxGroupConfigs,String comboBoxConfigs ){
-        this.addFieldComboBoxCascadeBySQL(fieldLabel,isValid,isAllowAdd,isAllowUpdate,true,isAllowSearch,isAllowBlank,comboBoxGroupName,firstComboBoxParamValue,comboBoxNames,loadDataMethodNames,comboBoxGroupConfigs,comboBoxConfigs);
+                                               String comboBoxGroupName,String firstComboBoxParamValue,String[] comboBoxNames,String[] comboBoxFlag,String comboBoxGroupConfigs,String comboBoxConfigs ){
+        this.addFieldComboBoxCascadeBySQL(fieldLabel,isValid,isAllowAdd,isAllowUpdate,true,isAllowSearch,isAllowBlank,comboBoxGroupName,firstComboBoxParamValue,comboBoxNames,comboBoxFlag,comboBoxGroupConfigs,comboBoxConfigs);
     }
 
     /**
@@ -826,13 +826,13 @@ public class SysEnController extends AbstractBaseBean {
      * @param comboBoxGroupName
      * @param firstComboBoxParamValue
      * @param comboBoxNames
-     * @param loadDataMethodNames
+     * @param comboBoxFlag
      * @param comboBoxGroupConfigs
      * @param comboBoxConfigs
      */
     public void addFieldComboBoxCascadeBySQL(  String fieldLabel,  boolean isValid, boolean isAllowAdd, boolean isAllowUpdate,boolean isShowList, boolean isAllowSearch, boolean isAllowBlank,
-                                               String comboBoxGroupName,String firstComboBoxParamValue,String[] comboBoxNames,String[] loadDataMethodNames,String comboBoxGroupConfigs,String comboBoxConfigs ){
-        if( comboBoxNames==null || loadDataMethodNames ==null || ( comboBoxNames.length!=loadDataMethodNames.length ) ){
+                                               String comboBoxGroupName,String firstComboBoxParamValue,String[] comboBoxNames,String[] comboBoxFlag,String comboBoxGroupConfigs,String comboBoxConfigs ){
+        if( comboBoxNames==null || comboBoxFlag ==null || ( comboBoxNames.length!=comboBoxFlag.length ) ){
             throw new PlatformException("构造下拉框出错！参数错误！");
         }
 
@@ -848,7 +848,7 @@ public class SysEnController extends AbstractBaseBean {
 
         int comboBoxNum = comboBoxNames.length;
         for( int i=0;i<comboBoxNum;i++ ){
-            if( StringUtils.isBlank( comboBoxNames[i] )  || StringUtils.isBlank( loadDataMethodNames[i] ) ){
+            if( StringUtils.isBlank( comboBoxNames[i] )  || StringUtils.isBlank( comboBoxFlag[i] ) ){
                 throw new PlatformException("构造下拉框出错！参数为空！");
             }
 
@@ -858,7 +858,7 @@ public class SysEnController extends AbstractBaseBean {
             if( i==0 ){
                 tempComboBox.setFirstComboBoxParamValue( firstComboBoxParamValue );
             }
-            tempComboBox.setLoadDataMethodName( loadDataMethodNames[i] );
+            tempComboBox.setComboBoxFlag( comboBoxFlag[i] );
             tempComboBox.setCascade(true);
             tempComboBox.setComboBoxOrder( i+1 );
             if( i>0 ){

@@ -27,10 +27,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.lang.reflect.Method;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by zhaojg on 2017/03/25
@@ -75,9 +72,14 @@ public class ExampleBeanController extends BaseController<ExampleBean>{
         /**
          * 将具体的业务的service对象赋值给baseservice，必须的操作。
          * service层需要将具体业务的mapper赋值给BaseModelMapper
+         *
+         * 此操作主要解决的问题是BaseModelMapper无法注入到BaseServiceImpl中的问题。手动赋值。
+         *
          * 要点：
          * 1.BaseController会调用统一的searchData()接口查询具体的业务数据。
          * 2.具体业务的mapper文件中实现searchData查询语句
+         *
+         *
          */
         if( null!=this.getExampleBeanService() ){
             super.initService(  this.getExampleBeanService()  );
@@ -96,112 +98,148 @@ public class ExampleBeanController extends BaseController<ExampleBean>{
 
     @Override
     public void initField( SysEnController controller ) {
-        String formHiddenConfigs = "value:'hidden隐藏域值'";
-        //,afterLabelTextTpl:['afterLabelTextTpl'],afterLabelTpl:['afterLabelTpl'],afterBodyEl:['afterBodyEl'],beforeBodyEl :['beforeBodyEl'],beforeLabelTextTpl :['beforeLabelTextTpl'],beforeLabelTpl:['beforeLabelTpl']
-        String formTextConfigs = "labelWidth:100,width:400,emptyText:'文本提示信息'";
-        String formPasswordConfigs = "labelWidth:100,width:300,emptyText:'密码提示信息'";
-        String formTextAreaConfigs = "labelWidth:100,width:400,height:80,emptyText:'文本域内容......',maxLength:50,maxLengthText:'最长为50个字',minLength:5,minLengthText:'最小为5个字'";
-        String formHtmlEditorConfigs = "labelWidth:100,width:500,height:200";
-        String formNumberIntConfigs = "labelWidth:100,width:200,height:25,emptyText:'整数',allowDecimals:false,maxValue:20,maxText:'最大为20',minValue:6,minText:'最小为6'";
-        String formNumberDoubleConfigs = "labelWidth:100,width:200,height:25,emptyText:'小数',maxValue:999.9,maxText:'最大为999.9',minValue:0.1,minText:'最小为0.1',step:100";
-        String formDecimalConfigs = "labelWidth:100,width:200,height:25,emptyText:'得分',maxValue:99999.9,maxText:'最大为99999.9',minValue:0.1,minText:'最小为0.1',step:100";
-        String formDateConfigs = "labelWidth:100,width:200,height:25,emptyText:'录入日期',editable:false,maxValue:'2017-12-31',maxText:'不能超过2017-12-31',minValue:'2015-03-21',minText:'最小为2015-03-21'";
-        String formDateTimeConfigs = "labelWidth:100,width:260,height:25,emptyText:'精确时间'";
-        String formDisplayConfigs = "labelWidth:100,width:300,value:'管理员',submitValue:true";
-//        String formComBoxGroupConfigs = "labelWidth:100";
-        String formComBoxConfigs = "labelWidth:100,emptyText:'选择类型',width:250";
-        String formComBoxSqlConfigs = "labelWidth:100,emptyText:'选择',width:300";
-        String formComboboxGroup1Configs = "labelWidth:100";
-        String formComboboxGroup1ComConfigs = "emptyText:'请选择',width:100";
-        String formComboboxGroup2Configs = "labelWidth:100,width:600";
-        String formComboboxGroup2ComConfigs = "emptyText:'请选择...',width:100";
-
-
-        String formRadioGroupConfigs = "labelWidth:100,width:500";
-        String formRadioConfigs = "width:80";//,style:{margin-right:'0px'}
-        String formCheckboxGroupConfigs = "labelWidth:100,width:500";
-        String formCheckboxConfigs = "width:100";//,style:{margin-right:'0px'}
-
-        String formFileConfigs = "labelWidth:100,width:400,emptyText:'请选择附件...'";
-        //上传附件的serviceConfigs为必须项，savePath和allowFileType必须配置
-        /**
-         * 以下格式的路径都可以，框架会自动处理修正。例：/upload/pic/,/upload/pic,upload/pic/。
-         */
-        String formFileServiceConfigs1 = "savePath:'/upload/doc/',allowFileType:'doc,docx'";
-        String formFileServiceConfigs2 = "savePath:'/upload/txt',allowFileType:'txt'";
-        String formFileServiceConfigs3 = "savePath:'upload/pdf',allowFileType:'pdf'";
-
         //构造字段
         controller.addFieldId("id","ID",null);
 
+        /***********************************************************************************************************
+         * 隐藏域、文本框、密码框、文本域
+         */
+        String formHiddenConfigs = "value:'hidden隐藏域值'";
+        //,afterLabelTextTpl:['afterLabelTextTpl'],afterLabelTpl:['afterLabelTpl'],afterBodyEl:['afterBodyEl'],beforeBodyEl :['beforeBodyEl'],beforeLabelTextTpl :['beforeLabelTextTpl'],beforeLabelTpl:['beforeLabelTpl']
+        String formTextConfigs = "labelWidth:100,width:400,emptyText:'文本提示信息'";
+        String formPasswordConfigs = "labelWidth:100,width:400,emptyText:'密码提示信息'";
+        String formTextAreaConfigs = "labelWidth:100,width:400,height:80,emptyText:'文本域内容......',maxLength:50,maxLengthText:'最长为50个字',minLength:5,minLengthText:'最小为5个字'";
+
         controller.addFieldHidden( "formHidden","form隐藏域",true,true,true,formHiddenConfigs );
         controller.addFieldText("formText","文本文本",true,true,true,true,true,false,formTextConfigs);
-        controller.addFieldPassword("formPassword","密码b",true,true,false,false,false,formPasswordConfigs);
-        controller.addFieldTextArea("formTextArea","文本域c",true,true,true,true,false,formTextAreaConfigs);
-        //htmlEditor没有继承Ext.form.field.Base
-        controller.addFieldHtmlEditor("formHtmlEditor","编辑器",true,true,true,false,formHtmlEditorConfigs);
-        /**
-         * extjs会自动判断提交的表单是否包含有附件（判断表单中是否有inputType="file"类型的表单元素，与是否选择了文件无关）
-         * ，以此决定是否使用enctype="multipart/form-data"提交表单
+        controller.addFieldPassword("formPassword","密码",true,true,false,false,false,formPasswordConfigs);
+        controller.addFieldTextArea("formTextArea","文本域",true,true,true,true,false,formTextAreaConfigs);
+
+        /***********************************************************************************************************
+         * 数字控件
+         *
+         * 对应java各数据类型
+         *
+         * 基本类型的数据目前提交表单时还存在问题。当值为空的时候，表单提交报400错误。
+         * 所以项目中定义数据变量时使用包装类型
          */
-        controller.addFieldFile("formFile1","附件1",true,true,true,true,formFileConfigs,formFileServiceConfigs1);
-        controller.addFieldFile("formFile2","附件2",true,true,true,true,formFileConfigs,formFileServiceConfigs2);
-        controller.addFieldFile("formFile3","附件3",true,true,true,true,formFileConfigs,formFileServiceConfigs3);
+        String formNumberIntConfigs = "labelWidth:100,width:300,height:25,emptyText:'整数',allowDecimals:false,maxValue:20,maxText:'最大为20',minValue:6,minText:'最小为6'";
+        String formNumberDoubleConfigs = "labelWidth:100,width:300,height:25,emptyText:'小数',maxValue:999.9,maxText:'最大为999.9',minValue:0.1,minText:'最小为0.1',step:100";
+        String formDecimalConfigs = "labelWidth:100,width:300,height:25,emptyText:'得分',maxValue:99999.9,maxText:'最大为99999.9',minValue:0.1,minText:'最小为0.1',step:100";
+        String formRadioGroupConfigsBoolean = "labelWidth:100,width:400";
+        String formRadioConfigsBoolean = "width:80";
 
-        //controller.addFieldNumber("formNumberShortBase","short",true,true,true,false,true,formNumberIntConfigs);
-//        controller.addFieldNumber("formNumberIntBase","int",true,true,true,false,false,formNumberIntConfigs);
-//        controller.addFieldNumber("formNumberLongBase","long",true,true,true,false,true,formNumberIntConfigs);
-//        controller.addFieldNumber("formNumberFloatBase","float",true,true,true,false,true,formNumberDoubleConfigs);
-//        controller.addFieldNumber("formNumberDoubleBase","double",true,true,true,false,true,formNumberDoubleConfigs);
-//        controller.addFieldRadioInitDataByJson("formBooleanBase","boolean",true,true,false,false,false,booleanJson,formRadioGroupConfigs,formRadioConfigs);
+        /*controller.addFieldNumber("formNumberShortBase","short",true,true,true,false,true,formNumberIntConfigs);
+        controller.addFieldNumber("formNumberIntBase","int",true,true,true,false,false,formNumberIntConfigs);
+        controller.addFieldNumber("formNumberLongBase","long",true,true,true,false,true,formNumberIntConfigs);
+        controller.addFieldNumber("formNumberFloatBase","float",true,true,true,false,true,formNumberDoubleConfigs);
+        controller.addFieldNumber("formNumberDoubleBase","double",true,true,true,false,true,formNumberDoubleConfigs);
+        controller.addFieldRadioInitDataByJson("formBooleanBase","boolean",true,true,false,false,false,booleanJson,formRadioGroupConfigs,formRadioConfigs);*/
 
-       /* controller.addFieldNumber("formNumberShort","Short",true,true,true,true,true,formNumberIntConfigs);
+        controller.addFieldNumber("formNumberShort","Short",true,true,true,true,true,formNumberIntConfigs);
         controller.addFieldNumber("formNumberInteger","Integer",true,true,true,true,true,formNumberIntConfigs);
         controller.addFieldNumber("formNumberLong","Long",true,true,true,true,true,formNumberIntConfigs);
         controller.addFieldNumber("formNumberFloat","Float",true,true,true,true,true,formNumberDoubleConfigs);
         controller.addFieldNumber("formNumberDouble","Double",true,true,true,true,true,formNumberDoubleConfigs);
         String booleanJson = "[{name:'是',value:'true'},{name:'否',value:'false'}]";
-        controller.addFieldRadioInitDataByJson("formBoolean","Boolean",true,true,true,false,true,booleanJson,formRadioGroupConfigs,formRadioConfigs);
+        controller.addFieldRadioInitDataByJson("formBoolean","Boolean",true,true,true,false,true,booleanJson,formRadioGroupConfigsBoolean,formRadioConfigsBoolean);
+        /***********************************************************************************************************
+         * 日期、时间控件
+         */
+        String formDateConfigs = "labelWidth:100,width:300,height:25,emptyText:'录入日期',editable:false,maxValue:'2017-12-31',maxText:'不能超过2017-12-31',minValue:'2015-03-21',minText:'最小为2015-03-21'";
+        String formDateTimeConfigs = "labelWidth:100,width:300,height:25,emptyText:'精确时间'";
 
         controller.addFieldDate("formDateString","日期(String)",true,true,true,true,false,formDateConfigs);
         controller.addFieldDate("formDateDate","日期(Date)",true,true,true,false,true,formDateConfigs);
         controller.addFieldDatetime("formDatetimeString","时间(String)",true,true,true,false,false,formDateTimeConfigs);
         controller.addFieldDatetime("formDatetimeDate","时间(Date)",true,true,true,false,true,formDateTimeConfigs);
-
-        String comboBoxJson = "[{name:'优',value:'90'},{name:'良',value:'80'},{name:'中',value:'70'},{name:'及格',value:'60'},{name:'差',value:'50'}]";
-        controller.addFieldComboBoxByJSON("formComboBox","下拉框(json)",true,true,false,false,false,comboBoxJson,formComBoxConfigs);
-        controller.addFieldComboBoxBySQL("formComBoxSql","下拉框(sql)",true,true,false,false,true,"loadComboboxData",null,formComBoxSqlConfigs);
-        controller.addFieldComboBoxCascadeBySQL("二级级联",true,true,false,false,true,"formComboboxGroup1","10",new String[] {"cascade1a","cascade1b"},new String[] {"loadComboboxData","loadComboboxData"},formComboboxGroup1Configs,formComboboxGroup1ComConfigs);
-        controller.addFieldComboBoxCascadeBySQL("三级级联",true,true,false,false,false,"formComboboxGroup2","1",new String[] {"formComboBoxCascade1","formComboBoxCascade2","formComboBoxCascade3"},new String[] {"loadComboboxData","loadComboboxData","loadComboboxData"},formComboboxGroup2Configs,formComboboxGroup2ComConfigs);
+        /***********************************************************************************************************
+        * 单选及多选控件
         */
-
-        String formComboBoxTreeConfigs1 = "labelWidth:100,width:400,multiSelect:true,multiCascade:true,selectedIds:'A,A1,A2,A13'";
-        String formComboBoxTreeConfigs2 = "labelWidth:100,width:400,multiSelect:true,multiCascade:false,selectedIds:'A,A2,A132,B1,B4a,C'";
-        String formComboBoxTreeConfigs3 = "labelWidth:100,width:400,multiSelect:false";
-        String formComboBoxTreeConfigs4 = "labelWidth:100,width:400,multiSelect:true,multiCascade:true";
-        String formComboBoxTreeConfigs5 = "labelWidth:100,width:400,multiSelect:true,multiCascade:false";
-        String formComboBoxTreeConfigs6 = "labelWidth:100,width:400,multiSelect:false";
-        String treeUrl1=  "resource/js/extjs/plugin/tree2.json";
-        String treeUrl2 = "resource/js/extjs/plugin/tree2.json";
-        String treeUrl3 = "sysMenu/queryMenuByUser.do";
-        String treeUrl4 = "exampleBean/loadTreeData.do?fieldMap=id:id,text:text,parentId:fk_parent_id&treeFlag=menu&resType=map&multiSelect=true";
-        String treeUrl5 = "exampleBean/loadTreeData.do?fieldMap=id:id,text:text,parentId:fk_parent_id&treeFlag=menu&resType=map&multiSelect=true";
-        String treeUrl6 = "exampleBean/loadTreeData.do?fieldMap=id:id,text:name,parentId:parent_id&treeFlag=district&resType=map&multiSelect=false";
-        controller.addFieldComboBoxTree( "formComboBoxTree1","树(多选级联)",true,true,false,false,false,formComboBoxTreeConfigs1,treeUrl1 );
-        controller.addFieldComboBoxTree( "formComboBoxTree2","树(多选不级联)",true,true,false,false,true,formComboBoxTreeConfigs2,treeUrl2 );
-        controller.addFieldComboBoxTree( "formComboBoxTree3","树(单选)",true,true,false,false,true,formComboBoxTreeConfigs3,treeUrl3 );
-        controller.addFieldComboBoxTree( "formComboBoxTree4","菜单树(多选级联)",true,true,false,false,true,formComboBoxTreeConfigs4,treeUrl4 );
-        controller.addFieldComboBoxTree( "formComboBoxTree5","菜单树(多选不级联)",true,true,false,false,true,formComboBoxTreeConfigs5,treeUrl5 );
-        controller.addFieldComboBoxTree( "formComboBoxTree6","行政区划树(单选)",true,true,false,false,true,formComboBoxTreeConfigs6,treeUrl6 );
+        String formRadioGroupConfigs = "labelWidth:100,width:500";
+        String formRadioConfigs = "width:80";//,style:{margin-right:'0px'}
+        String formCheckboxGroupConfigs = "labelWidth:100,width:500";
+        String formCheckboxConfigs = "width:80";//,style:{margin-right:'0px'}
 
         String radioJson = "[{name:'优秀',value:'90'},{name:'良好',value:'80'},{name:'中等',value:'70'}]";
         controller.addFieldRadioInitDataByJson("formRadio","单选",true,true,true,true,true,radioJson,formRadioGroupConfigs,formRadioConfigs);
 
         String checkboxJson = "[{name:'读书',value:'readbook'},{name:'跑步',value:'running'},{name:'游泳',value:'swimming'}]";
         controller.addFieldCheckboxInitDataByJson("formCheckbox","多选",true,true,true,true,false,checkboxJson,formCheckboxGroupConfigs,formCheckboxConfigs);
+        /***********************************************************************************************************
+         * 下拉框控件
+         */
+        String formComBoxConfigs = "labelWidth:100,emptyText:'选择类型',width:200";
+        String formComBoxSqlConfigs = "labelWidth:100,emptyText:'选择',width:200";
+        String formComboboxGroup1Configs = "labelWidth:100";
+        String formComboboxGroup1ComConfigs = "emptyText:'请选择',width:100";
+        String formComboboxGroup2Configs = "labelWidth:100,width:500";
+        String formComboboxGroup2ComConfigs = "emptyText:'请选择...',width:100";
 
-        controller.addFieldDisplay("formDisplay","form面板",true,true,true,true,formDisplayConfigs);
+        String comboBoxJson = "[{name:'优',value:'90'},{name:'良',value:'80'},{name:'中',value:'70'},{name:'及格',value:'60'},{name:'差',value:'50'}]";
 
+        controller.addFieldComboBoxByJSON("formComboBox","下拉框(json)",true,true,false,false,false,comboBoxJson,formComBoxConfigs);
+        controller.addFieldComboBoxBySQL("formComBoxSql","下拉框(sql)",true,true,false,false,true,"loadMenu",null,formComBoxSqlConfigs);
+        controller.addFieldComboBoxCascadeBySQL("二级级联",true,true,false,false,true,"formComboboxGroup1","1",new String[] {"cascade1a","cascade1b"},new String[] {"loadMenu","loadMenu"},formComboboxGroup1Configs,formComboboxGroup1ComConfigs);
+        controller.addFieldComboBoxCascadeBySQL("三级级联",true,true,false,false,false,"formComboboxGroup2",null,new String[] {"formComboBoxCascade1","formComboBoxCascade2","formComboBoxCascade3"},new String[] {"loadDistrict","loadDistrict","loadDistrict"},formComboboxGroup2Configs,formComboboxGroup2ComConfigs);
+        /***********************************************************************************************************
+         * 树控件
+         */
+        String formComboBoxTreeConfigs1 = "labelWidth:100,width:400,multiSelect:true,multiCascade:true,selectedIds:'A,A1,A2,A13'";
+        String formComboBoxTreeConfigs2 = "labelWidth:100,width:400,multiSelect:true,multiCascade:false,selectedIds:'A,A2,A132,B1,B4a,C'";
+        String formComboBoxTreeConfigs3 = "labelWidth:100,width:400,multiSelect:false";
+        String formComboBoxTreeConfigs4 = "labelWidth:100,width:400,multiSelect:true,multiCascade:true";
+        String formComboBoxTreeConfigs5 = "labelWidth:100,width:400,multiSelect:true,multiCascade:false";
+        String formComboBoxTreeConfigs6 = "labelWidth:100,width:400,multiSelect:false";
+
+        String treeUrl1=  "resource/js/extjs/plugin/tree2.json";
+        String treeUrl2 = "resource/js/extjs/plugin/tree2.json";
+        String treeUrl3 = "sysMenu/queryMenuByUser.do";
+        String treeUrl4 = "exampleBean/loadTreeData.do?fieldMap=id:id,text:text,parentId:fk_parent_id&treeFlag=menu&resType=map&multiSelect=true";
+        String treeUrl5 = "exampleBean/loadTreeData.do?fieldMap=id:id,text:text,parentId:fk_parent_id&treeFlag=menu&resType=map&multiSelect=true";
+        String treeUrl6 = "exampleBean/loadTreeData.do?fieldMap=id:id,text:name,parentId:parent_id&treeFlag=district&resType=map&multiSelect=false";
+
+        controller.addFieldComboBoxTree( "formComboBoxTree1","树(多选级联)",true,true,false,false,false,formComboBoxTreeConfigs1,treeUrl1 );
+        controller.addFieldComboBoxTree( "formComboBoxTree2","树(多选不级联)",true,true,false,false,true,formComboBoxTreeConfigs2,treeUrl2 );
+        controller.addFieldComboBoxTree( "formComboBoxTree3","树(单选)",true,true,false,false,true,formComboBoxTreeConfigs3,treeUrl3 );
+        controller.addFieldComboBoxTree( "formComboBoxTree4","菜单树(多选级联)",true,true,false,false,true,formComboBoxTreeConfigs4,treeUrl4 );
+        controller.addFieldComboBoxTree( "formComboBoxTree5","菜单树(多选不级联)",true,true,false,false,true,formComboBoxTreeConfigs5,treeUrl5 );
+        controller.addFieldComboBoxTree( "formComboBoxTree6","行政区划树(单选)",true,true,false,false,true,formComboBoxTreeConfigs6,treeUrl6 );
+        /***********************************************************************************************************
+         * 富文本编辑器控件
+         *
+         * htmlEditor没有继承Ext.form.field.Base
+         */
+        String formHtmlEditorConfigs = "labelWidth:100,width:400,height:200";
+
+        controller.addFieldHtmlEditor("formHtmlEditor","编辑器",true,true,true,false,formHtmlEditorConfigs);
+        /***********************************************************************************************************
+         * 附件控件
+         *
+         * extjs会自动判断提交的表单是否包含有附件（判断表单中是否有inputType="file"类型的表单元素，与是否选择了文件无关）
+         * ，以此决定是否使用enctype="multipart/form-data"提交表单
+         */
+        String formFileConfigs = "labelWidth:100,width:400,emptyText:'请选择附件...'";
+        /**
+         * 上传附件的serviceConfigs为必须项，savePath和allowFileType必须配置。
+         * 以下格式的路径都可以，框架会自动处理修正。例：/upload/pic/,/upload/pic,upload/pic/。
+         */
+        String formFileServiceConfigs1 = "savePath:'/upload/doc/',allowFileType:'doc,docx'";
+        String formFileServiceConfigs2 = "savePath:'/upload/txt',allowFileType:'txt'";
+        String formFileServiceConfigs3 = "savePath:'upload/pdf',allowFileType:'pdf'";
+
+        controller.addFieldFile("formFile1","附件1",true,true,true,true,formFileConfigs,formFileServiceConfigs1);
+        controller.addFieldFile("formFile2","附件2",true,true,true,true,formFileConfigs,formFileServiceConfigs2);
+        controller.addFieldFile("formFile3","附件3",true,true,true,true,formFileConfigs,formFileServiceConfigs3);
+        /***********************************************************************************************************
+         * 面板控件
+         */
+        String formDisplayConfigs = "labelWidth:100,width:400,value:'管理员',submitValue:true";
+
+        /*controller.addFieldDisplay("formDisplay","form面板",true,true,true,true,formDisplayConfigs);*/
+
+        /***********************************************************************************************************
+         */
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         String insertTimeConfigs = "value:'"+sdf.format( new Date() )+"'";
         String updateTimeConfigs = "value:'"+sdf.format( new Date() )+"'";
@@ -246,7 +284,27 @@ public class ExampleBeanController extends BaseController<ExampleBean>{
         return  modelAndView;
     }*/
     @Override
+    public List<Map<String,Object>> loadComboBoxDataMap(HttpServletRequest request, HttpServletResponse response, ExampleBean bean,String parentId){
+        /**
+         * 查询下拉框数据
+         */
+        String comboBoxFlag = request.getParameter("comboBoxFlag");
+        List<Map<String,Object>> res = null;
+
+        if( "loadMenu".equals( comboBoxFlag ) ){
+            res = this.getExampleBeanService().queryMenuComboBoxMap( parentId );
+        }else if( "loadDistrict".equals( comboBoxFlag ) ){
+            res = this.getExampleBeanService().queryDistrictComboBoxMap( parentId );
+        }
+
+        return res;
+    }
+
+    @Override
     public List<Map<String,Object>> loadTreeNodeDataMap(HttpServletRequest request, HttpServletResponse response, ExampleBean bean){
+        /**
+         * 加载树结点需要的数据
+         */
         String treeFlag = request.getParameter("treeFlag");
         List<Map<String,Object>> res = null;
 

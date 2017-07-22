@@ -28,11 +28,21 @@ public class ExampleBeanServiceImpl extends BaseServiceImpl implements ExampleBe
     public void initMapper() {
         System.out.println("ExampleBeanServiceImpl-->initMapper()");
         /**
-         * 具体业务层必须调用
+         * 具体业务service层必须覆写此方法
          */
         if( null!=exampleBeanMapper ){
             super.setBaseModelMapper( this.getExampleBeanMapper() );
         }
+    }
+
+    @Override
+    public List<Map<String, Object>> queryDistrictComboBoxMap(Object value) throws PlatformException {
+        return this.getExampleBeanMapper().queryDistrictComboBoxMap(value);
+    }
+
+    @Override
+    public List<Map<String, Object>> queryMenuComboBoxMap(Object value) throws PlatformException {
+        return this.getExampleBeanMapper().queryMenuComboBoxMap(value);
     }
 
     @Override
