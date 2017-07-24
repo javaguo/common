@@ -44,13 +44,17 @@ public class ExampleBean extends AbstractBaseBean{
     private Date formDateDate;
     private String formDatetimeString;
     private Date formDatetimeDate;
-    private String formComboBox;
+    private String formComboBoxJson;
+    private String formComboBoxSql;
     private String formComboBoxCascade1;
     private String formComboBoxCascade2;
     private String formComboBoxCascade3;
     private String formComboBoxTree1;
     private String formComboBoxTree2;
     private String formComboBoxTree3;
+    private String formComboBoxTree4;
+    private String formComboBoxTree5;
+    private String formComboBoxTree6;
     private String formRadio;
     private String formCheckbox;
     private String formDisplay;
@@ -257,12 +261,20 @@ public class ExampleBean extends AbstractBaseBean{
         this.formDatetimeDate = formDatetimeDate;
     }
 
-    public String getFormComboBox() {
-        return formComboBox;
+    public String getFormComboBoxJson() {
+        return formComboBoxJson;
     }
 
-    public void setFormComboBox(String formComboBox) {
-        this.formComboBox = formComboBox;
+    public void setFormComboBoxJson(String formComboBoxJson) {
+        this.formComboBoxJson = formComboBoxJson;
+    }
+
+    public String getFormComboBoxSql() {
+        return formComboBoxSql;
+    }
+
+    public void setFormComboBoxSql(String formComboBoxSql) {
+        this.formComboBoxSql = formComboBoxSql;
     }
 
     public String getFormComboBoxCascade1() {
@@ -311,6 +323,30 @@ public class ExampleBean extends AbstractBaseBean{
 
     public void setFormComboBoxTree3(String formComboBoxTree3) {
         this.formComboBoxTree3 = formComboBoxTree3;
+    }
+
+    public String getFormComboBoxTree4() {
+        return formComboBoxTree4;
+    }
+
+    public void setFormComboBoxTree4(String formComboBoxTree4) {
+        this.formComboBoxTree4 = formComboBoxTree4;
+    }
+
+    public String getFormComboBoxTree5() {
+        return formComboBoxTree5;
+    }
+
+    public void setFormComboBoxTree5(String formComboBoxTree5) {
+        this.formComboBoxTree5 = formComboBoxTree5;
+    }
+
+    public String getFormComboBoxTree6() {
+        return formComboBoxTree6;
+    }
+
+    public void setFormComboBoxTree6(String formComboBoxTree6) {
+        this.formComboBoxTree6 = formComboBoxTree6;
     }
 
     public String getFormRadio() {

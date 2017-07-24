@@ -342,7 +342,7 @@ Ext.onReady(function() {
 			fieldDefaults: {
 				labelWidth: 100,
 				labelAlign: "right",
-				width:300,
+				width:400,
 				flex: 0,//每项item的宽度权重。值为0或未设置此属性时，item的width值才起作用。
 				margin: 8
 			},
@@ -443,12 +443,301 @@ Ext.onReady(function() {
 	}
 
 	<%-- 编辑窗口方法开始 --%>
-	function openEditWindow${identifier}(){
+	function openEditWindow_${identifier}(){
 		
-	}
-	<%-- 编辑窗口方法结束 --%>
-
-    var  editPanel${identifier}=new Ext.FormPanel({
+		<%-- 下拉框初始化数据开始 --%>
+		<c:forEach items="${comboBoxList}" var="comboBoxInfo" varStatus="comboBoxStatus">
+			<%-- 定义下拉框store开始 --%>
+			<c:choose>
+				<%-- 使用json串初始化下拉框数据 --%>
+				<c:when test='${comboBoxInfo.loadDataImplModel=="json"}'>
+					var comboBoxStore_${comboBoxInfo.comboBoxName}_${identifier} = Ext.create('Ext.data.Store', {
+						fields: ['id', 'name'],
+						data : [
+							<c:forEach items="${comboBoxInfo.comboBoxOptionList}" var="comboBoxOptionInfo" varStatus="comboBoxOptionStatus">
+								{"id":"${comboBoxOptionInfo.value}", "name":"${comboBoxOptionInfo.name}"}
+								<c:choose>
+									<c:when test="${comboBoxOptionStatus.last}"></c:when>
+									<c:otherwise>,</c:otherwise>
+								</c:choose>
+							</c:forEach>
+						]
+					});
+				</c:when>
+				<%-- 请求后台查询数据库初始化下拉框数据 --%>
+				<c:when test='${comboBoxInfo.loadDataImplModel=="sql"}'>
+					var comboBoxStore_${comboBoxInfo.comboBoxName}_${identifier} = new Ext.data.Store({
+						model:comboBoxDataModel${identifier},
+						proxy: new Ext.data.HttpProxy({
+							url: '<%=basePath%>${controllerBaseUrl}/loadComboxData.do',
+							noCache:false,
+							reader:{
+								type:'json',
+								rootProperty: 'comboboxData'
+							}
+						}),
+						remoteSort: true
+					});
+					<c:choose>
+						<%-- 加载第一个下拉框的数据(级联有多个下拉框，非级联只有一个下拉框) --%>
+						<c:when test='${ !comboBoxInfo.isCascade || ( comboBoxInfo.isCascade && comboBoxInfo.isFirst )}'>
+							comboBoxStore_${comboBoxInfo.comboBoxName}_${identifier}.on("beforeload",function(){
+								Ext.apply(comboBoxStore_${comboBoxInfo.comboBoxName}_${identifier}.proxy.extraParams, {"comboBoxFlag":"${comboBoxInfo.comboBoxFlag}","value":"${comboBoxInfo.firstComboBoxParamValue}"});
+							});
+							comboBoxStore_${comboBoxInfo.comboBoxName}_${identifier}.load();
+						</c:when>
+					</c:choose>
+				</c:when>
+	
+				<c:otherwise>
+				</c:otherwise>
+			</c:choose>
+			<%-- 定义下拉框store结束 --%>
+			
+			<%-- 定义下拉框 --%>
+			var  comboBox_${comboBoxInfo.comboBoxName}_${identifier} = Ext.create('Ext.form.ComboBox', {
+							id:'comboBoxId${comboBoxInfo.comboBoxName}${identifier}',
+							name:'${comboBoxInfo.comboBoxName}',
+							xtype: 'combobox',
+							store: comboBoxStore_${comboBoxInfo.comboBoxName}_${identifier},
+							triggerAction: 'all',
+							//queryMode: 'local',
+							displayField: 'name',
+							valueField: 'id',
+							width:80,
+							loadingText: 'loading...',
+							emptyText: "请选择",
+							mode: "local",
+							typeAhead: true  //延时查询
+							<c:if test='${comboBoxInfo.configs!=null}'>
+								,${comboBoxInfo.configs}
+							</c:if>
+			});
+			
+			<c:choose>
+				<%-- 绑定下拉框级联事件 --%>
+				<c:when test='${ comboBoxInfo.loadDataImplModel=="sql" && comboBoxInfo.isCascade && !comboBoxInfo.isLast }'>
+					comboBox_${comboBoxInfo.comboBoxName}_${identifier}.on('select', function() {
+						<c:forEach items="${comboBoxInfo.cascadeList}" var="cascadeComboBoxInfo" varStatus="cascadeComboBoxStatus">
+							comboBox_${cascadeComboBoxInfo.comboBoxName}_${identifier}.clearValue();
+							comboBox_${cascadeComboBoxInfo.comboBoxName}_${identifier}.reset();
+							
+							comboBoxStore_${cascadeComboBoxInfo.comboBoxName}_${identifier}.removeAll();
+						</c:forEach>
+						Ext.apply(comboBoxStore_${comboBoxInfo.childComboBox}_${identifier}.proxy.extraParams, {"comboBoxFlag":"${comboBoxInfo.comboBoxFlag}","value":comboBox_${comboBoxInfo.comboBoxName}_${identifier}.getValue()});
+						comboBoxStore_${comboBoxInfo.childComboBox}_${identifier}.load();
+						
+					}); 
+				</c:when>
+			</c:choose>
+			
+		</c:forEach>
+		<%-- 下拉框初始化数据结束 --%>
+		
+		<%-- 生成所有字段表单元素开始 --%>
+		<c:forEach items="${updateFieldList}" var="fieldInfo" varStatus="validFieldStatus">
+			var  field_${fieldInfo.name}_${identifier} =
+			<c:choose>
+				<%-- 单选按钮开始 --%>
+				<c:when test='${fieldInfo.xtype=="radiogroup"}'>
+				Ext.create({
+					id: 'field_${fieldInfo.name}_${identifier}',
+					xtype: '${fieldInfo.xtype}',
+					fieldLabel: '${fieldInfo.fieldLabel}',
+					labelStyle:'vertical-align: middle;',
+					width:210,
+					columns: 10,
+					vertical: true,
+					items: [
+						<c:forEach items="${fieldInfo.sysEnFieldAttr.radioList}" var="radioFieldInfo" varStatus="radioFieldStatus">
+							{id:'edit_${fieldInfo.name}_${radioFieldInfo.eleId}_${identifier}', 
+							 boxLabel: '${radioFieldInfo.boxLabel}', name: '${fieldInfo.name}',
+							 inputValue: '${radioFieldInfo.inputValue}',width:60
+							 <c:if test='${radioFieldInfo.configs!=null}'>
+									,${radioFieldInfo.configs}
+							 </c:if>
+							}
+							<c:choose>
+								<c:when test="${radioFieldStatus.last}"></c:when>
+								<c:otherwise>,</c:otherwise>
+							</c:choose>
+						</c:forEach>
+					]
+					<c:if test='${!fieldInfo.isAllowBlank}'>
+						,beforeLabelTextTpl: ['<span class="required">*</span>']
+					</c:if>
+					<c:if test='${fieldInfo.sysEnFieldAttr!=null}'>
+						,${fieldInfo.sysEnFieldAttr.configs}
+					</c:if>
+				});
+				</c:when>
+				<%-- 单选按钮结束 --%>
+				<%-- 多选按钮开始 --%>
+				<c:when test='${fieldInfo.xtype=="checkboxgroup"}'>
+				Ext.create({
+					id: 'field_${fieldInfo.name}_${identifier}',
+					xtype: '${fieldInfo.xtype}',
+					fieldLabel: '${fieldInfo.fieldLabel}',
+					labelStyle:'vertical-align: middle;',
+					width:250,
+					columns: 10,
+					vertical: true,
+					items: [
+						<c:forEach items="${fieldInfo.sysEnFieldAttr.checkboxList}" var="checkboxFieldInfo" varStatus="checkboxFieldStatus">
+								{   id:'edit_${fieldInfo.name}_${checkboxFieldInfo.eleId}_${identifier}',
+									boxLabel: '${checkboxFieldInfo.boxLabel}', name: '${fieldInfo.name}',
+									inputValue: '${checkboxFieldInfo.inputValue}',width:60
+									<c:if test='${checkboxFieldInfo.configs!=null}'>
+										,${checkboxFieldInfo.configs}
+									</c:if>
+								}
+							<c:choose>
+								<c:when test="${checkboxFieldStatus.last}"></c:when>
+								<c:otherwise>,</c:otherwise>
+							</c:choose>
+						</c:forEach>
+					]
+					<c:if test='${!fieldInfo.isAllowBlank}'>
+						,beforeLabelTextTpl: ['<span class="required">*</span>']
+					</c:if>
+					<c:if test='${fieldInfo.sysEnFieldAttr!=null}'>
+						,${fieldInfo.sysEnFieldAttr.configs}
+					</c:if>
+				});
+				</c:when>
+				<%-- 多选按钮结束 --%>
+				<%-- 下拉框开始 --%>
+				<c:when test='${fieldInfo.xtype=="combobox"}'>
+					<c:if test='${fieldInfo.sysEnFieldAttr.isCascade}'>
+						Ext.create({
+							id: 'field_${fieldInfo.name}_${identifier}',
+							xtype: 'fieldcontainer',
+							fieldLabel: '${fieldInfo.fieldLabel}',
+							labelStyle:'vertical-align: middle;',
+							width:450,
+							layout: 'hbox',
+							items:[
+								<c:forEach items="${fieldInfo.sysEnFieldAttr.comboBoxList}" var="comboBoxFieldInfo" varStatus="comboBoxFieldStatus">
+									comboBox_${comboBoxFieldInfo.comboBoxName}_${identifier}
+									<c:choose>
+										<c:when test="${comboBoxFieldStatus.last}"></c:when>
+										<c:otherwise>,</c:otherwise>
+									</c:choose>
+								</c:forEach>
+							]
+							<c:if test='${!fieldInfo.isAllowBlank}'>
+								,beforeLabelTextTpl: ['<span class="required">*</span>']
+							</c:if>
+							<c:if test='${fieldInfo.sysEnFieldAttr!=null}'>
+								,${fieldInfo.sysEnFieldAttr.configs}
+							</c:if>
+						});
+					</c:if>
+					<c:if test='${!fieldInfo.sysEnFieldAttr.isCascade}'>
+						<%-- 非级联下拉框comboBoxList的size一定为1 --%>
+						<c:forEach items="${fieldInfo.sysEnFieldAttr.comboBoxList}" var="comboBoxFieldInfo" varStatus="comboBoxFieldStatus">
+							comboBox_${comboBoxFieldInfo.comboBoxName}_${identifier};
+							comboBox_${comboBoxFieldInfo.comboBoxName}_${identifier}.fieldLabel='${fieldInfo.fieldLabel}';
+							<c:if test='${!fieldInfo.isAllowBlank}'>
+								comboBox_${comboBoxFieldInfo.comboBoxName}_${identifier}.beforeLabelTextTpl= ['<span class="required">*</span>'];
+							</c:if>
+						</c:forEach>
+					</c:if>
+				
+				</c:when>
+				<%-- 下拉框结束 --%>
+				<%-- 下拉树开始 --%>
+				<c:when test='${fieldInfo.xtype=="comboboxtree"}'>
+				Ext.create("Ext.ux.ComboBoxTree",{
+					id: 'field_${fieldInfo.name}_${identifier}',
+					name: '${fieldInfo.name}',
+					fieldLabel: '${fieldInfo.fieldLabel}',
+					editable: false,
+					loadTreeDataUrl:'<%=basePath%>${fieldInfo.sysEnFieldAttr.url}'
+					<c:if test='${!fieldInfo.isAllowBlank}'>
+						,beforeLabelTextTpl: ['<span class="required">*</span>']
+					</c:if>
+					
+					<c:if test='${fieldInfo.sysEnFieldAttr!=null}'>
+						,${fieldInfo.sysEnFieldAttr.configs}
+					</c:if>
+				});
+				</c:when>
+				<%-- 下拉树结束 --%>
+				<%-- 附件开始 --%>
+				<c:when test='${fieldInfo.xtype=="filefield"}'>
+				Ext.create({
+					id: 'field_${fieldInfo.name}_${identifier}',
+					xtype: '${fieldInfo.xtype}',
+					id:'field_${fieldInfo.name}_${identifier}',
+					name: '${fieldInfo.name}',
+					fieldLabel: '${fieldInfo.fieldLabel}',
+					buttonText:'选择文件',
+					validator: function(value){
+						<c:if test='${fieldInfo.sysEnFieldAttr!=null}'>
+							return validateSuffix(value,'${fieldInfo.sysEnFieldAttr.allowFileType}');
+						</c:if>
+						
+						<c:if test='${fieldInfo.sysEnFieldAttr==null}'>
+							return "文件格式校验失败！缺少文件格式校验配置";
+						</c:if>
+					}
+					//afterLabelTextTpl:['<font color=red>*</font>']
+					<c:if test='${!fieldInfo.isAllowBlank}'>
+						,beforeLabelTextTpl: ['<span class="required">*</span>']
+					</c:if>
+					
+					<c:if test='${fieldInfo.sysEnFieldAttr!=null}'>
+						,${fieldInfo.sysEnFieldAttr.configs}
+					</c:if>
+				});
+				</c:when>
+				<%-- 附件结束 --%>
+				<%-- 富文本编辑器开始 --%>
+				<c:when test='${fieldInfo.xtype=="htmleditor"}'>
+				Ext.create({
+					id: 'field_${fieldInfo.name}_${identifier}',
+					xtype: '${fieldInfo.xtype}',
+					id:'field_${fieldInfo.name}_${identifier}',
+					name: '${fieldInfo.name}',
+					fieldLabel: '${fieldInfo.fieldLabel}',
+					fontFamilies :['宋体','隶书','黑体','Arial', 'Courier New', 'Tahoma', 'Times New Roman', 'Verdana']
+					<c:if test='${!fieldInfo.isAllowBlank}'>
+						,beforeLabelTextTpl: ['<span class="required">*</span>']
+					</c:if>
+					
+					<c:if test='${fieldInfo.sysEnFieldAttr!=null}'>
+						,${fieldInfo.sysEnFieldAttr.configs}
+					</c:if>
+				});
+				</c:when>
+				<%-- 富文本编辑器结束 --%>
+				<%-- 表单元素开始 --%>
+				<c:otherwise>
+				Ext.create({
+					id: 'field_${fieldInfo.name}_${identifier}',
+					xtype: '${fieldInfo.xtype}',
+					id:'field_${fieldInfo.name}_${identifier}',
+					name: '${fieldInfo.name}',
+					fieldLabel: '${fieldInfo.fieldLabel}'
+					//afterLabelTextTpl:['<font color=red>*</font>']
+					<c:if test='${!fieldInfo.isAllowBlank}'>
+						,beforeLabelTextTpl: ['<span class="required">*</span>']
+					</c:if>
+					
+					<c:if test='${fieldInfo.sysEnFieldAttr!=null}'>
+						,${fieldInfo.sysEnFieldAttr.configs}
+					</c:if>
+				});
+				</c:otherwise>
+				<%-- 表单元素结束 --%>
+			</c:choose>
+		</c:forEach>
+		<%-- 生成所有字段表单元素结束 --%>		
+		
+		
+		
+	var  editPanel${identifier}=new Ext.FormPanel({
         id:'editPanel${identifier}',
         frame : true,
         bodyBorder:false,
@@ -458,25 +747,21 @@ Ext.onReady(function() {
         url: '<%=basePath%>${controllerBaseUrl}/update.do',
         defaultType: 'textfield',
         fieldDefaults: {
-            labelWidth: 60,
+            labelWidth: 100,
             labelAlign: "right",
-            width:200,
+            width:400,
             flex: 0,//每项item的宽度权重。值为0或未设置此属性时，item的width值才起作用。
             margin: 8
         },
         items: [
-            <c:forEach items="${updateFieldList}" var="fieldInfo" varStatus="fieldStatus">
-            { id:'${identifier}${fieldInfo.name}Edit',fieldLabel: '${fieldInfo.fieldLabel}',
-			  name: '${fieldInfo.name}', type: '${fieldInfo.type}'
-			  <c:if test='${fieldInfo.name=="id"}'>
-				,hidden:true
-			  </c:if>
-            }
-				<c:choose>
-					<c:when test="${fieldStatus.last}"></c:when>
-					<c:otherwise>,</c:otherwise>
-				</c:choose>
-            </c:forEach>
+			
+			<c:forEach items="${updateFieldList}" var="fieldInfo" varStatus="fieldStatus">
+						field_${fieldInfo.name}_${identifier}
+						<c:choose>
+							<c:when test="${fieldStatus.last}"></c:when>
+							<c:otherwise>,</c:otherwise>
+						</c:choose>
+			</c:forEach>
         ],
 
         // Reset and Submit buttons
@@ -506,7 +791,7 @@ Ext.onReady(function() {
                                     //searForm.reset( false );
 
                                     //关闭编辑窗口
-                                    editWindow${identifier}.close();
+                                    editWindow_${identifier}.close();
 
                                     //重新加载列表页面数据
                                     //dataStore${identifier}.load({params:{page:1,start:0,limit:${pageSize}}});
@@ -525,21 +810,36 @@ Ext.onReady(function() {
         }]
     });
 
-    var editWindow${identifier} = new Ext.Window({
-        id:'editWindow${identifier}',
+    var editWindow_${identifier} = new Ext.Window({
+        id:'editWindow_${identifier}',
         title: '编辑窗口',
-        width:400,
-        autoHeight:true,
+        width:600,
+		maxHeight:500,
+		scrollable:true,
+        //autoHeight:true,
         resizable:false,
         bodyStyle : 'padding:0px 0px 0px 0px',
-        closeAction : 'hide',
+        <%-- closeAction应该使用destroy --%>
+		//closeAction : 'hide',   默认为destroy
         modal : true,
         plain:false,
-        listeners   : {'hide':{fn: closeAddWindow${identifier}}},
+        //listeners   : {'hide':{fn: closeAddWindow${identifier}}},
         items: [
             editPanel${identifier}
         ]
+		<c:if test='${controller.editWindowConfigs!=null}'>
+				,${controller.editWindowConfigs}
+		</c:if>
     });
+	
+	
+	
+	editWindow_${identifier}.show();
+	
+	}
+	<%-- 编辑窗口方法结束 --%>
+
+    
 
 
 
@@ -841,6 +1141,8 @@ Ext.onReady(function() {
                 //Ext.Msg.alert('提示', '双击了一行！'+"    tempModel.name-->"+tempModel.name+"    tempModel.id-->"+tempModel.id );
 
                 /**  编辑窗口开始 */
+				openEditWindow_${identifier}();
+				
                 Ext.Ajax.request({
                     url:'<%=basePath%>${controllerBaseUrl}/edit.do',
                     params: {
@@ -859,10 +1161,39 @@ Ext.onReady(function() {
                             //Ext.Msg.alert('提示', '操作成功！' );
                             var updateBean = responseJsonObj.bean;
                             <c:forEach items="${updateFieldList}" var="fieldInfo" varStatus="fieldStatus">
-                                Ext.getCmp("${identifier}${fieldInfo.name}Edit").setValue( updateBean.${fieldInfo.name} );
-                            </c:forEach>
-
-                            editWindow${identifier}.show();
+								<c:choose>
+									<c:when test='${fieldInfo.xtype=="radiogroup"}'>
+										<c:forEach items="${fieldInfo.sysEnFieldAttr.radioList}" var="radioFieldInfo" varStatus="radioFieldStatus">
+											<%-- 此处多拼接一个Temp字符串是为了进行变量类型转换，将boolean与数字类型的值都转为字符类型 --%>
+											if( '${radioFieldInfo.inputValue}Temp'==updateBean.${fieldInfo.name}+"Temp" ){
+												Ext.getCmp("edit_${fieldInfo.name}_${radioFieldInfo.eleId}_${identifier}").setValue(true);
+											}
+										</c:forEach>
+									</c:when>
+									
+									<c:when test='${fieldInfo.xtype=="checkboxgroup"}'>
+										var edit_${fieldInfo.name}_${identifier} = updateBean.${fieldInfo.name};
+										var edit_${fieldInfo.name}_${identifier}_arr;
+										if( edit_${fieldInfo.name}_${identifier} ){
+											edit_${fieldInfo.name}_${identifier}_arr = edit_${fieldInfo.name}_${identifier}.split(",");
+										}
+										<c:forEach items="${fieldInfo.sysEnFieldAttr.checkboxList}" var="checkboxFieldInfo" varStatus="checkboxFieldStatus">
+											<%-- 此处多拼接一个Temp字符串是为了进行变量类型转换，将boolean与数字类型的值都转为字符类型 --%>
+											if( edit_${fieldInfo.name}_${identifier}_arr ){
+												for( i=0;i<edit_${fieldInfo.name}_${identifier}_arr.length;i++ ){
+													if( edit_${fieldInfo.name}_${identifier}_arr[i]+"Temp"=="${checkboxFieldInfo.inputValue}Temp" ){
+														Ext.getCmp("edit_${fieldInfo.name}_${checkboxFieldInfo.eleId}_${identifier}").setValue(true);
+													}
+												}
+											}
+		
+										</c:forEach>
+									</c:when>
+									<c:otherwise>
+										Ext.getCmp("field_${fieldInfo.name}_${identifier}").setValue( updateBean.${fieldInfo.name} );
+									</c:otherwise>
+								</c:choose>	
+							</c:forEach>
 
                         }else{
                             Ext.Msg.alert('提示', '操作失败！'+responseJsonObj.msg );

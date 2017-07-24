@@ -580,10 +580,14 @@ public class SysEnController extends AbstractBaseBean {
             if( !tempJo.containsKey("value") ){
                 throw new PlatformException("缺少value属性。");
             }
+            if( !tempJo.containsKey("eleId") ){
+                throw new PlatformException("缺少eleId属性。");
+            }
 
             SysEnFieldCheckbox checkbox = new SysEnFieldCheckbox();
             checkbox.setBoxLabel( tempJo.getString("name") );
             checkbox.setInputValue( tempJo.getString("value") );
+            checkbox.setEleId( tempJo.getString("eleId") );
             checkbox.setConfigs( checkboxConfigs );
 
             checkboxGroup.getCheckboxList().add(checkbox);
@@ -650,9 +654,14 @@ public class SysEnController extends AbstractBaseBean {
                 throw new PlatformException("缺少value属性。");
             }
 
+            if( !tempJo.containsKey("eleId") ){
+                throw new PlatformException("缺少eleId属性。");
+            }
+
             SysEnFieldRadio radio = new SysEnFieldRadio();
             radio.setBoxLabel( tempJo.getString("name") );
             radio.setInputValue( tempJo.getString("value") );
+            radio.setEleId( tempJo.getString("eleId") );
             radio.setConfigs( radioConfigs );
 
             radioGroup.getRadioList().add(radio);

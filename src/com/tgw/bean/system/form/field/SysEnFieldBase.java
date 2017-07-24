@@ -15,6 +15,7 @@ import com.tgw.utils.config.PlatformSysConstant;
  * Created by zhaojg on 2017/4/23.
  */
 public class SysEnFieldBase extends AbstractBaseBean {
+    private String eleId;//表单元素id
     private String configs;
 
     private String anchor;
@@ -90,6 +91,14 @@ public class SysEnFieldBase extends AbstractBaseBean {
         }
 
         return checkRes;
+    }
+
+    public String getEleId() {
+        return eleId;
+    }
+
+    public void setEleId(String eleId) {
+        this.eleId = eleId;
     }
 
     public String getConfigs() {
