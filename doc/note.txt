@@ -75,6 +75,7 @@ E:\j2ee\ideaProject\common2\common\WebRoot\resource\js\plugin\ueditor1_4_3-utf8\
 20170722   3.5  修改下拉框获取数据的方法，不再依赖baseModelMapper。
 20170722   4   研究baseModelMapper无法注入问题，暂时没有解决。
 20170724   3.5 解决编辑窗口给radio及checkbox初始化值的问题。
+20170725   3.5 解决日期组件、富文本在编辑页面初始化值问题；单个下拉框编辑页面赋值问题。
 
 
 

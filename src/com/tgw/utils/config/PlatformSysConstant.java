@@ -11,6 +11,9 @@ public class PlatformSysConstant {
 
     public static String JSONSTR = "jsonStr";
 
+    public static String DATE_FORMAT_JAVA_YMD = "yyyy-MM-dd";
+    public static String DATE_FORMAT_JAVA_YMDHMS = "yyyy-MM-dd HH:mm:ss";
+
     public static String DATE_FORMAT_EXT_YMD = "Y-m-d";
     public static String DATE_FORMAT_EXT_YMDHMS = "Y-m-d H:i:s";
     public static String DATE_FORMAT_EXT_HMS = "H:i:s";

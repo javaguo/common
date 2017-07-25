@@ -516,7 +516,25 @@ public class BaseController<T extends AbstractBaseBean> implements Serializable 
 						Method met=obj.getClass().getDeclaredMethod( "get"+PlatformUtils.firstLetterToUpperCase(updateField.getName()) );
 						Object tempObj = met.invoke(obj);
 
-						objJSON.put( updateField.getName(),tempObj );
+						Class returnClass = met.getReturnType();
+						if( PlatformSysConstant.FORM_XTYPE_DATE.equals( updateField.getXtype() ) ||
+							PlatformSysConstant.FORM_XTYPE_DATE_TIME.equals(  updateField.getXtype()  )	){
+
+							if( Date.class.equals( returnClass ) ){
+								//java类中定义的时间属性为Date类型
+								SysEnFieldDate sysEnFieldDate = (SysEnFieldDate)updateField.getSysEnFieldAttr();
+								SimpleDateFormat sdf = new SimpleDateFormat( sysEnFieldDate.getFormatJava() );
+								Date tempDate = (Date)tempObj;
+
+								objJSON.put( updateField.getName(),sdf.format(tempDate) );
+							}else{
+								//java类中定义的时间属性为String类型
+								objJSON.put( updateField.getName(),tempObj );
+							}
+						}else{
+							objJSON.put( updateField.getName(),tempObj );
+						}
+
 					}
 					jo.put( "bean",objJSON );
 				}else{

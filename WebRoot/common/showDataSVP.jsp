@@ -496,7 +496,7 @@ Ext.onReady(function() {
 			
 			<%-- 定义下拉框 --%>
 			var  comboBox_${comboBoxInfo.comboBoxName}_${identifier} = Ext.create('Ext.form.ComboBox', {
-							id:'comboBoxId${comboBoxInfo.comboBoxName}${identifier}',
+							id:'edit_${comboBoxInfo.comboBoxName}_${identifier}',
 							name:'${comboBoxInfo.comboBoxName}',
 							xtype: 'combobox',
 							store: comboBoxStore_${comboBoxInfo.comboBoxName}_${identifier},
@@ -541,8 +541,8 @@ Ext.onReady(function() {
 				<%-- 单选按钮开始 --%>
 				<c:when test='${fieldInfo.xtype=="radiogroup"}'>
 				Ext.create({
-					id: 'field_${fieldInfo.name}_${identifier}',
 					xtype: '${fieldInfo.xtype}',
+					id: 'field_${fieldInfo.name}_${identifier}',
 					fieldLabel: '${fieldInfo.fieldLabel}',
 					labelStyle:'vertical-align: middle;',
 					width:210,
@@ -575,8 +575,8 @@ Ext.onReady(function() {
 				<%-- 多选按钮开始 --%>
 				<c:when test='${fieldInfo.xtype=="checkboxgroup"}'>
 				Ext.create({
-					id: 'field_${fieldInfo.name}_${identifier}',
 					xtype: '${fieldInfo.xtype}',
+					id: 'field_${fieldInfo.name}_${identifier}',
 					fieldLabel: '${fieldInfo.fieldLabel}',
 					labelStyle:'vertical-align: middle;',
 					width:250,
@@ -610,8 +610,8 @@ Ext.onReady(function() {
 				<c:when test='${fieldInfo.xtype=="combobox"}'>
 					<c:if test='${fieldInfo.sysEnFieldAttr.isCascade}'>
 						Ext.create({
-							id: 'field_${fieldInfo.name}_${identifier}',
 							xtype: 'fieldcontainer',
+							id: 'fieldcontainer_${fieldInfo.name}_${identifier}',
 							fieldLabel: '${fieldInfo.fieldLabel}',
 							labelStyle:'vertical-align: middle;',
 							width:450,
@@ -667,7 +667,6 @@ Ext.onReady(function() {
 				<%-- 附件开始 --%>
 				<c:when test='${fieldInfo.xtype=="filefield"}'>
 				Ext.create({
-					id: 'field_${fieldInfo.name}_${identifier}',
 					xtype: '${fieldInfo.xtype}',
 					id:'field_${fieldInfo.name}_${identifier}',
 					name: '${fieldInfo.name}',
@@ -696,9 +695,8 @@ Ext.onReady(function() {
 				<%-- 富文本编辑器开始 --%>
 				<c:when test='${fieldInfo.xtype=="htmleditor"}'>
 				Ext.create({
-					id: 'field_${fieldInfo.name}_${identifier}',
 					xtype: '${fieldInfo.xtype}',
-					id:'field_${fieldInfo.name}_${identifier}',
+					id: 'field_${fieldInfo.name}_${identifier}',
 					name: '${fieldInfo.name}',
 					fieldLabel: '${fieldInfo.fieldLabel}',
 					fontFamilies :['宋体','隶书','黑体','Arial', 'Courier New', 'Tahoma', 'Times New Roman', 'Verdana']
@@ -715,9 +713,8 @@ Ext.onReady(function() {
 				<%-- 表单元素开始 --%>
 				<c:otherwise>
 				Ext.create({
-					id: 'field_${fieldInfo.name}_${identifier}',
 					xtype: '${fieldInfo.xtype}',
-					id:'field_${fieldInfo.name}_${identifier}',
+					id: 'field_${fieldInfo.name}_${identifier}',
 					name: '${fieldInfo.name}',
 					fieldLabel: '${fieldInfo.fieldLabel}'
 					//afterLabelTextTpl:['<font color=red>*</font>']
@@ -1188,6 +1185,18 @@ Ext.onReady(function() {
 											}
 		
 										</c:forEach>
+									</c:when>
+									
+									<c:when test='${fieldInfo.xtype=="combobox"}'>
+										<c:forEach items="${fieldInfo.sysEnFieldAttr.comboBoxList}" var="comboBoxInfo" varStatus="comboBoxStatus">
+												Ext.getCmp("edit_${comboBoxInfo.comboBoxName}_${identifier}").setValue( updateBean.${fieldInfo.name} );
+										</c:forEach>
+									</c:when>
+									<c:when test='${fieldInfo.xtype=="comboboxtree"}'>
+										
+									</c:when>
+									<c:when test='${fieldInfo.xtype=="htmleditor"}'>
+										Ext.getCmp("field_${fieldInfo.name}_${identifier}").setValue( updateBean.${fieldInfo.name} );
 									</c:when>
 									<c:otherwise>
 										Ext.getCmp("field_${fieldInfo.name}_${identifier}").setValue( updateBean.${fieldInfo.name} );

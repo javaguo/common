@@ -414,17 +414,44 @@ public class SysEnController extends AbstractBaseBean {
         SysEnControllerField  sysEnControllerField = new SysEnControllerField(name,fieldLabel,PlatformSysConstant.FORM_XTYPE_DATE,isValid,isAllowAdd,isAllowUpdate,isShowList,isAllowSearch,isAllowBlank);
 
         SysEnFieldDate fieldDate = new SysEnFieldDate();
+        /**
+         * 执行以下代码，确保configs有值
+         */
         if( StringUtils.isNotBlank( configs ) ){
             configs = "allowBlank:"+isAllowBlank+","+configs;
         }else{
             configs = "allowBlank:"+isAllowBlank;
         }
 
+        JSONObject jo = null;
         if( StringUtils.isNotBlank( configs ) ){
+             jo = JSONObject.fromObject( "{"+configs+"}" );
+
+            //处理日期格式
+            if( jo.containsKey( "format" ) ){
+                if( !jo.containsKey( "formatJava" ) ){
+                    throw new PlatformException( name+"日期字段配置错误，缺少formatJava配置！");
+                }
+
+                fieldDate.setFormat( jo.get("format").toString() );
+                fieldDate.setFormatJava( jo.get("formatJava").toString() );
+            }else{
+                configs = "format:'"+PlatformSysConstant.DATE_FORMAT_EXT_YMD+"',"+configs;
+                configs = "formatJava:'"+PlatformSysConstant.DATE_FORMAT_JAVA_YMD+"',"+configs;
+                jo.put("format",PlatformSysConstant.DATE_FORMAT_EXT_YMD);
+                jo.put("formatJava",PlatformSysConstant.DATE_FORMAT_JAVA_YMD);
+
+                fieldDate.setFormat( PlatformSysConstant.DATE_FORMAT_EXT_YMD );
+                fieldDate.setFormatJava( PlatformSysConstant.DATE_FORMAT_JAVA_YMD );
+            }
+
+        }
+
+        /*if( StringUtils.isNotBlank( configs ) ){
             configs = "format:'"+PlatformSysConstant.DATE_FORMAT_EXT_YMD+"',"+configs;
         }else{
             configs = "format:'"+PlatformSysConstant.DATE_FORMAT_EXT_YMD;
-        }
+        }*/
 
         fieldDate.setConfigs( configs );
 		/*if( StringUtils.isNotBlank( configs ) ){
@@ -468,17 +495,44 @@ public class SysEnController extends AbstractBaseBean {
         SysEnControllerField  sysEnControllerField = new SysEnControllerField(name,fieldLabel,PlatformSysConstant.FORM_XTYPE_DATE_TIME,isValid,isAllowAdd,isAllowUpdate,isShowList,isAllowSearch,isAllowBlank);
 
         SysEnFieldDate fieldDate = new SysEnFieldDate();
+        /**
+         * 执行以下代码，确保configs有值
+         */
         if( StringUtils.isNotBlank( configs ) ){
             configs = "allowBlank:"+isAllowBlank+","+configs;
         }else{
             configs = "allowBlank:"+isAllowBlank;
         }
 
+        JSONObject jo = null;
         if( StringUtils.isNotBlank( configs ) ){
+            jo = JSONObject.fromObject( "{"+configs+"}" );
+
+            //处理日期格式
+            if( jo.containsKey( "format" ) ){
+                if( !jo.containsKey( "formatJava" ) ){
+                    throw new PlatformException( name+"日期字段配置错误，缺少formatJava配置！");
+                }
+
+                fieldDate.setFormat( jo.get("format").toString() );
+                fieldDate.setFormatJava( jo.get("formatJava").toString() );
+            }else{
+                configs = "format:'"+PlatformSysConstant.DATE_FORMAT_EXT_YMDHMS+"',"+configs;
+                configs = "formatJava:'"+PlatformSysConstant.DATE_FORMAT_JAVA_YMDHMS+"',"+configs;
+                jo.put("format",PlatformSysConstant.DATE_FORMAT_EXT_YMDHMS);
+                jo.put("formatJava",PlatformSysConstant.DATE_FORMAT_JAVA_YMDHMS);
+
+                fieldDate.setFormat( PlatformSysConstant.DATE_FORMAT_EXT_YMDHMS );
+                fieldDate.setFormatJava( PlatformSysConstant.DATE_FORMAT_JAVA_YMDHMS );
+            }
+
+        }
+
+        /*if( StringUtils.isNotBlank( configs ) ){
             configs = "format:'"+PlatformSysConstant.DATE_FORMAT_EXT_YMDHMS+"',"+configs;
         }else{
             configs = "format:'"+PlatformSysConstant.DATE_FORMAT_EXT_YMDHMS;
-        }
+        }*/
 
         fieldDate.setConfigs( configs );
 		/*if( StringUtils.isNotBlank( configs ) ){
@@ -486,8 +540,7 @@ public class SysEnController extends AbstractBaseBean {
 			this.dealFormFieldAttr( fieldDate,jo );
 		}
 		fieldDate.setFormat( PlatformSysConstant.DATE_FORMAT_EXT_YMD );
-		*/
-
+*/
         sysEnControllerField.setSysEnFieldAttr( fieldDate );
         this.getSysEnControllerFieldList().add( sysEnControllerField );
     }

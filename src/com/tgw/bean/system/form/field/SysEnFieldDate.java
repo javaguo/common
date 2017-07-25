@@ -9,7 +9,8 @@ public class SysEnFieldDate extends SysEnFieldPicker {
     private String disabledDatesText;
     private String disabledDays;
     private String disabledDaysText;
-    private String format;
+    private String format;//extjs的时间格式
+    private String formatJava;//java的时间格式，format要与formatJava格式相对应
     private String invalidText;
     private String maxText;
     private String maxValue;//最大时间
@@ -65,6 +66,14 @@ public class SysEnFieldDate extends SysEnFieldPicker {
 
     public void setFormat(String format) {
         this.format = format;
+    }
+
+    public String getFormatJava() {
+        return formatJava;
+    }
+
+    public void setFormatJava(String formatJava) {
+        this.formatJava = formatJava;
     }
 
     public String getInvalidText() {

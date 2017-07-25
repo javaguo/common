@@ -183,7 +183,7 @@ public class ExampleBeanController extends BaseController<ExampleBean>{
         controller.addFieldComboBoxByJSON("formComboBoxJson","下拉框(json)",true,true,true,false,false,comboBoxJson,formComBoxConfigs);
         controller.addFieldComboBoxBySQL("formComboBoxSql","下拉框(sql)",true,true,true,false,true,"loadMenu",null,formComBoxSqlConfigs);
         controller.addFieldComboBoxCascadeBySQL("二级级联",true,true,false,false,true,"formComboboxGroup1","1",new String[] {"cascade1a","cascade1b"},new String[] {"loadMenu","loadMenu"},formComboboxGroup1Configs,formComboboxGroup1ComConfigs);
-        controller.addFieldComboBoxCascadeBySQL("三级级联",true,true,false,false,false,"formComboboxGroup2",null,new String[] {"formComboBoxCascade1","formComboBoxCascade2","formComboBoxCascade3"},new String[] {"loadDistrict","loadDistrict","loadDistrict"},formComboboxGroup2Configs,formComboboxGroup2ComConfigs);
+        controller.addFieldComboBoxCascadeBySQL("三级级联",true,true,true,false,false,"formComboboxGroup2",null,new String[] {"formComboBoxCascade1","formComboBoxCascade2","formComboBoxCascade3"},new String[] {"loadDistrict","loadDistrict","loadDistrict"},formComboboxGroup2Configs,formComboboxGroup2ComConfigs);
         /***********************************************************************************************************
          * 树控件
          */
@@ -245,7 +245,7 @@ public class ExampleBeanController extends BaseController<ExampleBean>{
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         String insertTimeConfigs = "value:'"+sdf.format( new Date() )+"'";
         String updateTimeConfigs = "value:'"+sdf.format( new Date() )+"'";
-        controller.addFieldDatetime("insertTime","添加时间",true,true,true,false,false,insertTimeConfigs);
+        controller.addFieldDatetime("insertTime","添加时间",true,true,false,false,false,insertTimeConfigs);
         controller.addFieldDatetime("updateTime","更新时间",true,true,true,false,false,updateTimeConfigs);
     }
 
