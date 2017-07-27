@@ -1116,7 +1116,7 @@ public class SysEnController extends AbstractBaseBean {
             if( savePath!=null && StringUtils.isNotBlank( savePath.toString() ) ){
                 //文件的保存路径存到隐藏域中
                 String fileHiddenConfigs = "value:'"+savePath.toString()+"'";
-                this.addFieldHidden( name+"savePathHidden","",isValid,isAllowAdd,isAllowUpdate,fileHiddenConfigs);
+                this.addFieldHidden( name+"SavePathHidden","",isValid,isAllowAdd,isAllowUpdate,fileHiddenConfigs);
             }else{
                 throw new PlatformException("上传文件缺少保存路径配置！");
             }

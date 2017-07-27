@@ -375,7 +375,7 @@ public class BaseController<T extends AbstractBaseBean> implements Serializable 
 							continue;
 						}
 						//获取文件保存路径
-						String savePath = request.getParameter( file.getName()+"savePathHidden" );
+						String savePath = request.getParameter( file.getName()+"SavePathHidden" );
 						if( StringUtils.isBlank( savePath ) ){
 							throw new PlatformException("没有获取到上传文件的保存路径！");
 						}
@@ -511,29 +511,72 @@ public class BaseController<T extends AbstractBaseBean> implements Serializable 
 						throw new PlatformException("没有查找到要更新的信息！");
 					}
 
+					/**
+					 * 将对象的各属性值组成json串
+					 */
 					JSONObject objJSON = JSONObject.fromObject("{}");
 					for( SysEnControllerField updateField : updateFieldList ){
-						Method met=obj.getClass().getDeclaredMethod( "get"+PlatformUtils.firstLetterToUpperCase(updateField.getName()) );
-						Object tempObj = met.invoke(obj);
+						Method met=null;
+						Object tempObj = null;
 
-						Class returnClass = met.getReturnType();
-						if( PlatformSysConstant.FORM_XTYPE_DATE.equals( updateField.getXtype() ) ||
-							PlatformSysConstant.FORM_XTYPE_DATE_TIME.equals(  updateField.getXtype()  )	){
+						if( PlatformSysConstant.FORM_XTYPE_COMBOBOX.equals( updateField.getXtype() ) ){//下拉框类型
 
-							if( Date.class.equals( returnClass ) ){
-								//java类中定义的时间属性为Date类型
-								SysEnFieldDate sysEnFieldDate = (SysEnFieldDate)updateField.getSysEnFieldAttr();
-								SimpleDateFormat sdf = new SimpleDateFormat( sysEnFieldDate.getFormatJava() );
-								Date tempDate = (Date)tempObj;
+							SysEnFieldComboBoxGroup sysEnFieldComboBoxGroup = (SysEnFieldComboBoxGroup)updateField.getSysEnFieldAttr();
+							if( sysEnFieldComboBoxGroup.isCascade() ){//级联下拉框
+								List<SysEnFieldComboBox>  comboBoxList = sysEnFieldComboBoxGroup.getComboBoxList();
+								/**
+                                 * 遍历级联下拉框组的每一个下拉框
+								 */
+								for( SysEnFieldComboBox sysEnFieldComboBox:comboBoxList ){
+									met=obj.getClass().getDeclaredMethod( "get"+PlatformUtils.firstLetterToUpperCase( sysEnFieldComboBox.getComboBoxName() ) );
+									tempObj = met.invoke(obj);
 
-								objJSON.put( updateField.getName(),sdf.format(tempDate) );
-							}else{
-								//java类中定义的时间属性为String类型
+									objJSON.put( sysEnFieldComboBox.getComboBoxName(),tempObj );
+								}
+
+							}else{//单个下拉框
+								met=obj.getClass().getDeclaredMethod( "get"+PlatformUtils.firstLetterToUpperCase(updateField.getName()) );
+								tempObj = met.invoke(obj);
+
 								objJSON.put( updateField.getName(),tempObj );
 							}
-						}else{
+
+						}else if( PlatformSysConstant.FORM_XTYPE_FILE.equals( updateField.getXtype() ) ){
+							//编辑页面中显示文件的原始文件名
+							met=obj.getClass().getDeclaredMethod( "get"+PlatformUtils.firstLetterToUpperCase(updateField.getName())+"OrigFileName" );
+							tempObj = met.invoke(obj);
+
 							objJSON.put( updateField.getName(),tempObj );
+						}else if( updateField.getName().contains( "SavePathHidden" ) ){
+							/**
+							 * 包含SavePathHidden，则说明此字段为存储附件的路径字段。
+                             * 保存文件的路径，此字段为框架自动加的，不需要给赋值，具体业务的controller在添加附件字段时已经给此字段配置了值。
+							 */
+						}else{//其他类型字段
+							met=obj.getClass().getDeclaredMethod( "get"+PlatformUtils.firstLetterToUpperCase(updateField.getName()) );
+							tempObj = met.invoke(obj);
+
+							Class returnClass = met.getReturnType();
+							if( PlatformSysConstant.FORM_XTYPE_DATE.equals( updateField.getXtype() ) ||
+								PlatformSysConstant.FORM_XTYPE_DATE_TIME.equals(  updateField.getXtype()  )	){
+
+								if( Date.class.equals( returnClass ) ){
+									//java类中定义的时间属性为Date类型
+									SysEnFieldDate sysEnFieldDate = (SysEnFieldDate)updateField.getSysEnFieldAttr();
+									SimpleDateFormat sdf = new SimpleDateFormat( sysEnFieldDate.getFormatJava() );
+									Date tempDate = (Date)tempObj;
+
+									objJSON.put( updateField.getName(),sdf.format(tempDate) );
+								}else{
+									//java类中定义的时间属性为String类型
+									objJSON.put( updateField.getName(),tempObj );
+								}
+							}else{
+								objJSON.put( updateField.getName(),tempObj );
+							}
+
 						}
+
 
 					}
 					jo.put( "bean",objJSON );

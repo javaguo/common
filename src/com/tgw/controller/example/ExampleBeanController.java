@@ -188,8 +188,8 @@ public class ExampleBeanController extends BaseController<ExampleBean>{
          * 树控件
          */
         String formComboBoxTreeConfigs1 = "labelWidth:100,width:400,multiSelect:true,multiCascade:true,selectedIds:'A,A1,A2,A13'";
-        String formComboBoxTreeConfigs2 = "labelWidth:100,width:400,multiSelect:true,multiCascade:false,selectedIds:'A,A2,A132,B1,B4a,C'";
-        String formComboBoxTreeConfigs3 = "labelWidth:100,width:400,multiSelect:false";
+        String formComboBoxTreeConfigs2 = "labelWidth:100,width:400,multiSelect:true,multiCascade:false";
+        String formComboBoxTreeConfigs3 = "labelWidth:100,width:400,multiSelect:false,selectedIds:'15'";
         String formComboBoxTreeConfigs4 = "labelWidth:100,width:400,multiSelect:true,multiCascade:true";
         String formComboBoxTreeConfigs5 = "labelWidth:100,width:400,multiSelect:true,multiCascade:false";
         String formComboBoxTreeConfigs6 = "labelWidth:100,width:400,multiSelect:false";
@@ -230,9 +230,9 @@ public class ExampleBeanController extends BaseController<ExampleBean>{
         String formFileServiceConfigs2 = "savePath:'/upload/txt',allowFileType:'txt'";
         String formFileServiceConfigs3 = "savePath:'upload/pdf',allowFileType:'pdf'";
 
-        controller.addFieldFile("formFile1","附件1",true,true,false,true,formFileConfigs,formFileServiceConfigs1);
-        controller.addFieldFile("formFile2","附件2",true,true,false,true,formFileConfigs,formFileServiceConfigs2);
-        controller.addFieldFile("formFile3","附件3",true,true,false,true,formFileConfigs,formFileServiceConfigs3);
+        controller.addFieldFile("formFile1","附件1",true,true,true,true,formFileConfigs,formFileServiceConfigs1);
+        controller.addFieldFile("formFile2","附件2",true,true,true,true,formFileConfigs,formFileServiceConfigs2);
+        controller.addFieldFile("formFile3","附件3",true,true,true,true,formFileConfigs,formFileServiceConfigs3);
         /***********************************************************************************************************
          * 面板控件
          */
