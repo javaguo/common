@@ -642,6 +642,11 @@ public class SysEnController extends AbstractBaseBean {
             checkbox.setInputValue( tempJo.getString("value") );
             checkbox.setEleId( tempJo.getString("eleId") );
             checkbox.setConfigs( checkboxConfigs );
+            if( tempJo.containsKey("checked") && (boolean)tempJo.get("checked")  ){
+                checkbox.setChecked( "true" );
+            }else{
+                checkbox.setChecked( "false" );
+            }
 
             checkboxGroup.getCheckboxList().add(checkbox);
         }
@@ -716,6 +721,11 @@ public class SysEnController extends AbstractBaseBean {
             radio.setInputValue( tempJo.getString("value") );
             radio.setEleId( tempJo.getString("eleId") );
             radio.setConfigs( radioConfigs );
+            if( tempJo.containsKey("checked") && (boolean)tempJo.get("checked")  ){
+                radio.setChecked( "true" );
+            }else{
+                radio.setChecked( "false" );
+            }
 
             radioGroup.getRadioList().add(radio);
         }

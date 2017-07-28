@@ -100,6 +100,16 @@ public class ExampleBeanController extends BaseController<ExampleBean>{
 
     @Override
     public void initField( SysEnController controller ) {
+        /**
+         * 初始化字段说明：
+         *
+         *
+         *
+         * 注意事项：
+         * 1.定义的变量中不要包含SavePathHidden。SavePathHidden被框架使用。用来存储上传附件的路径。
+         *
+         */
+
         //构造字段
         controller.addFieldId("id","ID",null);
 
@@ -107,14 +117,13 @@ public class ExampleBeanController extends BaseController<ExampleBean>{
          * 隐藏域、文本框、密码框、文本域
          */
         String formHiddenConfigs = "value:'hidden隐藏域值'";
-        //,afterLabelTextTpl:['afterLabelTextTpl'],afterLabelTpl:['afterLabelTpl'],afterBodyEl:['afterBodyEl'],beforeBodyEl :['beforeBodyEl'],beforeLabelTextTpl :['beforeLabelTextTpl'],beforeLabelTpl:['beforeLabelTpl']
-        String formTextConfigs = "labelWidth:100,width:400,emptyText:'文本提示信息'";
-        String formPasswordConfigs = "labelWidth:100,width:400,emptyText:'密码提示信息'";
+        String formTextConfigs = "labelWidth:100,width:400,emptyText:'文本提示信息',value:'初始值'";
+        String formPasswordConfigs = "labelWidth:100,width:400,emptyText:'密码提示信息',value:'123456'";
         String formTextAreaConfigs = "labelWidth:100,width:400,height:80,emptyText:'文本域内容......',maxLength:50,maxLengthText:'最长为50个字',minLength:5,minLengthText:'最小为5个字'";
 
         controller.addFieldHidden( "formHidden","form隐藏域",true,true,true,formHiddenConfigs );
-        controller.addFieldText("formText","文本文本",true,true,true,true,true,false,formTextConfigs);
-        controller.addFieldPassword("formPassword","密码",true,true,true,false,false,formPasswordConfigs);
+        controller.addFieldText("formText","文本框",true,true,true,true,true,false,formTextConfigs);
+        controller.addFieldPassword("formPassword","密码框",true,true,true,false,false,formPasswordConfigs);
         controller.addFieldTextArea("formTextArea","文本域",true,true,true,true,false,formTextAreaConfigs);
 
         /***********************************************************************************************************
@@ -126,7 +135,7 @@ public class ExampleBeanController extends BaseController<ExampleBean>{
          * 所以项目中定义数据变量时使用包装类型
          */
         String formNumberIntConfigs = "labelWidth:100,width:300,height:25,emptyText:'整数',allowDecimals:false,maxValue:20,maxText:'最大为20',minValue:6,minText:'最小为6'";
-        String formNumberDoubleConfigs = "labelWidth:100,width:300,height:25,emptyText:'小数',maxValue:999.9,maxText:'最大为999.9',minValue:0.1,minText:'最小为0.1',step:100";
+        String formNumberDoubleConfigs = "labelWidth:100,width:300,height:25,emptyText:'小数',maxValue:999.9,maxText:'最大为999.9',minValue:0.1,minText:'最小为0.1',step:100,value:'109.58'";
         String formDecimalConfigs = "labelWidth:100,width:300,height:25,emptyText:'得分',maxValue:99999.9,maxText:'最大为99999.9',minValue:0.1,minText:'最小为0.1',step:100";
         String formRadioGroupConfigsBoolean = "labelWidth:100,width:400";
         String formRadioConfigsBoolean = "width:80";
@@ -143,13 +152,13 @@ public class ExampleBeanController extends BaseController<ExampleBean>{
         controller.addFieldNumber("formNumberLong","Long",true,true,true,true,true,formNumberIntConfigs);
         controller.addFieldNumber("formNumberFloat","Float",true,true,true,true,true,formNumberDoubleConfigs);
         controller.addFieldNumber("formNumberDouble","Double",true,true,true,true,true,formNumberDoubleConfigs);
-        String booleanJson = "[{name:'是',value:'true',eleId:'formBooleanShi'},{name:'否',value:'false',eleId:'formBooleanFou'}]";
+        String booleanJson = "[{name:'是',value:'true',eleId:'formBooleanShi',checked:true},{name:'否',value:'false',eleId:'formBooleanFou'}]";
         controller.addFieldRadioInitDataByJson("formBoolean","Boolean",true,true,true,false,true,booleanJson,formRadioGroupConfigsBoolean,formRadioConfigsBoolean);
         /***********************************************************************************************************
          * 日期、时间控件
          */
-        String formDateConfigs = "labelWidth:100,width:300,height:25,emptyText:'录入日期',editable:false,maxValue:'2017-12-31',maxText:'不能超过2017-12-31',minValue:'2015-03-21',minText:'最小为2015-03-21'";
-        String formDateTimeConfigs = "labelWidth:100,width:300,height:25,emptyText:'精确时间'";
+        String formDateConfigs = "labelWidth:100,width:300,height:25,emptyText:'录入日期',editable:false,maxValue:'2017-12-31',maxText:'不能超过2017-12-31',minValue:'2015-03-21',minText:'最小为2015-03-21',value:'2017-01-01'";
+        String formDateTimeConfigs = "labelWidth:100,width:300,height:25,emptyText:'精确时间',value:'2017-01-01 09:01:01'";
 
         controller.addFieldDate("formDateString","日期(String)",true,true,true,true,false,formDateConfigs);
         controller.addFieldDate("formDateDate","日期(Date)",true,true,true,false,true,formDateConfigs);
@@ -159,19 +168,20 @@ public class ExampleBeanController extends BaseController<ExampleBean>{
         * 单选及多选控件
         */
         String formRadioGroupConfigs = "labelWidth:100,width:500";
-        String formRadioConfigs = "width:80";//,style:{margin-right:'0px'}
+        String formRadioConfigs = "width:80";//是否初始选中checked，不要在此处配置中设置，此处设置控制所有的Radio；checkBox同理。
         String formCheckboxGroupConfigs = "labelWidth:100,width:500";
-        String formCheckboxConfigs = "width:80";//,style:{margin-right:'0px'}
+        String formCheckboxConfigs = "width:80";
 
-        String radioJson = "[{name:'优秀',value:'90',eleId:'formRadioYX'},{name:'良好',value:'80',eleId:'formRadioLH'},{name:'中等',value:'70',eleId:'formRadioZD'}]";
+        //eleId为自定义的属性，非extjs的属性.框架使用生成页面需要使用。
+        String radioJson = "[{name:'优秀',value:'90',eleId:'formRadioYX',checked:true},{name:'良好',value:'80',eleId:'formRadioLH'},{name:'中等',value:'70',eleId:'formRadioZD'}]";
         controller.addFieldRadioInitDataByJson("formRadio","单选",true,true,true,true,true,radioJson,formRadioGroupConfigs,formRadioConfigs);
 
-        String checkboxJson = "[{name:'读书',value:'readbook',eleId:'DS'},{name:'跑步',value:'running',eleId:'PB'},{name:'游泳',value:'swimming',eleId:'YY'}]";
+        String checkboxJson = "[{name:'读书',value:'readbook',eleId:'DS',checked:true},{name:'跑步',value:'running',eleId:'PB',checked:true},{name:'游泳',value:'swimming',eleId:'YY'}]";
         controller.addFieldCheckboxInitDataByJson("formCheckbox","多选",true,true,true,true,false,checkboxJson,formCheckboxGroupConfigs,formCheckboxConfigs);
         /***********************************************************************************************************
          * 下拉框控件
          */
-        String formComBoxConfigs = "labelWidth:100,emptyText:'选择类型',width:200";
+        String formComBoxConfigs = "labelWidth:100,emptyText:'选择类型',width:200,value:'90'";
         String formComBoxSqlConfigs = "labelWidth:100,emptyText:'选择',width:200";
         String formComboboxGroup1Configs = "labelWidth:100";
         String formComboboxGroup1ComConfigs = "emptyText:'请选择',width:100";
@@ -182,7 +192,7 @@ public class ExampleBeanController extends BaseController<ExampleBean>{
 
         controller.addFieldComboBoxByJSON("formComboBoxJson","下拉框(json)",true,true,true,false,false,comboBoxJson,formComBoxConfigs);
         controller.addFieldComboBoxBySQL("formComboBoxSql","下拉框(sql)",true,true,true,false,true,"loadMenu",null,formComBoxSqlConfigs);
-        controller.addFieldComboBoxCascadeBySQL("二级级联",true,true,false,false,true,"formComboboxGroup1","1",new String[] {"cascade1a","cascade1b"},new String[] {"loadMenu","loadMenu"},formComboboxGroup1Configs,formComboboxGroup1ComConfigs);
+        controller.addFieldComboBoxCascadeBySQL("二级级联",true,true,false,false,true,"formComboboxGroup1","1",new String[] {"formComboBoxCascadeA","formComboBoxCascadeB"},new String[] {"loadMenu","loadMenu"},formComboboxGroup1Configs,formComboboxGroup1ComConfigs);
         controller.addFieldComboBoxCascadeBySQL("三级级联",true,true,true,false,false,"formComboboxGroup2",null,new String[] {"formComboBoxCascade1","formComboBoxCascade2","formComboBoxCascade3"},new String[] {"loadDistrict","loadDistrict","loadDistrict"},formComboboxGroup2Configs,formComboboxGroup2ComConfigs);
         /***********************************************************************************************************
          * 树控件
@@ -190,9 +200,9 @@ public class ExampleBeanController extends BaseController<ExampleBean>{
         String formComboBoxTreeConfigs1 = "labelWidth:100,width:400,multiSelect:true,multiCascade:true,selectedIds:'A,A1,A2,A13'";
         String formComboBoxTreeConfigs2 = "labelWidth:100,width:400,multiSelect:true,multiCascade:false";
         String formComboBoxTreeConfigs3 = "labelWidth:100,width:400,multiSelect:false,selectedIds:'15'";
-        String formComboBoxTreeConfigs4 = "labelWidth:100,width:400,multiSelect:true,multiCascade:true";
+        String formComboBoxTreeConfigs4 = "labelWidth:100,width:400,multiSelect:true,multiCascade:true,emptyText:'请选择菜单...'";
         String formComboBoxTreeConfigs5 = "labelWidth:100,width:400,multiSelect:true,multiCascade:false";
-        String formComboBoxTreeConfigs6 = "labelWidth:100,width:400,multiSelect:false";
+        String formComboBoxTreeConfigs6 = "labelWidth:100,width:400,multiSelect:false,emptyText:'请选择地区'";
 
         String treeUrl1=  "resource/js/extjs/plugin/tree2.json";
         String treeUrl2 = "resource/js/extjs/plugin/tree2.json";
@@ -210,9 +220,10 @@ public class ExampleBeanController extends BaseController<ExampleBean>{
         /***********************************************************************************************************
          * 富文本编辑器控件
          *
+         * 富文本编辑哭目前不知道如何设置emptyText提示信息。
          * htmlEditor没有继承Ext.form.field.Base
          */
-        String formHtmlEditorConfigs = "labelWidth:100,width:400,height:200";
+        String formHtmlEditorConfigs = "labelWidth:100,width:400,height:200,value:'富文本编辑器很强大！'";
 
         controller.addFieldHtmlEditor("formHtmlEditor","编辑器",true,true,true,false,formHtmlEditorConfigs);
         /***********************************************************************************************************

@@ -151,7 +151,8 @@ Ext.onReady(function() {
 					items: [
 						<c:forEach items="${validFieldInfo.sysEnFieldAttr.radioList}" var="radioFieldInfo" varStatus="radioFieldStatus">
 							{ boxLabel: '${radioFieldInfo.boxLabel}', name: '${validFieldInfo.name}',
-							inputValue: '${radioFieldInfo.inputValue}',width:60
+							inputValue: '${radioFieldInfo.inputValue}',
+							checked:${radioFieldInfo.checked},width:60
 							<c:if test='${radioFieldInfo.configs!=null}'>
 									,${radioFieldInfo.configs}
 							</c:if>
@@ -183,7 +184,8 @@ Ext.onReady(function() {
 					items: [
 						<c:forEach items="${validFieldInfo.sysEnFieldAttr.checkboxList}" var="checkboxFieldInfo" varStatus="checkboxFieldStatus">
 								{ boxLabel: '${checkboxFieldInfo.boxLabel}', name: '${validFieldInfo.name}',
-									inputValue: '${checkboxFieldInfo.inputValue}',width:60
+									inputValue: '${checkboxFieldInfo.inputValue}',
+									checked:${checkboxFieldInfo.checked},width:60
 									<c:if test='${checkboxFieldInfo.configs!=null}'>
 										,${checkboxFieldInfo.configs}
 									</c:if>
@@ -523,7 +525,7 @@ Ext.onReady(function() {
 								,${comboBoxInfo.configs}
 							</c:if>
 			});
-			
+			<%-- 最后再设置值，防止comboBoxInfo.configs中的配置覆盖 --%>
 			comboBox_${comboBoxInfo.comboBoxName}_${identifier}.setValue( beanValJson.${comboBoxInfo.comboBoxName} );
 			
 			<c:choose>
@@ -590,11 +592,13 @@ Ext.onReady(function() {
 						<c:forEach items="${fieldInfo.sysEnFieldAttr.radioList}" var="radioFieldInfo" varStatus="radioFieldStatus">
 							{id:'edit_${fieldInfo.name}_${radioFieldInfo.eleId}_${identifier}', 
 							 boxLabel: '${radioFieldInfo.boxLabel}', name: '${fieldInfo.name}',
-							 inputValue: '${radioFieldInfo.inputValue}',width:60,
-							 checked:( '${radioFieldInfo.inputValue}'==beanValJson.${fieldInfo.name}+""?true:false )
+							 inputValue: '${radioFieldInfo.inputValue}',
+							 checked:${radioFieldInfo.checked},width:60
 							 <c:if test='${radioFieldInfo.configs!=null}'>
 									,${radioFieldInfo.configs}
 							 </c:if>
+							 <%-- 最后再设置值，防止radioFieldInfo.configs中的配置覆盖 --%>
+							 ,checked:( '${radioFieldInfo.inputValue}'==beanValJson.${fieldInfo.name}+""?true:false )
 							}
 							<c:choose>
 								<c:when test="${radioFieldStatus.last}"></c:when>
@@ -630,11 +634,13 @@ Ext.onReady(function() {
 						<c:forEach items="${fieldInfo.sysEnFieldAttr.checkboxList}" var="checkboxFieldInfo" varStatus="checkboxFieldStatus">
 								{   id:'edit_${fieldInfo.name}_${checkboxFieldInfo.eleId}_${identifier}',
 									boxLabel: '${checkboxFieldInfo.boxLabel}', name: '${fieldInfo.name}',
-									inputValue: '${checkboxFieldInfo.inputValue}',width:60,
-									checked: val_${fieldInfo.name}_${checkboxFieldInfo.eleId}_${identifier}
+									inputValue: '${checkboxFieldInfo.inputValue}',
+									checked:${checkboxFieldInfo.checked},width:60
 									<c:if test='${checkboxFieldInfo.configs!=null}'>
 										,${checkboxFieldInfo.configs}
 									</c:if>
+									<%-- 最后再设置值，防止checkboxFieldInfo.configs中的配置覆盖 --%>
+									,checked: val_${fieldInfo.name}_${checkboxFieldInfo.eleId}_${identifier}
 								}
 							<c:choose>
 								<c:when test="${checkboxFieldStatus.last}"></c:when>
@@ -655,6 +661,7 @@ Ext.onReady(function() {
 				<c:when test='${fieldInfo.xtype=="combobox"}'>
 					var  edit_${fieldInfo.name}_${identifier} =
 					<c:if test='${fieldInfo.sysEnFieldAttr.isCascade}'>	
+						<%-- 生成级联下拉框 --%>
 						Ext.create({
 							xtype: 'fieldcontainer',
 							id: 'fieldcontainer_${fieldInfo.name}_${identifier}',
@@ -680,6 +687,7 @@ Ext.onReady(function() {
 						});
 					</c:if>
 					<c:if test='${!fieldInfo.sysEnFieldAttr.isCascade}'>
+						<%-- 生成单个下拉框 --%>
 						<%-- 非级联下拉框comboBoxList的size一定为1 --%>
 						<c:forEach items="${fieldInfo.sysEnFieldAttr.comboBoxList}" var="comboBoxFieldInfo" varStatus="comboBoxFieldStatus">
 							comboBox_${comboBoxFieldInfo.comboBoxName}_${identifier};
@@ -700,15 +708,15 @@ Ext.onReady(function() {
 					name: '${fieldInfo.name}',
 					fieldLabel: '${fieldInfo.fieldLabel}',
 					editable: false,
-					loadTreeDataUrl:'<%=basePath%>${fieldInfo.sysEnFieldAttr.url}',
-					selectedIds:beanValJson.${fieldInfo.name}
+					loadTreeDataUrl:'<%=basePath%>${fieldInfo.sysEnFieldAttr.url}'
 					<c:if test='${!fieldInfo.isAllowBlank}'>
 						,beforeLabelTextTpl: ['<span class="required">*</span>']
 					</c:if>
-					
 					<c:if test='${fieldInfo.sysEnFieldAttr!=null}'>
 						,${fieldInfo.sysEnFieldAttr.configs}
 					</c:if>
+					<%-- 最后再设置值，防止fieldInfo.sysEnFieldAttr.configs中的配置覆盖 --%>
+					,selectedIds:beanValJson.${fieldInfo.name}
 				});
 				</c:when>
 				<%-- 下拉树结束 --%>
@@ -719,7 +727,7 @@ Ext.onReady(function() {
 					xtype: '${fieldInfo.xtype}',
 					id:'edit_${fieldInfo.name}_${identifier}',
 					name: '${fieldInfo.name}',
-					value: beanValJson.${fieldInfo.name},
+					//value: beanValJson.${fieldInfo.name},
 					fieldLabel: '${fieldInfo.fieldLabel}',
 					buttonText:'选择文件',
 					validator: function(value){
@@ -740,6 +748,10 @@ Ext.onReady(function() {
 						,${fieldInfo.sysEnFieldAttr.configs}
 					</c:if>
 				});
+				if( beanValJson.${fieldInfo.name} ){
+					<%-- 初始化配置value不起作用，使用如下方法在文本框中显示文件名称 --%>
+					edit_${fieldInfo.name}_${identifier}.setRawValue( beanValJson.${fieldInfo.name} );
+				}
 				</c:when>
 				<%-- 附件结束 --%>
 				<%-- 富文本编辑器开始 --%>
@@ -749,17 +761,20 @@ Ext.onReady(function() {
 					xtype: '${fieldInfo.xtype}',
 					id: 'edit_${fieldInfo.name}_${identifier}',
 					name: '${fieldInfo.name}',
+					//value: beanValJson.${fieldInfo.name},
 					fieldLabel: '${fieldInfo.fieldLabel}',
-					fontFamilies :['宋体','隶书','黑体','Arial', 'Courier New', 'Tahoma', 'Times New Roman', 'Verdana'],
-					value: beanValJson.${fieldInfo.name}
+					fontFamilies :['宋体','隶书','黑体','Arial', 'Courier New', 'Tahoma', 'Times New Roman', 'Verdana']
 					<c:if test='${!fieldInfo.isAllowBlank}'>
 						,beforeLabelTextTpl: ['<span class="required">*</span>']
 					</c:if>
-					
 					<c:if test='${fieldInfo.sysEnFieldAttr!=null}'>
 						,${fieldInfo.sysEnFieldAttr.configs}
 					</c:if>
 				});
+				if( beanValJson.${fieldInfo.name} ){
+					<%-- 最后再设置值，防止fieldInfo.sysEnFieldAttr.configs中的配置覆盖 --%>
+					edit_${fieldInfo.name}_${identifier}.setValue( beanValJson.${fieldInfo.name} );
+				}
 				</c:when>
 				<%-- 富文本编辑器结束 --%>
 				<%-- 表单元素开始 --%>
@@ -769,17 +784,20 @@ Ext.onReady(function() {
 					xtype: '${fieldInfo.xtype}',
 					id: 'edit_${fieldInfo.name}_${identifier}',
 					name: '${fieldInfo.name}',
-					fieldLabel: '${fieldInfo.fieldLabel}',
-					value: beanValJson.${fieldInfo.name}
+					//value: beanValJson.${fieldInfo.name},
+					fieldLabel: '${fieldInfo.fieldLabel}'
 					//afterLabelTextTpl:['<font color=red>*</font>']
 					<c:if test='${!fieldInfo.isAllowBlank}'>
 						,beforeLabelTextTpl: ['<span class="required">*</span>']
 					</c:if>
-					
 					<c:if test='${fieldInfo.sysEnFieldAttr!=null}'>
 						,${fieldInfo.sysEnFieldAttr.configs}
 					</c:if>
 				});
+				if( beanValJson.${fieldInfo.name} ){
+					<%-- 最后设置值，防止fieldInfo.sysEnFieldAttr.configs中的配置覆盖 --%>
+					edit_${fieldInfo.name}_${identifier}.setValue( beanValJson.${fieldInfo.name} );
+				}
 				</c:otherwise>
 				<%-- 表单元素结束 --%>
 			</c:choose>

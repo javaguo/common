@@ -46,6 +46,8 @@ public class ExampleBean extends AbstractBaseBean{
     private Date formDatetimeDate;
     private String formComboBoxJson;
     private String formComboBoxSql;
+    private String formComboBoxCascadeA;
+    private String formComboBoxCascadeB;
     private String formComboBoxCascade1;
     private String formComboBoxCascade2;
     private String formComboBoxCascade3;
@@ -275,6 +277,22 @@ public class ExampleBean extends AbstractBaseBean{
 
     public void setFormComboBoxSql(String formComboBoxSql) {
         this.formComboBoxSql = formComboBoxSql;
+    }
+
+    public String getFormComboBoxCascadeA() {
+        return formComboBoxCascadeA;
+    }
+
+    public void setFormComboBoxCascadeA(String formComboBoxCascadeA) {
+        this.formComboBoxCascadeA = formComboBoxCascadeA;
+    }
+
+    public String getFormComboBoxCascadeB() {
+        return formComboBoxCascadeB;
+    }
+
+    public void setFormComboBoxCascadeB(String formComboBoxCascadeB) {
+        this.formComboBoxCascadeB = formComboBoxCascadeB;
     }
 
     public String getFormComboBoxCascade1() {

@@ -64,7 +64,15 @@ Ext.define('Ext.ux.ComboBoxTree',{
                             for( var i=0;i< idArr.length;i++ ){
                                 var temp = store.getNodeById( idArr[i] );
                                 if( temp ){
-                                    temp.set("checked",true);
+                                    /**
+                                     * 多选的时候才设置checked属性。
+                                     * 设置checked属性，树节点前面会出现勾选框，无论值是true或false.
+                                     * true:选中  false：不选中
+                                     */
+                                    if( self.multiSelect ){
+                                        temp.set("checked",true);
+                                    }
+
                                     if( displayValue.length>0 ){
                                         displayName = displayName+","+temp.get("text");
                                         displayValue = displayValue+","+temp.get("id");
