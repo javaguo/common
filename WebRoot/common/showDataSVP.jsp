@@ -47,7 +47,7 @@ Ext.onReady(function() {
 	function openAddWindow${identifier}(){
 		
 		<%-- 下拉框初始化数据开始 --%>
-		<c:forEach items="${comboBoxList}" var="comboBoxInfo" varStatus="comboBoxStatus">
+		<c:forEach items="${comboBoxAddList}" var="comboBoxInfo" varStatus="comboBoxStatus">
 			<%-- 定义下拉框store开始 --%>
 			<c:choose>
 				<%-- 使用json串初始化下拉框数据 --%>
@@ -182,21 +182,21 @@ Ext.onReady(function() {
 		<%-- tag控件下拉框初始化数据结束 --%>		
 		
 		<%-- 生成所有字段表单元素开始 --%>
-		<c:forEach items="${validFieldList}" var="validFieldInfo" varStatus="validFieldStatus">
-			var  field_${validFieldInfo.name}_${identifier} =
+		<c:forEach items="${addFieldList}" var="fieldInfo" varStatus="validFieldStatus">
+			var  field_${fieldInfo.name}_${identifier} =
 			<c:choose>
 				<%-- 单选按钮开始 --%>
-				<c:when test='${validFieldInfo.xtype=="radiogroup"}'>
+				<c:when test='${fieldInfo.xtype=="radiogroup"}'>
 				Ext.create({
-					xtype: '${validFieldInfo.xtype}',
-					fieldLabel: '${validFieldInfo.fieldLabel}',
+					xtype: '${fieldInfo.xtype}',
+					fieldLabel: '${fieldInfo.fieldLabel}',
 					labelStyle:'vertical-align: middle;',
 					width:210,
 					columns: 10,
 					vertical: true,
 					items: [
-						<c:forEach items="${validFieldInfo.sysEnFieldAttr.radioList}" var="radioFieldInfo" varStatus="radioFieldStatus">
-							{ boxLabel: '${radioFieldInfo.boxLabel}', name: '${validFieldInfo.name}',
+						<c:forEach items="${fieldInfo.sysEnFieldAttr.radioList}" var="radioFieldInfo" varStatus="radioFieldStatus">
+							{ boxLabel: '${radioFieldInfo.boxLabel}', name: '${fieldInfo.name}',
 							inputValue: '${radioFieldInfo.inputValue}',
 							checked:${radioFieldInfo.checked},width:60
 							<c:if test='${radioFieldInfo.configs!=null}'>
@@ -209,27 +209,27 @@ Ext.onReady(function() {
 							</c:choose>
 						</c:forEach>
 					]
-					<c:if test='${!validFieldInfo.isAllowBlank}'>
+					<c:if test='${!fieldInfo.isAllowBlank}'>
 						,beforeLabelTextTpl: ['<span class="required">*</span>']
 					</c:if>
-					<c:if test='${validFieldInfo.sysEnFieldAttr!=null}'>
-						,${validFieldInfo.sysEnFieldAttr.configs}
+					<c:if test='${fieldInfo.sysEnFieldAttr!=null}'>
+						,${fieldInfo.sysEnFieldAttr.configs}
 					</c:if>
 				});
 				</c:when>
 				<%-- 单选按钮结束 --%>
 				<%-- 多选按钮开始 --%>
-				<c:when test='${validFieldInfo.xtype=="checkboxgroup"}'>
+				<c:when test='${fieldInfo.xtype=="checkboxgroup"}'>
 				Ext.create({
-					xtype: '${validFieldInfo.xtype}',
-					fieldLabel: '${validFieldInfo.fieldLabel}',
+					xtype: '${fieldInfo.xtype}',
+					fieldLabel: '${fieldInfo.fieldLabel}',
 					labelStyle:'vertical-align: middle;',
 					width:250,
 					columns: 10,
 					vertical: true,
 					items: [
-						<c:forEach items="${validFieldInfo.sysEnFieldAttr.checkboxList}" var="checkboxFieldInfo" varStatus="checkboxFieldStatus">
-								{ boxLabel: '${checkboxFieldInfo.boxLabel}', name: '${validFieldInfo.name}',
+						<c:forEach items="${fieldInfo.sysEnFieldAttr.checkboxList}" var="checkboxFieldInfo" varStatus="checkboxFieldStatus">
+								{ boxLabel: '${checkboxFieldInfo.boxLabel}', name: '${fieldInfo.name}',
 									inputValue: '${checkboxFieldInfo.inputValue}',
 									checked:${checkboxFieldInfo.checked},width:60
 									<c:if test='${checkboxFieldInfo.configs!=null}'>
@@ -242,26 +242,26 @@ Ext.onReady(function() {
 							</c:choose>
 						</c:forEach>
 					]
-					<c:if test='${!validFieldInfo.isAllowBlank}'>
+					<c:if test='${!fieldInfo.isAllowBlank}'>
 						,beforeLabelTextTpl: ['<span class="required">*</span>']
 					</c:if>
-					<c:if test='${validFieldInfo.sysEnFieldAttr!=null}'>
-						,${validFieldInfo.sysEnFieldAttr.configs}
+					<c:if test='${fieldInfo.sysEnFieldAttr!=null}'>
+						,${fieldInfo.sysEnFieldAttr.configs}
 					</c:if>
 				});
 				</c:when>
 				<%-- 多选按钮结束 --%>
 				<%-- 下拉框开始 --%>
-				<c:when test='${validFieldInfo.xtype=="combobox"}'>
-					<c:if test='${validFieldInfo.sysEnFieldAttr.isCascade}'>
+				<c:when test='${fieldInfo.xtype=="combobox"}'>
+					<c:if test='${fieldInfo.sysEnFieldAttr.isCascade}'>
 						Ext.create({
 							xtype: 'fieldcontainer',
-							fieldLabel: '${validFieldInfo.fieldLabel}',
+							fieldLabel: '${fieldInfo.fieldLabel}',
 							labelStyle:'vertical-align: middle;',
 							width:450,
 							layout: 'hbox',
 							items:[
-								<c:forEach items="${validFieldInfo.sysEnFieldAttr.comboBoxList}" var="comboBoxFieldInfo" varStatus="comboBoxFieldStatus">
+								<c:forEach items="${fieldInfo.sysEnFieldAttr.comboBoxList}" var="comboBoxFieldInfo" varStatus="comboBoxFieldStatus">
 									comboBox_${comboBoxFieldInfo.comboBoxName}_${identifier}
 									<c:choose>
 										<c:when test="${comboBoxFieldStatus.last}"></c:when>
@@ -269,20 +269,20 @@ Ext.onReady(function() {
 									</c:choose>
 								</c:forEach>
 							]
-							<c:if test='${!validFieldInfo.isAllowBlank}'>
+							<c:if test='${!fieldInfo.isAllowBlank}'>
 								,beforeLabelTextTpl: ['<span class="required">*</span>']
 							</c:if>
-							<c:if test='${validFieldInfo.sysEnFieldAttr!=null}'>
-								,${validFieldInfo.sysEnFieldAttr.configs}
+							<c:if test='${fieldInfo.sysEnFieldAttr!=null}'>
+								,${fieldInfo.sysEnFieldAttr.configs}
 							</c:if>
 						});
 					</c:if>
-					<c:if test='${!validFieldInfo.sysEnFieldAttr.isCascade}'>
+					<c:if test='${!fieldInfo.sysEnFieldAttr.isCascade}'>
 						<%-- 非级联下拉框comboBoxList的size一定为1 --%>
-						<c:forEach items="${validFieldInfo.sysEnFieldAttr.comboBoxList}" var="comboBoxFieldInfo" varStatus="comboBoxFieldStatus">
+						<c:forEach items="${fieldInfo.sysEnFieldAttr.comboBoxList}" var="comboBoxFieldInfo" varStatus="comboBoxFieldStatus">
 							comboBox_${comboBoxFieldInfo.comboBoxName}_${identifier};
-							comboBox_${comboBoxFieldInfo.comboBoxName}_${identifier}.fieldLabel='${validFieldInfo.fieldLabel}';
-							<c:if test='${!validFieldInfo.isAllowBlank}'>
+							comboBox_${comboBoxFieldInfo.comboBoxName}_${identifier}.fieldLabel='${fieldInfo.fieldLabel}';
+							<c:if test='${!fieldInfo.isAllowBlank}'>
 								comboBox_${comboBoxFieldInfo.comboBoxName}_${identifier}.beforeLabelTextTpl= ['<span class="required">*</span>'];
 							</c:if>
 						</c:forEach>
@@ -291,13 +291,13 @@ Ext.onReady(function() {
 				</c:when>
 				<%-- 下拉框结束 --%>
 				<%-- Tag控件开始 --%>
-				<c:when test='${validFieldInfo.xtype=="tagfield"}'>
+				<c:when test='${fieldInfo.xtype=="tagfield"}'>
 				Ext.create({
 							xtype: 'tagfield',
-							id:'field_${validFieldInfo.name}_${identifier}',
-							name:'${validFieldInfo.name}',
-							fieldLabel: '${validFieldInfo.fieldLabel}',
-							store: tagStore_${validFieldInfo.name}_${identifier},
+							id:'field_${fieldInfo.name}_${identifier}',
+							name:'${fieldInfo.name}',
+							fieldLabel: '${fieldInfo.fieldLabel}',
+							store: tagStore_${fieldInfo.name}_${identifier},
 							mode: "local",
 							displayField: 'name',
 							valueField: 'id',
@@ -309,75 +309,75 @@ Ext.onReady(function() {
 							loadingText: '正在加载...',
 							emptyText: "请选择",
 							typeAhead: true  //延时查询
-							<c:if test='${!validFieldInfo.isAllowBlank}'>
+							<c:if test='${!fieldInfo.isAllowBlank}'>
 								,beforeLabelTextTpl: ['<span class="required">*</span>']
 							</c:if>
-							<c:if test='${validFieldInfo.sysEnFieldAttr!=null}'>
-								,${validFieldInfo.sysEnFieldAttr.configs}
+							<c:if test='${fieldInfo.sysEnFieldAttr!=null}'>
+								,${fieldInfo.sysEnFieldAttr.configs}
 							</c:if>
 				});
 				</c:when>
 				<%-- Tag控件结束 --%>
 				<%-- 下拉树开始 --%>
-				<c:when test='${validFieldInfo.xtype=="comboboxtree"}'>
+				<c:when test='${fieldInfo.xtype=="comboboxtree"}'>
 				Ext.create("Ext.ux.ComboBoxTree",{
-					id:'field_${validFieldInfo.name}_${identifier}',
-					name: '${validFieldInfo.name}',
-					fieldLabel: '${validFieldInfo.fieldLabel}',
+					id:'field_${fieldInfo.name}_${identifier}',
+					name: '${fieldInfo.name}',
+					fieldLabel: '${fieldInfo.fieldLabel}',
 					editable: false,
-					loadTreeDataUrl:'<%=basePath%>${validFieldInfo.sysEnFieldAttr.url}'
-					<c:if test='${!validFieldInfo.isAllowBlank}'>
+					loadTreeDataUrl:'<%=basePath%>${fieldInfo.sysEnFieldAttr.url}'
+					<c:if test='${!fieldInfo.isAllowBlank}'>
 						,beforeLabelTextTpl: ['<span class="required">*</span>']
 					</c:if>
 					
-					<c:if test='${validFieldInfo.sysEnFieldAttr!=null}'>
-						,${validFieldInfo.sysEnFieldAttr.configs}
+					<c:if test='${fieldInfo.sysEnFieldAttr!=null}'>
+						,${fieldInfo.sysEnFieldAttr.configs}
 					</c:if>
 				});
 				</c:when>
 				<%-- 下拉树结束 --%>
 				<%-- 附件开始 --%>
-				<c:when test='${validFieldInfo.xtype=="filefield"}'>
+				<c:when test='${fieldInfo.xtype=="filefield"}'>
 				Ext.create({
-					xtype: '${validFieldInfo.xtype}',
-					id:'field_${validFieldInfo.name}_${identifier}',
-					name: '${validFieldInfo.name}',
-					fieldLabel: '${validFieldInfo.fieldLabel}',
+					xtype: '${fieldInfo.xtype}',
+					id:'field_${fieldInfo.name}_${identifier}',
+					name: '${fieldInfo.name}',
+					fieldLabel: '${fieldInfo.fieldLabel}',
 					buttonText:'选择文件',
 					validator: function(value){
-						<c:if test='${validFieldInfo.sysEnFieldAttr!=null}'>
-							return validateSuffix(value,'${validFieldInfo.sysEnFieldAttr.allowFileType}');
+						<c:if test='${fieldInfo.sysEnFieldAttr!=null}'>
+							return validateSuffix(value,'${fieldInfo.sysEnFieldAttr.allowFileType}');
 						</c:if>
 						
-						<c:if test='${validFieldInfo.sysEnFieldAttr==null}'>
+						<c:if test='${fieldInfo.sysEnFieldAttr==null}'>
 							return "文件格式校验失败！缺少文件格式校验配置";
 						</c:if>
 					}
 					//afterLabelTextTpl:['<font color=red>*</font>']
-					<c:if test='${!validFieldInfo.isAllowBlank}'>
+					<c:if test='${!fieldInfo.isAllowBlank}'>
 						,beforeLabelTextTpl: ['<span class="required">*</span>']
 					</c:if>
 					
-					<c:if test='${validFieldInfo.sysEnFieldAttr!=null}'>
-						,${validFieldInfo.sysEnFieldAttr.configs}
+					<c:if test='${fieldInfo.sysEnFieldAttr!=null}'>
+						,${fieldInfo.sysEnFieldAttr.configs}
 					</c:if>
 				});
 				</c:when>
 				<%-- 附件结束 --%>
 				<%-- 富文本编辑器开始 --%>
-				<c:when test='${validFieldInfo.xtype=="htmleditor"}'>
+				<c:when test='${fieldInfo.xtype=="htmleditor"}'>
 				Ext.create({
-					xtype: '${validFieldInfo.xtype}',
-					id:'field_${validFieldInfo.name}_${identifier}',
-					name: '${validFieldInfo.name}',
-					fieldLabel: '${validFieldInfo.fieldLabel}',
+					xtype: '${fieldInfo.xtype}',
+					id:'field_${fieldInfo.name}_${identifier}',
+					name: '${fieldInfo.name}',
+					fieldLabel: '${fieldInfo.fieldLabel}',
 					fontFamilies :['宋体','隶书','黑体','Arial', 'Courier New', 'Tahoma', 'Times New Roman', 'Verdana']
-					<c:if test='${!validFieldInfo.isAllowBlank}'>
+					<c:if test='${!fieldInfo.isAllowBlank}'>
 						,beforeLabelTextTpl: ['<span class="required">*</span>']
 					</c:if>
 					
-					<c:if test='${validFieldInfo.sysEnFieldAttr!=null}'>
-						,${validFieldInfo.sysEnFieldAttr.configs}
+					<c:if test='${fieldInfo.sysEnFieldAttr!=null}'>
+						,${fieldInfo.sysEnFieldAttr.configs}
 					</c:if>
 				});
 				</c:when>
@@ -385,17 +385,17 @@ Ext.onReady(function() {
 				<%-- 表单元素开始 --%>
 				<c:otherwise>
 				Ext.create({
-					xtype: '${validFieldInfo.xtype}',
-					id:'field_${validFieldInfo.name}_${identifier}',
-					name: '${validFieldInfo.name}',
-					fieldLabel: '${validFieldInfo.fieldLabel}'
+					xtype: '${fieldInfo.xtype}',
+					id:'field_${fieldInfo.name}_${identifier}',
+					name: '${fieldInfo.name}',
+					fieldLabel: '${fieldInfo.fieldLabel}'
 					//afterLabelTextTpl:['<font color=red>*</font>']
-					<c:if test='${!validFieldInfo.isAllowBlank}'>
+					<c:if test='${!fieldInfo.isAllowBlank}'>
 						,beforeLabelTextTpl: ['<span class="required">*</span>']
 					</c:if>
 					
-					<c:if test='${validFieldInfo.sysEnFieldAttr!=null}'>
-						,${validFieldInfo.sysEnFieldAttr.configs}
+					<c:if test='${fieldInfo.sysEnFieldAttr!=null}'>
+						,${fieldInfo.sysEnFieldAttr.configs}
 					</c:if>
 				});
 				</c:otherwise>
@@ -537,7 +537,7 @@ Ext.onReady(function() {
 	
 	function openEditWindow_${identifier}( beanValJson ){
 		<%-- 下拉框初始化数据开始 --%>
-		<c:forEach items="${comboBoxList}" var="comboBoxInfo" varStatus="comboBoxStatus">
+		<c:forEach items="${comboBoxUpdateList}" var="comboBoxInfo" varStatus="comboBoxStatus">
 			<%-- 定义下拉框store开始 --%>
 			<c:choose>
 				<%-- 使用json串初始化下拉框数据 --%>
