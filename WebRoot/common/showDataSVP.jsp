@@ -106,7 +106,7 @@ Ext.onReady(function() {
 							displayField: 'name',
 							valueField: 'id',
 							width:80,
-							loadingText: 'loading...',
+							loadingText: '正在加载...',
 							emptyText: "请选择",
 							mode: "local",
 							typeAhead: true  //延时查询
@@ -134,6 +134,52 @@ Ext.onReady(function() {
 			
 		</c:forEach>
 		<%-- 下拉框初始化数据结束 --%>
+		
+		<%-- tag控件下拉框初始化数据开始 --%>
+		<c:forEach items="${tagAddList}" var="tagInfo" varStatus="tagStatus">
+			<%-- 定义下拉框store开始 --%>
+			<c:choose>
+				<%-- 使用json串初始化下拉框数据 --%>
+				<c:when test='${tagInfo.loadDataImplModel=="json"}'>
+					var tagStore_${tagInfo.comboBoxName}_${identifier} = Ext.create('Ext.data.Store', {
+						fields: ['id', 'name'],
+						data : [
+							<c:forEach items="${tagInfo.comboBoxOptionList}" var="comboBoxOptionInfo" varStatus="comboBoxOptionStatus">
+								{"id":"${comboBoxOptionInfo.value}", "name":"${comboBoxOptionInfo.name}"}
+								<c:choose>
+									<c:when test="${comboBoxOptionStatus.last}"></c:when>
+									<c:otherwise>,</c:otherwise>
+								</c:choose>
+							</c:forEach>
+						]
+					});
+				</c:when>
+				<%-- 请求后台查询数据库初始化下拉框数据 --%>
+				<c:when test='${tagInfo.loadDataImplModel=="sql"}'>
+					var tagStore_${tagInfo.comboBoxName}_${identifier} = new Ext.data.Store({
+						model:comboBoxDataModel${identifier},
+						proxy: new Ext.data.HttpProxy({
+							url: '<%=basePath%>${controllerBaseUrl}/loadComboxData.do',
+							noCache:false,
+							reader:{
+								type:'json',
+								rootProperty: 'comboboxData'
+							}
+						}),
+						remoteSort: true
+					});
+					tagStore_${tagInfo.comboBoxName}_${identifier}.on("beforeload",function(){
+						Ext.apply(tagStore_${tagInfo.comboBoxName}_${identifier}.proxy.extraParams, {"comboBoxFlag":"${tagInfo.comboBoxFlag}","value":"${tagInfo.firstComboBoxParamValue}"});
+					});
+					tagStore_${tagInfo.comboBoxName}_${identifier}.load();
+				</c:when>
+	
+				<c:otherwise>
+				</c:otherwise>
+			</c:choose>
+			<%-- 定义下拉框store结束 --%>
+		</c:forEach>
+		<%-- tag控件下拉框初始化数据结束 --%>		
 		
 		<%-- 生成所有字段表单元素开始 --%>
 		<c:forEach items="${validFieldList}" var="validFieldInfo" varStatus="validFieldStatus">
@@ -244,6 +290,34 @@ Ext.onReady(function() {
 				
 				</c:when>
 				<%-- 下拉框结束 --%>
+				<%-- Tag控件开始 --%>
+				<c:when test='${validFieldInfo.xtype=="tagfield"}'>
+				Ext.create({
+							xtype: 'tagfield',
+							id:'field_${validFieldInfo.name}_${identifier}',
+							name:'${validFieldInfo.name}',
+							fieldLabel: '${validFieldInfo.fieldLabel}',
+							store: tagStore_${validFieldInfo.name}_${identifier},
+							mode: "local",
+							displayField: 'name',
+							valueField: 'id',
+							labelWidth:100,
+							width:400,
+							//filterPickList: true,
+							triggerAction: 'all',
+							//queryMode: 'local',
+							loadingText: '正在加载...',
+							emptyText: "请选择",
+							typeAhead: true  //延时查询
+							<c:if test='${!validFieldInfo.isAllowBlank}'>
+								,beforeLabelTextTpl: ['<span class="required">*</span>']
+							</c:if>
+							<c:if test='${validFieldInfo.sysEnFieldAttr!=null}'>
+								,${validFieldInfo.sysEnFieldAttr.configs}
+							</c:if>
+				});
+				</c:when>
+				<%-- Tag控件结束 --%>
 				<%-- 下拉树开始 --%>
 				<c:when test='${validFieldInfo.xtype=="comboboxtree"}'>
 				Ext.create("Ext.ux.ComboBoxTree",{
@@ -330,8 +404,6 @@ Ext.onReady(function() {
 		</c:forEach>
 		<%-- 生成所有字段表单元素结束 --%>
 			
-		
-	
 		var  addPanel_${identifier}=new Ext.FormPanel({
 			id:'addPanel_${identifier}',
 			frame : true,
@@ -428,9 +500,7 @@ Ext.onReady(function() {
 			</c:if>
 		});
 		
-		
 		addWindow${identifier}.show();
-		
   }
   <%-- 添加窗口方法结束 --%>
 	
@@ -517,7 +587,7 @@ Ext.onReady(function() {
 							displayField: 'name',
 							valueField: 'id',
 							width:80,
-							loadingText: 'loading...',
+							loadingText: '正在加载...',
 							emptyText: "请选择",
 							mode: "local",
 							typeAhead: true  //延时查询
@@ -572,6 +642,51 @@ Ext.onReady(function() {
 			</c:choose>
 		</c:forEach>
 		<%-- 下拉框初始化数据结束 --%>
+		
+		<%-- tag控件下拉框初始化数据开始 --%>
+		<c:forEach items="${tagUpdateList}" var="tagInfo" varStatus="tagStatus">
+			<%-- 定义下拉框store开始 --%>
+			<c:choose>
+				<%-- 使用json串初始化下拉框数据 --%>
+				<c:when test='${tagInfo.loadDataImplModel=="json"}'>
+					var tagStore_${tagInfo.comboBoxName}_${identifier} = Ext.create('Ext.data.Store', {
+						fields: ['id', 'name'],
+						data : [
+							<c:forEach items="${tagInfo.comboBoxOptionList}" var="comboBoxOptionInfo" varStatus="comboBoxOptionStatus">
+								{"id":"${comboBoxOptionInfo.value}", "name":"${comboBoxOptionInfo.name}"}
+								<c:choose>
+									<c:when test="${comboBoxOptionStatus.last}"></c:when>
+									<c:otherwise>,</c:otherwise>
+								</c:choose>
+							</c:forEach>
+						]
+					});
+				</c:when>
+				<%-- 请求后台查询数据库初始化下拉框数据 --%>
+				<c:when test='${tagInfo.loadDataImplModel=="sql"}'>
+					var tagStore_${tagInfo.comboBoxName}_${identifier} = new Ext.data.Store({
+						model:comboBoxDataModel${identifier},
+						proxy: new Ext.data.HttpProxy({
+							url: '<%=basePath%>${controllerBaseUrl}/loadComboxData.do',
+							noCache:false,
+							reader:{
+								type:'json',
+								rootProperty: 'comboboxData'
+							}
+						}),
+						remoteSort: true
+					});
+					tagStore_${tagInfo.comboBoxName}_${identifier}.on("beforeload",function(){
+						Ext.apply(tagStore_${tagInfo.comboBoxName}_${identifier}.proxy.extraParams, {"comboBoxFlag":"${tagInfo.comboBoxFlag}","value":"${tagInfo.firstComboBoxParamValue}"});
+					});
+					tagStore_${tagInfo.comboBoxName}_${identifier}.load();
+				</c:when>
+				<c:otherwise>
+				</c:otherwise>
+			</c:choose>
+			<%-- 定义下拉框store结束 --%>
+		</c:forEach>
+		<%-- tag控件下拉框初始化数据结束 --%>
 		
 		<%-- 生成所有字段表单元素开始 --%>
 		<c:forEach items="${updateFieldList}" var="fieldInfo" varStatus="validFieldStatus">
@@ -700,6 +815,39 @@ Ext.onReady(function() {
 				
 				</c:when>
 				<%-- 下拉框结束 --%>
+				<%-- Tag控件开始 --%>
+				<c:when test='${fieldInfo.xtype=="tagfield"}'>
+				var  edit_${fieldInfo.name}_${identifier} =
+				Ext.create({
+							xtype: 'tagfield',
+							id:'edit_${fieldInfo.name}_${identifier}',
+							name:'${fieldInfo.name}',
+							fieldLabel: '${fieldInfo.fieldLabel}',
+							store: tagStore_${fieldInfo.name}_${identifier},
+							mode: "local",
+							displayField: 'name',
+							valueField: 'id',
+							labelWidth:100,
+							width:400,
+							//filterPickList: true,
+							triggerAction: 'all',
+							//queryMode: 'local',
+							loadingText: '正在加载...',
+							emptyText: "请选择",
+							typeAhead: true  //延时查询
+							<c:if test='${!fieldInfo.isAllowBlank}'>
+								,beforeLabelTextTpl: ['<span class="required">*</span>']
+							</c:if>
+							<c:if test='${fieldInfo.sysEnFieldAttr!=null}'>
+								,${fieldInfo.sysEnFieldAttr.configs}
+							</c:if>
+				});
+				if( beanValJson.${fieldInfo.name} ){
+					<%-- 最后设置值，防止fieldInfo.sysEnFieldAttr.configs中的配置覆盖 --%>
+					edit_${fieldInfo.name}_${identifier}.setValue( beanValJson.${fieldInfo.name} );
+				}
+				</c:when>
+				<%-- Tag控件结束 --%>
 				<%-- 下拉树开始 --%>
 				<c:when test='${fieldInfo.xtype=="comboboxtree"}'>
 				var  edit_${fieldInfo.name}_${identifier} =
@@ -846,6 +994,8 @@ Ext.onReady(function() {
                 var form = this.up('form').getForm();
                 if (form.isValid()) {
                     form.submit({
+						submitEmptyText :false,
+						waitMsg :'正在保存，请耐心等待......',
                         success: function(form, action) {
                             Ext.Msg.alert('提示信息', action.result.msg);
                             Ext.Msg.show({
@@ -900,16 +1050,9 @@ Ext.onReady(function() {
 		</c:if>
     });
 	
-	
-	
 	editWindow_${identifier}.show();
-	
 	}
 	<%-- 编辑窗口方法结束 --%>
-
-    
-
-
 
 	var searPanel${identifier}=new Ext.FormPanel({
         id:'searPanel${identifier}',
@@ -1099,7 +1242,6 @@ Ext.onReady(function() {
 						}
 						</c:if>
 						Ext.Msg.confirm("提示信息","确定要操作选中的数据吗？",function (btn) {
-							alert("btn-->"+btn);
 							if( btn=="yes" ){
 
 								var ids = "";
@@ -1151,11 +1293,9 @@ Ext.onReady(function() {
 
 							}
 						});
-
-
 						</c:when>
 						<c:otherwise>
-						Ext.Msg.alert('提示', '没有定义对应的响应事件！-->${functionInfo.typeNum}');
+							Ext.Msg.alert('提示', '没有定义对应的响应事件！-->${functionInfo.typeNum}');
 						</c:otherwise>
 						</c:choose>
 					}
@@ -1208,9 +1348,7 @@ Ext.onReady(function() {
                 //var tempModelJSONStr = Ext.JSON.encode( tempModel );
                 //Ext.Msg.alert('提示', '双击了一行！'+"    tempModel.name-->"+tempModel.name+"    tempModel.id-->"+tempModel.id );
 
-                /**  编辑窗口开始 */
-				
-				
+                /**  编辑开始 */
                 Ext.Ajax.request({
                     url:'<%=basePath%>${controllerBaseUrl}/edit.do',
                     params: {
@@ -1226,22 +1364,17 @@ Ext.onReady(function() {
                         var responseJsonObj = Ext.JSON.decode( responseStr );
 
                         if( responseJsonObj.success ){
-                            //Ext.Msg.alert('提示', '操作成功！' );
                             var updateBean = responseJsonObj.bean;
-							
                             openEditWindow_${identifier}( updateBean );
-
                         }else{
                             Ext.Msg.alert('提示', '操作失败！'+responseJsonObj.msg );
                         }
-
-
                     },
                     failure:function(response){
                         Ext.Msg.alert('提示', '抱歉，操作失败，出错了！' );
                     }
                 });
-                /**  编辑窗口结束 */
+                /**  编辑结束 */
 			}
 		}
 

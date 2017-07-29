@@ -14,6 +14,7 @@ import com.tgw.utils.file.PlatformFileUtils;
 import com.tgw.utils.tree.PlatformTreeUtils;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
+import org.apache.commons.collections.ArrayStack;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
 import org.springframework.stereotype.Controller;
@@ -135,6 +136,12 @@ public class BaseController<T extends AbstractBaseBean> implements Serializable 
 
 			//页面上的所有下拉框
 			List<SysEnFieldComboBox> comboBoxList = new ArrayList<SysEnFieldComboBox>();
+			List<SysEnFieldComboBox> comboBoxAddList = new ArrayList<SysEnFieldComboBox>();
+			List<SysEnFieldComboBox> comboBoxUpdateList = new ArrayList<SysEnFieldComboBox>();
+			//页面上的所有tag控件，tag继承自comboBox
+			List<SysEnFieldTag> tagList = new ArrayList<SysEnFieldTag>();
+			List<SysEnFieldTag> tagAddList = new ArrayList<SysEnFieldTag>();
+			List<SysEnFieldTag> tagUpdateList = new ArrayList<SysEnFieldTag>();
 
             for( SysEnControllerField conField : controller.getSysEnControllerFieldList() ){
                 /*if( "id".equals( conField.getName() ) ){//编辑页面一定需要id，不管id字段配置成什么状态，都要加上id
@@ -168,6 +175,23 @@ public class BaseController<T extends AbstractBaseBean> implements Serializable 
 					 comboBoxGroup.getComboBoxList();
 					for( SysEnFieldComboBox comboBox:comboBoxGroup.getComboBoxList() ){
 						comboBoxList.add( comboBox );
+						if( conField.isAllowAdd() ){
+							comboBoxAddList.add( comboBox );
+						}
+						if( conField.isAllowUpdate() ){
+							comboBoxUpdateList.add( comboBox );
+						}
+					}
+				}
+
+				if( PlatformSysConstant.FORM_XTYPE_TAG.equals( conField.getXtype() ) ){
+					SysEnFieldTag sysEnFieldTag = (SysEnFieldTag)conField.getSysEnFieldAttr();
+					tagList.add( sysEnFieldTag );
+					if( conField.isAllowAdd() ){
+						tagAddList.add(sysEnFieldTag);
+					}
+					if( conField.isAllowUpdate() ){
+						tagUpdateList.add(sysEnFieldTag);
 					}
 				}
             }
@@ -180,6 +204,11 @@ public class BaseController<T extends AbstractBaseBean> implements Serializable 
 			modelAndView.addObject("showFieldList",showFieldList );
 
 			modelAndView.addObject("comboBoxList",comboBoxList);
+			modelAndView.addObject("comboBoxAddList",comboBoxAddList);
+			modelAndView.addObject("comboBoxUpdateList",comboBoxUpdateList);
+			modelAndView.addObject("tagList",tagList);
+			modelAndView.addObject("tagAddList",tagAddList);
+			modelAndView.addObject("tagUpdateList",tagUpdateList);
 
 
             int searchConditionFieldNum = searFieldList.size();
@@ -372,8 +401,14 @@ public class BaseController<T extends AbstractBaseBean> implements Serializable 
 						 * 在此通过判断文件名是否为空来判断是否上传了文件 。
 					 	*/
 						if( StringUtils.isBlank( file.getOriginalFilename() ) ){
+							//continue;
+							System.out.println("OriginalFilename为空！");
+						}
+
+						if( file.isEmpty() ){
 							continue;
 						}
+
 						//获取文件保存路径
 						String savePath = request.getParameter( file.getName()+"SavePathHidden" );
 						if( StringUtils.isBlank( savePath ) ){
@@ -622,25 +657,35 @@ public class BaseController<T extends AbstractBaseBean> implements Serializable 
 		/**
 		 * extjs的form表单提交后根据返回值中的success值判断走success回调函数或failure函数
 		 */
+
+		/**
+		 * 更新方法实现思路
+		 *
+		 * 1.根据表单提交的id，从数据库中获取到原先的oldBean对象。
+		 * 2.将表单提交的bean对象的各字段的值赋值给oldBean对象。
+		 * 3.更新保存oldBean对象。
+		 */
 		try{
 			SysEnController controller = new SysEnController();
 			this.initField( controller );
 
 			Class beanClass = bean.getClass();
 
+			//获取表单提交的id
 			Method getIdMet=beanClass.getDeclaredMethod( "getId" );
 			Object tempIdObj = getIdMet.invoke(bean);
 			Integer tempId = Integer.parseInt( tempIdObj.toString() );
 
+			//根据表单提交的id获取oldBean对象
 			Object oldObj = beanClass.newInstance();
 			Method setIdMethod = beanClass.getDeclaredMethod("setId",new Class[]{ Integer.class } );
 			setIdMethod.invoke(oldObj,tempId );
-
 			oldObj = this.getBaseService().selectUniqueBeanByPrimaryKey( oldObj );
 
+			//将表单提交的bean对象的各字段的值赋值给oldBean对象
 			if( null!=controller.getSysEnControllerFieldList() && controller.getSysEnControllerFieldList().size()>0 ) {
 
-				//可被更新的字段
+				//获取所有可被更新的字段
 				List<SysEnControllerField> updateFieldList = new ArrayList<SysEnControllerField>();
 				for (SysEnControllerField conField : controller.getSysEnControllerFieldList()) {
 					if (!conField.isValid()) {
@@ -655,12 +700,141 @@ public class BaseController<T extends AbstractBaseBean> implements Serializable 
 
 				if( null!=updateFieldList && updateFieldList.size()>0 ){
 					for( SysEnControllerField updateField : updateFieldList ){
-						Method getMet=beanClass.getDeclaredMethod( "get"+PlatformUtils.firstLetterToUpperCase(updateField.getName()) );
-						Object tempObj = getMet.invoke( bean );
+						Method getMet=null;
+						Object tempObj =null;
 
-						Method setMet=beanClass.getDeclaredMethod( "set"+PlatformUtils.firstLetterToUpperCase(updateField.getName()),getMet.getReturnType() );
-						setMet.invoke(oldObj,tempObj);
+						Method setMet=null;
+
+						if( PlatformSysConstant.FORM_XTYPE_COMBOBOX.equals( updateField.getXtype() ) ){//下拉框类型
+
+							SysEnFieldComboBoxGroup sysEnFieldComboBoxGroup = (SysEnFieldComboBoxGroup)updateField.getSysEnFieldAttr();
+							if( sysEnFieldComboBoxGroup.isCascade() ){//级联下拉框
+								List<SysEnFieldComboBox>  comboBoxList = sysEnFieldComboBoxGroup.getComboBoxList();
+								/**
+								 * 遍历级联下拉框组的每一个下拉框
+								 */
+								for( SysEnFieldComboBox sysEnFieldComboBox:comboBoxList ){
+									getMet=beanClass.getDeclaredMethod( "get"+PlatformUtils.firstLetterToUpperCase(sysEnFieldComboBox.getComboBoxName()) );
+									tempObj = getMet.invoke( bean );
+
+									setMet=beanClass.getDeclaredMethod( "set"+PlatformUtils.firstLetterToUpperCase(sysEnFieldComboBox.getComboBoxName()),getMet.getReturnType() );
+									setMet.invoke(oldObj,tempObj);
+								}
+
+							}else{//单个下拉框
+								getMet=beanClass.getDeclaredMethod( "get"+PlatformUtils.firstLetterToUpperCase(updateField.getName()) );
+								tempObj = getMet.invoke( bean );
+
+								setMet=beanClass.getDeclaredMethod( "set"+PlatformUtils.firstLetterToUpperCase(updateField.getName()),getMet.getReturnType() );
+								setMet.invoke(oldObj,tempObj);
+							}
+
+						}else if( PlatformSysConstant.FORM_XTYPE_FILE.equals( updateField.getXtype() ) ){//文件类型字段
+							//文件类型字段不在此处更新，在后面对文件类型字段特殊处理
+							continue;
+						}else if( updateField.getName().contains( "SavePathHidden" ) ){
+							/**
+							 * 包含SavePathHidden，则说明此字段为存储附件的路径字段。
+							 * 保存文件的路径，此字段为框架自动加的，不需要处理，在后面处理附件时使用。
+							 */
+						}else{//其它类型字段
+							getMet=beanClass.getDeclaredMethod( "get"+PlatformUtils.firstLetterToUpperCase(updateField.getName()) );
+							tempObj = getMet.invoke( bean );
+
+							setMet=beanClass.getDeclaredMethod( "set"+PlatformUtils.firstLetterToUpperCase(updateField.getName()),getMet.getReturnType() );
+							setMet.invoke(oldObj,tempObj);
+						}
+
 					}
+
+					/**
+					 * 查找上传的文件，将文件保存到指定路径中，将路径地址保存到数据库中。
+					 */
+					//处理附件开始
+
+					//使用spring mvc 自带的方法查找上传的附件
+					//将当前上下文初始化给  CommonsMutipartResolver （多部分解析器）
+					CommonsMultipartResolver multipartResolver=new CommonsMultipartResolver( request.getSession().getServletContext() );
+					//检查form中是否有enctype="multipart/form-data"
+					if(multipartResolver.isMultipart(request)){
+						//将request变成多部分request
+						MultipartHttpServletRequest multiRequest=(MultipartHttpServletRequest)request;
+						//获取multiRequest 中所有的文件名
+						Iterator iter=multiRequest.getFileNames();
+
+						while(iter.hasNext())
+						{
+							//一次遍历所有文件
+							MultipartFile file=multiRequest.getFile(iter.next().toString());
+							if(file!=null)
+							{
+
+								/**
+								 * 页面上有文件表单字段时，即使用户在浏览器中没有选择附件，MultipartFile也不为空。但其实文件内容是空的。
+								 * 判断是否上传了文件 。
+								 */
+								if( file.isEmpty() ){
+									continue;
+								}
+								//获取文件保存路径
+								String savePath = request.getParameter( file.getName()+"SavePathHidden" );
+								if( StringUtils.isBlank( savePath ) ){
+									throw new PlatformException("没有获取到上传文件的保存路径！");
+								}
+
+								//路径修正
+								savePath = savePath.replace("/",File.separator);
+								savePath = savePath.replace("\\",File.separator);
+								if( !savePath.startsWith( File.separator ) ){
+									savePath = File.separator+savePath;
+								}
+								//所有上传的文件都放在项目根目录下的atta目录中
+								savePath = File.separator+"atta"+savePath;
+
+								//创建目录
+								String realPath= PlatformInfo.getAbsolutePath(request,savePath);
+								File fileDir = new File(realPath);
+								if( !fileDir.exists() ){
+									boolean mkdirRes = fileDir.mkdirs();
+									if( !mkdirRes ){
+										throw new PlatformException("创建上传的文件保存目录失败！");
+									}
+								}
+
+								//重命名文件名
+								String renameFileName = PlatformFileUtils.renameFileNameByTimeRandom( file.getOriginalFilename() );
+								if( realPath.endsWith( File.separator ) ){
+									realPath = realPath+renameFileName;
+								}else{
+									realPath = realPath+File.separator+renameFileName;
+								}
+
+								File objFile = new File(realPath);
+								//保存文件
+								file.transferTo( objFile );
+
+								//将文件的存储路径及原文件名保存到数据库中
+								if( savePath.endsWith( File.separator ) ){
+									savePath = savePath+renameFileName;
+								}else{
+									savePath = savePath+File.separator+renameFileName;
+								}
+								try{
+									Method fileUrlMethod = beanClass.getDeclaredMethod( "set"+PlatformUtils.firstLetterToUpperCase(file.getName()+"Url"),String.class );
+									Method fileNameMethod = beanClass.getDeclaredMethod( "set"+PlatformUtils.firstLetterToUpperCase(file.getName()+"OrigFileName"),String.class );
+									fileUrlMethod.invoke(oldObj,savePath);
+									fileNameMethod.invoke(oldObj,file.getOriginalFilename());
+								}catch (NoSuchMethodException e){
+									e.printStackTrace();
+									throw new PlatformException("上传附件配置错误，缺少相关字段！");
+								}
+
+							}
+
+						}
+
+					}
+					//处理附件结束
 
 					this.getBaseService().updateBean( oldObj );
 				}else{

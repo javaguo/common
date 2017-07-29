@@ -46,6 +46,8 @@ public class ExampleBean extends AbstractBaseBean{
     private Date formDatetimeDate;
     private String formComboBoxJson;
     private String formComboBoxSql;
+    private String formTagJson;
+    private String formTagSql;
     private String formComboBoxCascadeA;
     private String formComboBoxCascadeB;
     private String formComboBoxCascade1;
@@ -277,6 +279,22 @@ public class ExampleBean extends AbstractBaseBean{
 
     public void setFormComboBoxSql(String formComboBoxSql) {
         this.formComboBoxSql = formComboBoxSql;
+    }
+
+    public String getFormTagJson() {
+        return formTagJson;
+    }
+
+    public void setFormTagJson(String formTagJson) {
+        this.formTagJson = formTagJson;
+    }
+
+    public String getFormTagSql() {
+        return formTagSql;
+    }
+
+    public void setFormTagSql(String formTagSql) {
+        this.formTagSql = formTagSql;
     }
 
     public String getFormComboBoxCascadeA() {

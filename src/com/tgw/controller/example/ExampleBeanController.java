@@ -154,6 +154,19 @@ public class ExampleBeanController extends BaseController<ExampleBean>{
         controller.addFieldNumber("formNumberDouble","Double",true,true,true,true,true,formNumberDoubleConfigs);
         String booleanJson = "[{name:'是',value:'true',eleId:'formBooleanShi',checked:true},{name:'否',value:'false',eleId:'formBooleanFou'}]";
         controller.addFieldRadioInitDataByJson("formBoolean","Boolean",true,true,true,false,true,booleanJson,formRadioGroupConfigsBoolean,formRadioConfigsBoolean);
+
+        /***********************************************************************************************************
+         * Tag控件，ext的Tag控件继承自combobox
+         *
+         *目前存在的bug，点击tag控件后，总是要回跳到formPanel顶部。radioGroup与checkGroup也存在相同的问题。
+         */
+        String formTagJsonConfigs = "";
+        String formTagSqlConfigs = "value:'130000,140000'";
+        String tagJson = "[{name:'优',value:'90'},{name:'良',value:'80'},{name:'中',value:'70'},{name:'及格',value:'60'},{name:'差',value:'50'}]";
+
+        controller.addFieldTagByJSON( "formTagJson","tag控件(json)",true,true,true,false,false,tagJson,formTagJsonConfigs );
+        controller.addFieldTagBySQL( "formTagSql","tag控件(sql)",true,true,true,false,true,"loadTag",null,formTagSqlConfigs );
+
         /***********************************************************************************************************
          * 日期、时间控件
          */
@@ -194,6 +207,7 @@ public class ExampleBeanController extends BaseController<ExampleBean>{
         controller.addFieldComboBoxBySQL("formComboBoxSql","下拉框(sql)",true,true,true,false,true,"loadMenu",null,formComBoxSqlConfigs);
         controller.addFieldComboBoxCascadeBySQL("二级级联",true,true,false,false,true,"formComboboxGroup1","1",new String[] {"formComboBoxCascadeA","formComboBoxCascadeB"},new String[] {"loadMenu","loadMenu"},formComboboxGroup1Configs,formComboboxGroup1ComConfigs);
         controller.addFieldComboBoxCascadeBySQL("三级级联",true,true,true,false,false,"formComboboxGroup2",null,new String[] {"formComboBoxCascade1","formComboBoxCascade2","formComboBoxCascade3"},new String[] {"loadDistrict","loadDistrict","loadDistrict"},formComboboxGroup2Configs,formComboboxGroup2ComConfigs);
+
         /***********************************************************************************************************
          * 树控件
          */
@@ -309,6 +323,8 @@ public class ExampleBeanController extends BaseController<ExampleBean>{
         if( "loadMenu".equals( comboBoxFlag ) ){
             res = this.getExampleBeanService().queryMenuComboBoxMap( parentId );
         }else if( "loadDistrict".equals( comboBoxFlag ) ){
+            res = this.getExampleBeanService().queryDistrictComboBoxMap( parentId );
+        }else if("loadTag".equals( comboBoxFlag )){
             res = this.getExampleBeanService().queryDistrictComboBoxMap( parentId );
         }
 

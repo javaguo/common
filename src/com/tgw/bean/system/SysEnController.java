@@ -735,6 +735,130 @@ public class SysEnController extends AbstractBaseBean {
     }
 
     /**
+     * 添加一个tag控件     isShowList为true
+     * @param name
+     * @param fieldLabel
+     * @param isValid
+     * @param isAllowAdd
+     * @param isAllowUpdate
+     * @param isAllowSearch
+     * @param isAllowBlank
+     * @param jsonData
+     * @param tagConfigs
+     */
+    public void addFieldTagByJSON( String name, String fieldLabel,  boolean isValid, boolean isAllowAdd, boolean isAllowUpdate, boolean isAllowSearch, boolean isAllowBlank,String jsonData,String tagConfigs ){
+        this.addFieldTagByJSON(name,fieldLabel,isValid,isAllowAdd,isAllowUpdate,true,isAllowSearch,isAllowBlank,jsonData,tagConfigs);
+    }
+
+    /**
+     * 添加一个tag控件
+     * 使用json初始化数据。
+     * @param name
+     * @param fieldLabel
+     * @param isValid
+     * @param isAllowAdd
+     * @param isAllowUpdate
+     * @param isShowList
+     * @param isAllowSearch
+     * @param isAllowBlank
+     * @param jsonData
+     * @param tagConfigs
+     */
+    public void addFieldTagByJSON( String name, String fieldLabel,  boolean isValid, boolean isAllowAdd, boolean isAllowUpdate,boolean isShowList, boolean isAllowSearch, boolean isAllowBlank,String jsonData,String tagConfigs ){
+        SysEnControllerField  sysEnControllerField = new SysEnControllerField(name,fieldLabel,PlatformSysConstant.FORM_XTYPE_TAG,isValid,isAllowAdd,isAllowUpdate,isShowList,isAllowSearch,isAllowBlank);
+
+        //tag继承combox，使用combobox属性即可
+        SysEnFieldTag tag = new SysEnFieldTag();
+        tag.setComboBoxName( name );
+        tag.setLoadDataImplModel("json");
+        tag.setCascade(false);
+
+        if( StringUtils.isNotBlank( tagConfigs ) ){
+            tagConfigs = "allowBlank:"+isAllowBlank+","+tagConfigs;
+        }else{
+            tagConfigs = "allowBlank:"+isAllowBlank;
+        }
+
+        tag.setConfigs( tagConfigs );
+
+
+        JSONArray ja = JSONArray.fromObject(jsonData);
+        for( int i=0 ;i<ja.size();i++ ){
+            JSONObject tempJo = ja.getJSONObject(i);
+            if( !tempJo.containsKey("name") ){
+                throw new PlatformException("缺少name属性。 ");
+            }
+            if( !tempJo.containsKey("value") ){
+                throw new PlatformException("缺少value属性。");
+            }
+
+            SysEnFieldComboBoxOption comboBoxOption = new SysEnFieldComboBoxOption();
+            comboBoxOption.setName( tempJo.getString("name") );
+            comboBoxOption.setValue( tempJo.getString("value") );
+
+            tag.getComboBoxOptionList().add( comboBoxOption );
+        }
+
+        sysEnControllerField.setSysEnFieldAttr( tag );
+        this.getSysEnControllerFieldList().add(sysEnControllerField);
+    }
+
+    /**
+     * 添加一个tag控件。
+     * isShowList   true
+     * @param name
+     * @param fieldLabel
+     * @param isValid
+     * @param isAllowAdd
+     * @param isAllowUpdate
+     * @param isAllowSearch
+     * @param isAllowBlank
+     * @param comboBoxFlag
+     * @param firstComboBoxParamValue
+     * @param tagConfigs
+     */
+    public void addFieldTagBySQL( String name, String fieldLabel,  boolean isValid, boolean isAllowAdd, boolean isAllowUpdate, boolean isAllowSearch, boolean isAllowBlank,String comboBoxFlag,String firstComboBoxParamValue,String tagConfigs){
+        this.addFieldTagBySQL(name,fieldLabel,isValid,isAllowAdd,isAllowUpdate,true,isAllowSearch,isAllowBlank,comboBoxFlag,firstComboBoxParamValue,tagConfigs);
+    }
+
+    /**
+     * 添加一个tag控件。
+     * 通过页面请求url地址加载下拉数据。
+     * @param name
+     * @param fieldLabel
+     * @param isValid
+     * @param isAllowAdd
+     * @param isAllowUpdate
+     * @param isShowList
+     * @param isAllowSearch
+     * @param isAllowBlank
+     * @param comboBoxFlag
+     * @param firstComboBoxParamValue
+     * @param tagConfigs
+     */
+    public void addFieldTagBySQL( String name, String fieldLabel,  boolean isValid, boolean isAllowAdd, boolean isAllowUpdate,boolean isShowList, boolean isAllowSearch, boolean isAllowBlank,String comboBoxFlag,String firstComboBoxParamValue,String tagConfigs){
+        SysEnControllerField  sysEnControllerField = new SysEnControllerField(name,fieldLabel,PlatformSysConstant.FORM_XTYPE_TAG,isValid,isAllowAdd,isAllowUpdate,isShowList,isAllowSearch,isAllowBlank);
+
+        SysEnFieldTag tag = new SysEnFieldTag();
+        tag.setComboBoxName( name );
+        tag.setLoadDataImplModel("sql");
+        tag.setComboBoxFlag( comboBoxFlag );
+        tag.setFirstComboBoxParamValue( firstComboBoxParamValue );
+        tag.setCascade(false);
+
+        if( StringUtils.isNotBlank(tagConfigs) ){
+            tagConfigs = "allowBlank:"+isAllowBlank+","+ tagConfigs;
+        }else{
+            tagConfigs = "allowBlank:"+isAllowBlank;
+        }
+
+        tag.setConfigs(tagConfigs);
+
+        sysEnControllerField.setSysEnFieldAttr( tag );
+        this.getSysEnControllerFieldList().add(sysEnControllerField);
+    }
+
+    /**
      * 添加一个下拉框。 isShowList：true
      * @param name
      * @param fieldLabel

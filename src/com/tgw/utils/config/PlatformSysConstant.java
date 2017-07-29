@@ -32,7 +32,6 @@ public class PlatformSysConstant {
     public static String FORM_XTYPE_CHECKBOXGROUP = "checkboxgroup";
     public static String FORM_XTYPE_COMBOBOX = "combobox";
     public static String FORM_XTYPE_COMBOBOXTREE = "comboboxtree";////extjs未提供comboboxtree组件，此组件是自定义扩展的组件
-    public static String FORM_XTYPE_HTMLEDITOR = "htmleditor";
     public static String FORM_XTYPE_FILE = "filefield";
     public static String FORM_XTYPE_DISPLAY = "displayfield";
     public static String FORM_XTYPE_SPINNER = "spinnerfield";
