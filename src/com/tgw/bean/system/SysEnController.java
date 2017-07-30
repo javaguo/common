@@ -29,6 +29,16 @@ public class SysEnController extends AbstractBaseBean {
     private List<SysEnControllerField> sysEnControllerFieldList = new ArrayList<SysEnControllerField>();
     private List<SysEnControllerFunction> sysEnControllerFunctionList = new ArrayList<SysEnControllerFunction>();
 
+    public void addWindowConfig(String addWindowConfigs,String editWindowConfigs){
+        if( StringUtils.isNotBlank( addWindowConfigs ) ){
+            this.setAddWindowConfigs( addWindowConfigs );
+        }
+
+        if( StringUtils.isNotBlank( editWindowConfigs ) ){
+            this.setEditWindowConfigs( editWindowConfigs );
+        }
+    }
+
     /**
      * 暂时先保留此方法，框架编写完成后删除
      * 添加列表页面每一个字段的相关属性
@@ -113,7 +123,10 @@ public class SysEnController extends AbstractBaseBean {
         SysEnControllerField  sysEnControllerField = new SysEnControllerField(name,fieldLabel, PlatformSysConstant.FORM_XTYPE_HIDDEN,true,false,false,false,false,false);
 
         SysEnFieldBase formField = new SysEnFieldBase();
-        formField.setConfigs( configs );
+        if( StringUtils.isNotBlank( configs ) ){
+            formField.setConfigs( configs );
+        }
+
 		/*if( StringUtils.isNotBlank( configs ) ){
 			JSONObject jo = JSONObject.fromObject( "{"+configs+"}" );
 			this.dealFormFieldAttr( formField,jo );
@@ -136,7 +149,9 @@ public class SysEnController extends AbstractBaseBean {
         SysEnControllerField  sysEnControllerField = new SysEnControllerField(name,fieldLabel,PlatformSysConstant.FORM_XTYPE_HIDDEN,isValid,isAllowAdd,isAllowUpdate,false,false,true);
 
         SysEnFieldHidden formField = new SysEnFieldHidden();
-        formField.setConfigs( configs );
+        if( StringUtils.isNotBlank( configs ) ){
+            formField.setConfigs( configs );
+        }
 		/*if( StringUtils.isNotBlank(configs) ){
 			JSONObject jo = JSONObject.fromObject( "{"+ configs +"}" );
 			this.dealFormFieldAttr( formField,jo );
@@ -192,7 +207,10 @@ public class SysEnController extends AbstractBaseBean {
      * @param configs
      */
     public void addFieldText( String name, String fieldLabel, boolean isValid, boolean isAllowAdd, boolean isAllowUpdate, boolean isAllowSearch, boolean isAllowBlank, String emptyText, String vtype,String configs ){
-        String tempConfigs = "inputType:'"+PlatformSysConstant.FORM_INPUTTYPE_TEXT+"',emptyText:'"+emptyText+"',"+"vtype:'"+vtype+"',"+configs;
+        String tempConfigs = "inputType:'"+PlatformSysConstant.FORM_INPUTTYPE_TEXT+"',emptyText:'"+emptyText+"',"+"vtype:'"+vtype+"'";
+        if( StringUtils.isNotBlank( configs ) ){
+            tempConfigs += ","+configs;
+        }
         this.addFieldText(name,fieldLabel,isValid,isAllowAdd,isAllowUpdate,true,isAllowSearch,isAllowBlank,tempConfigs);
     }
 
@@ -242,7 +260,10 @@ public class SysEnController extends AbstractBaseBean {
      * @param configs
      */
     public void addFieldPassword( String name, String fieldLabel, boolean isValid, boolean isAllowAdd, boolean isAllowUpdate, boolean isAllowSearch, boolean isAllowBlank, String emptyText, String vtype,String configs ){
-        String tempConfigs = "inputType:'"+PlatformSysConstant.FORM_INPUTTYPE_PASSWORD+"',emptyText:'"+emptyText+"',"+"vtype:'"+vtype+"',"+configs;
+        String tempConfigs = "inputType:'"+PlatformSysConstant.FORM_INPUTTYPE_PASSWORD+"',emptyText:'"+emptyText+"',"+"vtype:'"+vtype+"'";
+        if( StringUtils.isNotBlank( configs ) ){
+            tempConfigs += ","+configs;
+        }
         this.addFieldText(name,fieldLabel,isValid,isAllowAdd,isAllowUpdate,false,isAllowSearch,isAllowBlank,tempConfigs);
     }
 
@@ -258,7 +279,10 @@ public class SysEnController extends AbstractBaseBean {
      * @param configs
      */
     public void addFieldPassword( String name, String fieldLabel, boolean isValid, boolean isAllowAdd, boolean isAllowUpdate, boolean isAllowSearch, boolean isAllowBlank,String configs ){
-        String tempConfigs = "inputType:'"+PlatformSysConstant.FORM_INPUTTYPE_PASSWORD+"',"+configs;
+        String tempConfigs = "inputType:'"+PlatformSysConstant.FORM_INPUTTYPE_PASSWORD+"'";
+        if( StringUtils.isNotBlank( configs ) ){
+            tempConfigs += ","+configs;
+        }
         this.addFieldText(name,fieldLabel,isValid,isAllowAdd,isAllowUpdate,false,isAllowSearch,isAllowBlank,tempConfigs);
     }
 
@@ -283,7 +307,9 @@ public class SysEnController extends AbstractBaseBean {
             configs = "allowBlank:"+isAllowBlank;
         }
 
-        formField.setConfigs( configs );
+        if( StringUtils.isNotBlank( configs ) ){
+            formField.setConfigs( configs );
+        }
 		/*if( StringUtils.isNotBlank( configs ) ){
 			JSONObject jo = JSONObject.fromObject( "{"+configs+"}" );
 			this.dealFormFieldAttr( formField,jo );
@@ -328,7 +354,9 @@ public class SysEnController extends AbstractBaseBean {
             configs = "allowBlank:"+isAllowBlank;
         }
 
-        formField.setConfigs( configs );
+        if( StringUtils.isNotBlank( configs ) ){
+            formField.setConfigs( configs );
+        }
 		/*if( StringUtils.isNotBlank( configs ) ){
 			JSONObject jo = JSONObject.fromObject( "{"+configs+"}" );
 			this.dealFormFieldAttr( formField,jo );
@@ -368,12 +396,14 @@ public class SysEnController extends AbstractBaseBean {
 
         SysEnFieldNumber formField = new SysEnFieldNumber();
         if( StringUtils.isNotBlank( configs ) ){
-            configs = "allowBlank:"+isAllowBlank+","+configs;
+            configs = "width:250,allowBlank:"+isAllowBlank+","+configs;
         }else{
-            configs = "allowBlank:"+isAllowBlank;
+            configs = "width:250,allowBlank:"+isAllowBlank;
         }
 
-        formField.setConfigs( configs );
+        if( StringUtils.isNotBlank( configs ) ){
+            formField.setConfigs( configs );
+        }
 		/*if( StringUtils.isNotBlank( configs ) ){
 			JSONObject jo = JSONObject.fromObject( "{"+configs+"}" );
 			this.dealFormFieldAttr( formField,jo );
@@ -418,9 +448,9 @@ public class SysEnController extends AbstractBaseBean {
          * 执行以下代码，确保configs有值
          */
         if( StringUtils.isNotBlank( configs ) ){
-            configs = "allowBlank:"+isAllowBlank+","+configs;
+            configs = "width:250,allowBlank:"+isAllowBlank+","+configs;
         }else{
-            configs = "allowBlank:"+isAllowBlank;
+            configs = "width:250,allowBlank:"+isAllowBlank;
         }
 
         JSONObject jo = null;
@@ -453,7 +483,9 @@ public class SysEnController extends AbstractBaseBean {
             configs = "format:'"+PlatformSysConstant.DATE_FORMAT_EXT_YMD;
         }*/
 
-        fieldDate.setConfigs( configs );
+        if( StringUtils.isNotBlank( configs ) ){
+            fieldDate.setConfigs( configs );
+        }
 		/*if( StringUtils.isNotBlank( configs ) ){
 			JSONObject jo = JSONObject.fromObject( "{"+configs+"}" );
 			this.dealFormFieldAttr( fieldDate,jo );
@@ -499,9 +531,9 @@ public class SysEnController extends AbstractBaseBean {
          * 执行以下代码，确保configs有值
          */
         if( StringUtils.isNotBlank( configs ) ){
-            configs = "allowBlank:"+isAllowBlank+","+configs;
+            configs = "width:250,allowBlank:"+isAllowBlank+","+configs;
         }else{
-            configs = "allowBlank:"+isAllowBlank;
+            configs = "width:250,allowBlank:"+isAllowBlank;
         }
 
         JSONObject jo = null;
@@ -534,7 +566,9 @@ public class SysEnController extends AbstractBaseBean {
             configs = "format:'"+PlatformSysConstant.DATE_FORMAT_EXT_YMDHMS;
         }*/
 
-        fieldDate.setConfigs( configs );
+        if( StringUtils.isNotBlank( configs ) ){
+            fieldDate.setConfigs( configs );
+        }
 		/*if( StringUtils.isNotBlank( configs ) ){
 			JSONObject jo = JSONObject.fromObject( "{"+configs+"}" );
 			this.dealFormFieldAttr( fieldDate,jo );
@@ -576,12 +610,15 @@ public class SysEnController extends AbstractBaseBean {
 
         SysEnFieldHtmlEditor formField = new SysEnFieldHtmlEditor();
         if( StringUtils.isNotBlank(extConfigs) ){
-            extConfigs = "allowBlank:"+isAllowBlank+","+ extConfigs;
+            extConfigs = "width:400,allowBlank:"+isAllowBlank+","+ extConfigs;
         }else{
-            extConfigs = "allowBlank:"+isAllowBlank;
+            extConfigs = "width:400,allowBlank:"+isAllowBlank;
         }
 
-        formField.setConfigs(extConfigs);
+
+        if( StringUtils.isNotBlank( extConfigs ) ){
+            formField.setConfigs(extConfigs);
+        }
 
         sysEnControllerField.setSysEnFieldAttr( formField );
         this.getSysEnControllerFieldList().add( sysEnControllerField );
@@ -622,7 +659,10 @@ public class SysEnController extends AbstractBaseBean {
         SysEnControllerField  sysEnControllerField = new SysEnControllerField(name,fieldLabel,PlatformSysConstant.FORM_XTYPE_CHECKBOXGROUP,isValid,isAllowAdd,isAllowUpdate,isShowList,isAllowSearch,isAllowBlank);
 
         SysEnFieldCheckboxGroup checkboxGroup = new SysEnFieldCheckboxGroup();
-        checkboxGroup.setConfigs( checkboxGroupConfigs );
+
+        if( StringUtils.isNotBlank( checkboxGroupConfigs ) ){
+            checkboxGroup.setConfigs( checkboxGroupConfigs );
+        }
 
         JSONArray ja = JSONArray.fromObject(jsonData);
         for( int i=0 ;i<ja.size();i++ ){
@@ -641,7 +681,9 @@ public class SysEnController extends AbstractBaseBean {
             checkbox.setBoxLabel( tempJo.getString("name") );
             checkbox.setInputValue( tempJo.getString("value") );
             checkbox.setEleId( tempJo.getString("eleId") );
-            checkbox.setConfigs( checkboxConfigs );
+            if( StringUtils.isNotBlank( checkboxConfigs ) ){
+                checkbox.setConfigs( checkboxConfigs );
+            }
             if( tempJo.containsKey("checked") && (boolean)tempJo.get("checked")  ){
                 checkbox.setChecked( "true" );
             }else{
@@ -700,7 +742,10 @@ public class SysEnController extends AbstractBaseBean {
         SysEnControllerField  sysEnControllerField = new SysEnControllerField(name,fieldLabel,PlatformSysConstant.FORM_XTYPE_RADIOGROUP,isValid,isAllowAdd,isAllowUpdate,isShowList,isAllowSearch,isAllowBlank);
 
         SysEnFieldRadioGroup radioGroup = new SysEnFieldRadioGroup();
-        radioGroup.setConfigs( radioGroupConfigs );
+
+        if( StringUtils.isNotBlank( radioGroupConfigs ) ){
+            radioGroup.setConfigs( radioGroupConfigs );
+        }
 
         JSONArray ja = JSONArray.fromObject(jsonData);
         for( int i=0 ;i<ja.size();i++ ){
@@ -720,7 +765,9 @@ public class SysEnController extends AbstractBaseBean {
             radio.setBoxLabel( tempJo.getString("name") );
             radio.setInputValue( tempJo.getString("value") );
             radio.setEleId( tempJo.getString("eleId") );
-            radio.setConfigs( radioConfigs );
+            if( StringUtils.isNotBlank( radioConfigs ) ){
+                radio.setConfigs( radioConfigs );
+            }
             if( tempJo.containsKey("checked") && (boolean)tempJo.get("checked")  ){
                 radio.setChecked( "true" );
             }else{
@@ -779,8 +826,9 @@ public class SysEnController extends AbstractBaseBean {
             tagConfigs = "allowBlank:"+isAllowBlank;
         }
 
-        tag.setConfigs( tagConfigs );
-
+        if( StringUtils.isNotBlank( tagConfigs ) ){
+            tag.setConfigs( tagConfigs );
+        }
 
         JSONArray ja = JSONArray.fromObject(jsonData);
         for( int i=0 ;i<ja.size();i++ ){
@@ -852,7 +900,9 @@ public class SysEnController extends AbstractBaseBean {
             tagConfigs = "allowBlank:"+isAllowBlank;
         }
 
-        tag.setConfigs(tagConfigs);
+        if( StringUtils.isNotBlank( tagConfigs ) ){
+            tag.setConfigs( tagConfigs );
+        }
 
         sysEnControllerField.setSysEnFieldAttr( tag );
         this.getSysEnControllerFieldList().add(sysEnControllerField);
@@ -900,13 +950,14 @@ public class SysEnController extends AbstractBaseBean {
         comboBox.setCascade(false);
 
         if( StringUtils.isNotBlank( comboBoxConfigs ) ){
-            comboBoxConfigs = "allowBlank:"+isAllowBlank+","+comboBoxConfigs;
+            comboBoxConfigs = "width:250,allowBlank:"+isAllowBlank+","+comboBoxConfigs;
         }else{
-            comboBoxConfigs = "allowBlank:"+isAllowBlank;
+            comboBoxConfigs = "width:250,allowBlank:"+isAllowBlank;
         }
 
-        comboBox.setConfigs( comboBoxConfigs );
-
+        if( StringUtils.isNotBlank( comboBoxConfigs ) ){
+            comboBox.setConfigs( comboBoxConfigs );
+        }
 
         SysEnFieldComboBoxGroup comboBoxGroup = new SysEnFieldComboBoxGroup();
         comboBoxGroup.setCascade( false );
@@ -955,13 +1006,14 @@ public class SysEnController extends AbstractBaseBean {
         comboBox.setCascade(false);
 
         if( StringUtils.isNotBlank( comboBoxConfigs ) ){
-            comboBoxConfigs = "allowBlank:"+isAllowBlank+","+comboBoxConfigs;
+            comboBoxConfigs = "width:250,allowBlank:"+isAllowBlank+","+comboBoxConfigs;
         }else{
-            comboBoxConfigs = "allowBlank:"+isAllowBlank;
+            comboBoxConfigs = "width:250,allowBlank:"+isAllowBlank;
         }
 
-        comboBox.setConfigs( comboBoxConfigs );
-
+        if( StringUtils.isNotBlank( comboBoxConfigs ) ){
+            comboBox.setConfigs( comboBoxConfigs );
+        }
 
         JSONArray ja = JSONArray.fromObject(jsonData);
         for( int i=0 ;i<ja.size();i++ ){
@@ -985,7 +1037,6 @@ public class SysEnController extends AbstractBaseBean {
         comboBoxGroup.getComboBoxList().add( comboBox );
 //        comboBoxGroup.setConfigs( comboBoxGroupConfigs );
 
-
         sysEnControllerField.setSysEnFieldAttr( comboBoxGroup );
         this.getSysEnControllerFieldList().add(sysEnControllerField);
     }
@@ -1006,8 +1057,29 @@ public class SysEnController extends AbstractBaseBean {
      * @param comboBoxConfigs
      */
     public void addFieldComboBoxCascadeBySQL(  String fieldLabel,  boolean isValid, boolean isAllowAdd, boolean isAllowUpdate, boolean isAllowSearch, boolean isAllowBlank,
+                                               String comboBoxGroupName,String firstComboBoxParamValue,String[] comboBoxNames,String[] comboBoxFlag,String comboBoxGroupConfigs,String comboBoxConfigs,String[] comboBoxInitVal ){
+        this.addFieldComboBoxCascadeBySQL(fieldLabel,isValid,isAllowAdd,isAllowUpdate,true,isAllowSearch,isAllowBlank,comboBoxGroupName,firstComboBoxParamValue,comboBoxNames,comboBoxFlag,comboBoxGroupConfigs,comboBoxConfigs,comboBoxInitVal);
+    }
+
+    /**
+     * 添加一组级联下拉框（级联层数不限）     isShowList：true
+     * 不用传初始化的值。
+     * @param fieldLabel
+     * @param isValid
+     * @param isAllowAdd
+     * @param isAllowUpdate
+     * @param isAllowSearch
+     * @param isAllowBlank
+     * @param comboBoxGroupName
+     * @param firstComboBoxParamValue
+     * @param comboBoxNames
+     * @param comboBoxFlag
+     * @param comboBoxGroupConfigs
+     * @param comboBoxConfigs
+     */
+    public void addFieldComboBoxCascadeBySQL(  String fieldLabel,  boolean isValid, boolean isAllowAdd, boolean isAllowUpdate, boolean isAllowSearch, boolean isAllowBlank,
                                                String comboBoxGroupName,String firstComboBoxParamValue,String[] comboBoxNames,String[] comboBoxFlag,String comboBoxGroupConfigs,String comboBoxConfigs ){
-        this.addFieldComboBoxCascadeBySQL(fieldLabel,isValid,isAllowAdd,isAllowUpdate,true,isAllowSearch,isAllowBlank,comboBoxGroupName,firstComboBoxParamValue,comboBoxNames,comboBoxFlag,comboBoxGroupConfigs,comboBoxConfigs);
+        this.addFieldComboBoxCascadeBySQL(fieldLabel,isValid,isAllowAdd,isAllowUpdate,true,isAllowSearch,isAllowBlank,comboBoxGroupName,firstComboBoxParamValue,comboBoxNames,comboBoxFlag,comboBoxGroupConfigs,comboBoxConfigs,null);
     }
 
     /**
@@ -1027,9 +1099,13 @@ public class SysEnController extends AbstractBaseBean {
      * @param comboBoxConfigs
      */
     public void addFieldComboBoxCascadeBySQL(  String fieldLabel,  boolean isValid, boolean isAllowAdd, boolean isAllowUpdate,boolean isShowList, boolean isAllowSearch, boolean isAllowBlank,
-                                               String comboBoxGroupName,String firstComboBoxParamValue,String[] comboBoxNames,String[] comboBoxFlag,String comboBoxGroupConfigs,String comboBoxConfigs ){
-        if( comboBoxNames==null || comboBoxFlag ==null || ( comboBoxNames.length!=comboBoxFlag.length ) ){
+                                               String comboBoxGroupName,String firstComboBoxParamValue,String[] comboBoxNames,String[] comboBoxFlag,String comboBoxGroupConfigs,String comboBoxConfigs,String[] comboBoxInitVal ){
+        if( comboBoxNames==null || comboBoxFlag ==null || ( comboBoxNames.length!=comboBoxFlag.length )  ){
             throw new PlatformException("构造下拉框出错！参数错误！");
+        }
+
+        if( comboBoxInitVal!=null && comboBoxNames.length!=comboBoxInitVal.length  ){
+            throw new PlatformException("构造下拉框出错！初始化下拉框值参数错误！");
         }
 
         if( comboBoxNames.length<1 ){
@@ -1040,7 +1116,10 @@ public class SysEnController extends AbstractBaseBean {
 
         SysEnFieldComboBoxGroup comboBoxGroup = new SysEnFieldComboBoxGroup();
         comboBoxGroup.setCascade( true );
-        comboBoxGroup.setConfigs( comboBoxGroupConfigs );
+
+        if( StringUtils.isNotBlank( comboBoxGroupConfigs ) ){
+            comboBoxGroup.setConfigs( comboBoxGroupConfigs );
+        }
 
         int comboBoxNum = comboBoxNames.length;
         for( int i=0;i<comboBoxNum;i++ ){
@@ -1079,12 +1158,19 @@ public class SysEnController extends AbstractBaseBean {
             }
 
             if( StringUtils.isNotBlank( comboBoxConfigs ) ){
-                comboBoxConfigs = "allowBlank:"+isAllowBlank+","+comboBoxConfigs;
+                comboBoxConfigs = "labelWidth:0,width:88,allowBlank:"+isAllowBlank+","+comboBoxConfigs;
             }else{
-                comboBoxConfigs = "allowBlank:"+isAllowBlank;
+                comboBoxConfigs = "labelWidth:0,width:88,allowBlank:"+isAllowBlank;
             }
 
-            tempComboBox.setConfigs( comboBoxConfigs );
+
+            if( StringUtils.isNotBlank( comboBoxConfigs ) ){
+                tempComboBox.setConfigs( comboBoxConfigs );
+            }
+
+            if( comboBoxInitVal!=null && StringUtils.isNotBlank( comboBoxInitVal[i] ) ){
+                tempComboBox.setValue( comboBoxInitVal[i] );
+            }
 
             comboBoxGroup.getComboBoxList().add( tempComboBox );
         }
@@ -1163,7 +1249,10 @@ public class SysEnController extends AbstractBaseBean {
             }
         }*/
 
-        fieldComboBoxTree.setConfigs( configs );
+
+        if( StringUtils.isNotBlank( configs ) ){
+            fieldComboBoxTree.setConfigs( configs );
+        }
 
         sysEnControllerField.setSysEnFieldAttr( fieldComboBoxTree );
         this.getSysEnControllerFieldList().add( sysEnControllerField );
@@ -1197,7 +1286,10 @@ public class SysEnController extends AbstractBaseBean {
         SysEnControllerField  sysEnControllerField = new SysEnControllerField(name,fieldLabel,PlatformSysConstant.FORM_XTYPE_DISPLAY,isValid,isAllowAdd,isAllowUpdate,isShowList,isAllowSearch,true);
 
         SysEnFieldDisplay formField = new SysEnFieldDisplay();
-        formField.setConfigs( configs );
+
+        if( StringUtils.isNotBlank( configs ) ){
+            formField.setConfigs( configs );
+        }
 		/*if( StringUtils.isNotBlank(configs) ){
 			JSONObject jo = JSONObject.fromObject( "{"+ configs +"}" );
 			this.dealFormFieldAttr( formField,jo );
@@ -1232,13 +1324,13 @@ public class SysEnController extends AbstractBaseBean {
             extConfigs = "allowBlank:"+isAllowBlank;
         }
 
-        formField.setConfigs(extConfigs);
+        if( StringUtils.isNotBlank( extConfigs ) ){
+            formField.setConfigs(extConfigs);
+        }
 		/*if( StringUtils.isNotBlank( configs ) ){
 			JSONObject jo = JSONObject.fromObject( "{"+configs+"}" );
 			this.dealFormFieldAttr( formField,jo );
 		}*/
-
-
 
         /**
          * 处理上传附件的服务端配置信息

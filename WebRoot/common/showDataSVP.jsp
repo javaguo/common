@@ -36,7 +36,8 @@ String browserLang=request.getLocale().toString();
 Ext.onReady(function() {
 	/**onReady开始*/	
 	Ext.tip.QuickTipManager.init();
-
+	
+	
 	<%-- 定义下拉框数据模型 --%>
 	Ext.define('comboBoxDataModel${identifier}', {
 			extend: 'Ext.data.Model',
@@ -45,6 +46,8 @@ Ext.onReady(function() {
 	
 	<%-- 添加窗口方法开始 --%>
 	function openAddWindow${identifier}(){
+		<%-- 存放需要调整样式left值的级联comboBox。解决不对齐问题 --%>
+		var resetLeftComboArray=new Array();
 		
 		<%-- 下拉框初始化数据开始 --%>
 		<c:forEach items="${comboBoxAddList}" var="comboBoxInfo" varStatus="comboBoxStatus">
@@ -67,10 +70,18 @@ Ext.onReady(function() {
 				</c:when>
 				<%-- 请求后台查询数据库初始化下拉框数据 --%>
 				<c:when test='${comboBoxInfo.loadDataImplModel=="sql"}'>
+					<c:choose>
+						<c:when test='${comboBoxInfo.isCascade && !comboBoxInfo.isFirst }'>
+							var cascChild_${comboBoxInfo.comboBoxName}_${identifier} = "true";
+						</c:when>
+						<c:otherwise>
+							var cascChild_${comboBoxInfo.comboBoxName}_${identifier} = "false";
+						</c:otherwise>
+					</c:choose>
 					var comboBoxStore_${comboBoxInfo.comboBoxName}_${identifier} = new Ext.data.Store({
 						model:comboBoxDataModel${identifier},
 						proxy: new Ext.data.HttpProxy({
-							url: '<%=basePath%>${controllerBaseUrl}/loadComboxData.do',
+							url: '<%=basePath%>${controllerBaseUrl}/loadComboxData.do?cascChild='+cascChild_${comboBoxInfo.comboBoxName}_${identifier},
 							noCache:false,
 							reader:{
 								type:'json',
@@ -105,7 +116,7 @@ Ext.onReady(function() {
 							//queryMode: 'local',
 							displayField: 'name',
 							valueField: 'id',
-							width:80,
+							width:100,
 							loadingText: '正在加载...',
 							emptyText: "请选择",
 							mode: "local",
@@ -114,24 +125,68 @@ Ext.onReady(function() {
 								,${comboBoxInfo.configs}
 							</c:if>
 			});
+			<%-- 最后再设置值，防止comboBoxInfo.configs中的配置覆盖 --%>
+			if( '${comboBoxInfo.value}'.length>0 ){
+				comboBox_${comboBoxInfo.comboBoxName}_${identifier}.setValue( '${comboBoxInfo.value}' );
+			}
+			<c:if test='${comboBoxInfo.isCascade}'>
+				resetLeftComboArray.push( comboBox_${comboBoxInfo.comboBoxName}_${identifier} );	
+			</c:if>
 			
 			<c:choose>
 				<%-- 绑定下拉框级联事件 --%>
 				<c:when test='${ comboBoxInfo.loadDataImplModel=="sql" && comboBoxInfo.isCascade && !comboBoxInfo.isLast }'>
 					comboBox_${comboBoxInfo.comboBoxName}_${identifier}.on('select', function() {
 						<c:forEach items="${comboBoxInfo.cascadeList}" var="cascadeComboBoxInfo" varStatus="cascadeComboBoxStatus">
-							comboBox_${cascadeComboBoxInfo.comboBoxName}_${identifier}.clearValue();
+							<%-- 给comboBox赋了初始值使用clearValue()方法不起作用，清除不了值。使用setValue("")清除。问题比较奇怪 --%>
+							//comboBox_${cascadeComboBoxInfo.comboBoxName}_${identifier}.clearValue();
+							comboBox_${cascadeComboBoxInfo.comboBoxName}_${identifier}.setValue( null );
 							comboBox_${cascadeComboBoxInfo.comboBoxName}_${identifier}.reset();
 							
 							comboBoxStore_${cascadeComboBoxInfo.comboBoxName}_${identifier}.removeAll();
 						</c:forEach>
-						Ext.apply(comboBoxStore_${comboBoxInfo.childComboBox}_${identifier}.proxy.extraParams, {"comboBoxFlag":"${comboBoxInfo.comboBoxFlag}","value":comboBox_${comboBoxInfo.comboBoxName}_${identifier}.getValue()});
+						Ext.apply(comboBoxStore_${comboBoxInfo.childComboBox}_${identifier}.proxy.extraParams, 
+									{"comboBoxFlag":"${comboBoxInfo.comboBoxFlag}",
+									 "value":comboBox_${comboBoxInfo.comboBoxName}_${identifier}.getValue()});
 						comboBoxStore_${comboBoxInfo.childComboBox}_${identifier}.load();
 						
 					}); 
 				</c:when>
 			</c:choose>
 			
+			<c:choose>
+				<%-- 请求后台查询数据库初始化下拉框数据(所有的下拉框store都要初始化) --%>
+				<c:when test='${comboBoxInfo.loadDataImplModel=="sql"}'>
+					comboBoxStore_${comboBoxInfo.comboBoxName}_${identifier}.on("beforeload",function(){
+								Ext.apply(comboBoxStore_${comboBoxInfo.comboBoxName}_${identifier}.proxy.extraParams, 
+									{"comboBoxFlag":"${comboBoxInfo.comboBoxFlag}",
+										<c:choose>
+											<%-- 加载第一个下拉框的数据(级联有多个下拉框，非级联只有一个下拉框) --%>
+											<c:when test='${ !comboBoxInfo.isCascade || ( comboBoxInfo.isCascade && comboBoxInfo.isFirst )}'>			
+												"value":"${comboBoxInfo.firstComboBoxParamValue}"
+											</c:when>
+											<c:otherwise>
+												"value":comboBox_${comboBoxInfo.parentComboBox}_${identifier}.getValue()
+											</c:otherwise>
+										</c:choose>
+								});
+					});
+					<c:choose>
+						<%-- 加载级联第一个下拉框或非级联下拉框(非级联下拉框只有一个) --%>
+						<c:when test='${ !comboBoxInfo.isCascade || ( comboBoxInfo.isCascade && comboBoxInfo.isFirst )}'>			
+							comboBoxStore_${comboBoxInfo.comboBoxName}_${identifier}.load();
+						</c:when>
+						<c:otherwise>
+							<%-- 加载级联下拉框数据(除第一个下拉框),父级联框有数据时才加载子级联框 --%>
+						    if( comboBox_${comboBoxInfo.parentComboBox}_${identifier}.getValue() ){
+								comboBoxStore_${comboBoxInfo.comboBoxName}_${identifier}.load();
+							}
+						</c:otherwise>
+					</c:choose>
+				</c:when>
+				<c:otherwise>
+				</c:otherwise>
+			</c:choose>
 		</c:forEach>
 		<%-- 下拉框初始化数据结束 --%>
 		
@@ -189,9 +244,9 @@ Ext.onReady(function() {
 				<c:when test='${fieldInfo.xtype=="radiogroup"}'>
 				Ext.create({
 					xtype: '${fieldInfo.xtype}',
+					id: field_${fieldInfo.name}_${identifier},
 					fieldLabel: '${fieldInfo.fieldLabel}',
 					labelStyle:'vertical-align: middle;',
-					width:210,
 					columns: 10,
 					vertical: true,
 					items: [
@@ -212,7 +267,7 @@ Ext.onReady(function() {
 					<c:if test='${!fieldInfo.isAllowBlank}'>
 						,beforeLabelTextTpl: ['<span class="required">*</span>']
 					</c:if>
-					<c:if test='${fieldInfo.sysEnFieldAttr!=null}'>
+					<c:if test='${fieldInfo.sysEnFieldAttr!=null && fieldInfo.sysEnFieldAttr.configs!=null}'>
 						,${fieldInfo.sysEnFieldAttr.configs}
 					</c:if>
 				});
@@ -222,9 +277,9 @@ Ext.onReady(function() {
 				<c:when test='${fieldInfo.xtype=="checkboxgroup"}'>
 				Ext.create({
 					xtype: '${fieldInfo.xtype}',
+					id: field_${fieldInfo.name}_${identifier},
 					fieldLabel: '${fieldInfo.fieldLabel}',
 					labelStyle:'vertical-align: middle;',
-					width:250,
 					columns: 10,
 					vertical: true,
 					items: [
@@ -245,7 +300,7 @@ Ext.onReady(function() {
 					<c:if test='${!fieldInfo.isAllowBlank}'>
 						,beforeLabelTextTpl: ['<span class="required">*</span>']
 					</c:if>
-					<c:if test='${fieldInfo.sysEnFieldAttr!=null}'>
+					<c:if test='${fieldInfo.sysEnFieldAttr!=null && fieldInfo.sysEnFieldAttr.configs!=null}'>
 						,${fieldInfo.sysEnFieldAttr.configs}
 					</c:if>
 				});
@@ -256,9 +311,9 @@ Ext.onReady(function() {
 					<c:if test='${fieldInfo.sysEnFieldAttr.isCascade}'>
 						Ext.create({
 							xtype: 'fieldcontainer',
+							id: field_${fieldInfo.name}_${identifier},
 							fieldLabel: '${fieldInfo.fieldLabel}',
 							labelStyle:'vertical-align: middle;',
-							width:450,
 							layout: 'hbox',
 							items:[
 								<c:forEach items="${fieldInfo.sysEnFieldAttr.comboBoxList}" var="comboBoxFieldInfo" varStatus="comboBoxFieldStatus">
@@ -272,7 +327,7 @@ Ext.onReady(function() {
 							<c:if test='${!fieldInfo.isAllowBlank}'>
 								,beforeLabelTextTpl: ['<span class="required">*</span>']
 							</c:if>
-							<c:if test='${fieldInfo.sysEnFieldAttr!=null}'>
+							<c:if test='${fieldInfo.sysEnFieldAttr!=null && fieldInfo.sysEnFieldAttr.configs!=null}'>
 								,${fieldInfo.sysEnFieldAttr.configs}
 							</c:if>
 						});
@@ -301,8 +356,6 @@ Ext.onReady(function() {
 							mode: "local",
 							displayField: 'name',
 							valueField: 'id',
-							labelWidth:100,
-							width:400,
 							//filterPickList: true,
 							triggerAction: 'all',
 							//queryMode: 'local',
@@ -312,7 +365,7 @@ Ext.onReady(function() {
 							<c:if test='${!fieldInfo.isAllowBlank}'>
 								,beforeLabelTextTpl: ['<span class="required">*</span>']
 							</c:if>
-							<c:if test='${fieldInfo.sysEnFieldAttr!=null}'>
+							<c:if test='${fieldInfo.sysEnFieldAttr!=null && fieldInfo.sysEnFieldAttr.configs!=null}'>
 								,${fieldInfo.sysEnFieldAttr.configs}
 							</c:if>
 				});
@@ -330,7 +383,7 @@ Ext.onReady(function() {
 						,beforeLabelTextTpl: ['<span class="required">*</span>']
 					</c:if>
 					
-					<c:if test='${fieldInfo.sysEnFieldAttr!=null}'>
+					<c:if test='${fieldInfo.sysEnFieldAttr!=null && fieldInfo.sysEnFieldAttr.configs!=null}'>
 						,${fieldInfo.sysEnFieldAttr.configs}
 					</c:if>
 				});
@@ -358,7 +411,7 @@ Ext.onReady(function() {
 						,beforeLabelTextTpl: ['<span class="required">*</span>']
 					</c:if>
 					
-					<c:if test='${fieldInfo.sysEnFieldAttr!=null}'>
+					<c:if test='${fieldInfo.sysEnFieldAttr!=null && fieldInfo.sysEnFieldAttr.configs!=null}'>
 						,${fieldInfo.sysEnFieldAttr.configs}
 					</c:if>
 				});
@@ -376,7 +429,7 @@ Ext.onReady(function() {
 						,beforeLabelTextTpl: ['<span class="required">*</span>']
 					</c:if>
 					
-					<c:if test='${fieldInfo.sysEnFieldAttr!=null}'>
+					<c:if test='${fieldInfo.sysEnFieldAttr!=null && fieldInfo.sysEnFieldAttr.configs!=null}'>
 						,${fieldInfo.sysEnFieldAttr.configs}
 					</c:if>
 				});
@@ -393,8 +446,7 @@ Ext.onReady(function() {
 					<c:if test='${!fieldInfo.isAllowBlank}'>
 						,beforeLabelTextTpl: ['<span class="required">*</span>']
 					</c:if>
-					
-					<c:if test='${fieldInfo.sysEnFieldAttr!=null}'>
+					<c:if test='${fieldInfo.sysEnFieldAttr!=null && fieldInfo.sysEnFieldAttr.configs!=null}'>
 						,${fieldInfo.sysEnFieldAttr.configs}
 					</c:if>
 				});
@@ -481,7 +533,7 @@ Ext.onReady(function() {
 		var addWindow${identifier} = new Ext.Window({
 			id:'addWindow${identifier}',
 			title: '添加窗口',
-			width:600,
+			width:550,
 			maxHeight:500,
 			scrollable:true,
 			//autoHeight:true,
@@ -491,7 +543,14 @@ Ext.onReady(function() {
 			//closeAction : 'hide',   默认为destroy
 			modal : true,
 			plain:false,
-			//listeners   : {'hide':{fn: closeAddWindow${identifier}}},
+			//listeners   : {'hide':{fn: closeWindowPlatform}},
+			listeners   : {afterlayout:function(){
+					<%-- 纠正级联框左侧与其它控件对齐问题。须在afterlayout后执行，
+						 ext计算布局完毕后，重新设置left值。
+					--%>
+					resetComLeft(resetLeftComboArray);
+				}
+			},
 			items: [
 				addPanel_${identifier}
 			]
@@ -501,41 +560,15 @@ Ext.onReady(function() {
 		});
 		
 		addWindow${identifier}.show();
+		
   }
   <%-- 添加窗口方法结束 --%>
 	
-	
-	function closeAddWindow${identifier}(){
-		/**
-		  添加编辑都用到此方法
-		 * 关闭窗口事件，空方法即可
-		 * window窗口需要通过实现closeAction来关闭，
-		 * 否则有其他问题，具体原理暂不清楚
-		 * */
-	}
-
 	<%-- 编辑窗口方法开始 --%>
-	//判断checkbox是否选中。checkedVal为所有选中的值，逗号分隔。currenVal要判断的值
-	function isCheckedCheckbox( checkedVal,currenVal){		
-		var checkedVal_arr;
-		if( checkedVal ){
-			checkedVal_arr = checkedVal.split(",");
-		}else{
-			return false;
-		}
-		
-		if( checkedVal_arr ){
-			for( i=0;i<checkedVal_arr.length;i++ ){
-				if( checkedVal_arr[i]+""==currenVal+"" ){
-					return true;
-				}
-			}
-		}
-			
-		return false;
-	}
-	
 	function openEditWindow_${identifier}( beanValJson ){
+		<%-- 存放需要调整样式left值的级联comboBox。解决不对齐问题 --%>
+		var resetLeftComboArray=new Array();
+		
 		<%-- 下拉框初始化数据开始 --%>
 		<c:forEach items="${comboBoxUpdateList}" var="comboBoxInfo" varStatus="comboBoxStatus">
 			<%-- 定义下拉框store开始 --%>
@@ -557,10 +590,18 @@ Ext.onReady(function() {
 				</c:when>
 				<%-- 请求后台查询数据库初始化下拉框数据 --%>
 				<c:when test='${comboBoxInfo.loadDataImplModel=="sql"}'>
+					<c:choose>
+						<c:when test='${comboBoxInfo.isCascade && !comboBoxInfo.isFirst }'>
+							var cascChild_${comboBoxInfo.comboBoxName}_${identifier} = "true";
+						</c:when>
+						<c:otherwise>
+							var cascChild_${comboBoxInfo.comboBoxName}_${identifier} = "false";
+						</c:otherwise>
+					</c:choose>
 					var comboBoxStore_${comboBoxInfo.comboBoxName}_${identifier} = new Ext.data.Store({
 						model:comboBoxDataModel${identifier},
 						proxy: new Ext.data.HttpProxy({
-							url: '<%=basePath%>${controllerBaseUrl}/loadComboxData.do',
+							url: '<%=basePath%>${controllerBaseUrl}/loadComboxData.do?cascChild='+cascChild_${comboBoxInfo.comboBoxName}_${identifier},
 							noCache:false,
 							reader:{
 								type:'json',
@@ -596,7 +637,18 @@ Ext.onReady(function() {
 							</c:if>
 			});
 			<%-- 最后再设置值，防止comboBoxInfo.configs中的配置覆盖 --%>
-			comboBox_${comboBoxInfo.comboBoxName}_${identifier}.setValue( beanValJson.${comboBoxInfo.comboBoxName} );
+			if( '${comboBoxInfo.value}'.length>0 ){
+				<%-- 默认值 --%>
+				comboBox_${comboBoxInfo.comboBoxName}_${identifier}.setValue( '${comboBoxInfo.value}' );
+			}
+			if( beanValJson.${comboBoxInfo.comboBoxName} ){
+				<%-- 数据库中的值 --%>
+				comboBox_${comboBoxInfo.comboBoxName}_${identifier}.setValue( beanValJson.${comboBoxInfo.comboBoxName} );
+			}
+			<c:if test='${comboBoxInfo.isCascade}'>
+				resetLeftComboArray.push( comboBox_${comboBoxInfo.comboBoxName}_${identifier} );	
+			</c:if>
+			
 			
 			<c:choose>
 				<%-- 绑定下拉框级联事件 --%>
@@ -610,7 +662,10 @@ Ext.onReady(function() {
 							
 							comboBoxStore_${cascadeComboBoxInfo.comboBoxName}_${identifier}.removeAll();
 						</c:forEach>
-						Ext.apply(comboBoxStore_${comboBoxInfo.childComboBox}_${identifier}.proxy.extraParams, {"comboBoxFlag":"${comboBoxInfo.comboBoxFlag}","value":comboBox_${comboBoxInfo.comboBoxName}_${identifier}.getValue()});
+						
+						Ext.apply(comboBoxStore_${comboBoxInfo.childComboBox}_${identifier}.proxy.extraParams, 
+							{"comboBoxFlag":"${comboBoxInfo.comboBoxFlag}",
+							 "value":comboBox_${comboBoxInfo.comboBoxName}_${identifier}.getValue()});
 						comboBoxStore_${comboBoxInfo.childComboBox}_${identifier}.load();
 					}); 
 				</c:when>
@@ -635,7 +690,18 @@ Ext.onReady(function() {
 										</c:choose>
 								});
 					});
-					comboBoxStore_${comboBoxInfo.comboBoxName}_${identifier}.load();
+					<c:choose>
+						<%-- 加载级联第一个下拉框或非级联下拉框(非级联下拉框只有一个) --%>
+						<c:when test='${ !comboBoxInfo.isCascade || ( comboBoxInfo.isCascade && comboBoxInfo.isFirst )}'>			
+							comboBoxStore_${comboBoxInfo.comboBoxName}_${identifier}.load();
+						</c:when>
+						<c:otherwise>
+							<%-- 加载级联下拉框数据(除第一个下拉框),父级联框有数据时才加载子级联框 --%>
+						    if( comboBox_${comboBoxInfo.parentComboBox}_${identifier}.getValue() ){
+								comboBoxStore_${comboBoxInfo.comboBoxName}_${identifier}.load();
+							}
+						</c:otherwise>
+					</c:choose>
 				</c:when>
 				<c:otherwise>
 				</c:otherwise>
@@ -700,7 +766,6 @@ Ext.onReady(function() {
 					id: 'edit_${fieldInfo.name}_${identifier}',
 					fieldLabel: '${fieldInfo.fieldLabel}',
 					labelStyle:'vertical-align: middle;',
-					width:210,
 					columns: 10,
 					vertical: true,
 					items: [
@@ -724,7 +789,7 @@ Ext.onReady(function() {
 					<c:if test='${!fieldInfo.isAllowBlank}'>
 						,beforeLabelTextTpl: ['<span class="required">*</span>']
 					</c:if>
-					<c:if test='${fieldInfo.sysEnFieldAttr!=null}'>
+					<c:if test='${fieldInfo.sysEnFieldAttr!=null && fieldInfo.sysEnFieldAttr.configs!=null}'>
 						,${fieldInfo.sysEnFieldAttr.configs}
 					</c:if>
 				});
@@ -742,7 +807,6 @@ Ext.onReady(function() {
 					id: 'edit_${fieldInfo.name}_${identifier}',
 					fieldLabel: '${fieldInfo.fieldLabel}',
 					labelStyle:'vertical-align: middle;',
-					width:250,
 					columns: 10,
 					vertical: true,
 					items: [
@@ -766,7 +830,7 @@ Ext.onReady(function() {
 					<c:if test='${!fieldInfo.isAllowBlank}'>
 						,beforeLabelTextTpl: ['<span class="required">*</span>']
 					</c:if>
-					<c:if test='${fieldInfo.sysEnFieldAttr!=null}'>
+					<c:if test='${fieldInfo.sysEnFieldAttr!=null && fieldInfo.sysEnFieldAttr.configs!=null}'>
 						,${fieldInfo.sysEnFieldAttr.configs}
 					</c:if>
 				});
@@ -782,7 +846,6 @@ Ext.onReady(function() {
 							id: 'fieldcontainer_${fieldInfo.name}_${identifier}',
 							fieldLabel: '${fieldInfo.fieldLabel}',
 							labelStyle:'vertical-align: middle;',
-							width:450,
 							layout: 'hbox',
 							items:[
 								<c:forEach items="${fieldInfo.sysEnFieldAttr.comboBoxList}" var="comboBoxFieldInfo" varStatus="comboBoxFieldStatus">
@@ -796,7 +859,7 @@ Ext.onReady(function() {
 							<c:if test='${!fieldInfo.isAllowBlank}'>
 								,beforeLabelTextTpl: ['<span class="required">*</span>']
 							</c:if>
-							<c:if test='${fieldInfo.sysEnFieldAttr!=null}'>
+							<c:if test='${fieldInfo.sysEnFieldAttr!=null && fieldInfo.sysEnFieldAttr.configs!=null}'>
 								,${fieldInfo.sysEnFieldAttr.configs}
 							</c:if>
 						});
@@ -827,8 +890,6 @@ Ext.onReady(function() {
 							mode: "local",
 							displayField: 'name',
 							valueField: 'id',
-							labelWidth:100,
-							width:400,
 							//filterPickList: true,
 							triggerAction: 'all',
 							//queryMode: 'local',
@@ -838,7 +899,7 @@ Ext.onReady(function() {
 							<c:if test='${!fieldInfo.isAllowBlank}'>
 								,beforeLabelTextTpl: ['<span class="required">*</span>']
 							</c:if>
-							<c:if test='${fieldInfo.sysEnFieldAttr!=null}'>
+							<c:if test='${fieldInfo.sysEnFieldAttr!=null && fieldInfo.sysEnFieldAttr.configs!=null}'>
 								,${fieldInfo.sysEnFieldAttr.configs}
 							</c:if>
 				});
@@ -860,7 +921,7 @@ Ext.onReady(function() {
 					<c:if test='${!fieldInfo.isAllowBlank}'>
 						,beforeLabelTextTpl: ['<span class="required">*</span>']
 					</c:if>
-					<c:if test='${fieldInfo.sysEnFieldAttr!=null}'>
+					<c:if test='${fieldInfo.sysEnFieldAttr!=null && fieldInfo.sysEnFieldAttr.configs!=null}'>
 						,${fieldInfo.sysEnFieldAttr.configs}
 					</c:if>
 					<%-- 最后再设置值，防止fieldInfo.sysEnFieldAttr.configs中的配置覆盖 --%>
@@ -892,7 +953,7 @@ Ext.onReady(function() {
 						,beforeLabelTextTpl: ['<span class="required">*</span>']
 					</c:if>
 					
-					<c:if test='${fieldInfo.sysEnFieldAttr!=null}'>
+					<c:if test='${fieldInfo.sysEnFieldAttr!=null && fieldInfo.sysEnFieldAttr.configs!=null}'>
 						,${fieldInfo.sysEnFieldAttr.configs}
 					</c:if>
 				});
@@ -915,7 +976,7 @@ Ext.onReady(function() {
 					<c:if test='${!fieldInfo.isAllowBlank}'>
 						,beforeLabelTextTpl: ['<span class="required">*</span>']
 					</c:if>
-					<c:if test='${fieldInfo.sysEnFieldAttr!=null}'>
+					<c:if test='${fieldInfo.sysEnFieldAttr!=null && fieldInfo.sysEnFieldAttr.configs!=null}'>
 						,${fieldInfo.sysEnFieldAttr.configs}
 					</c:if>
 				});
@@ -938,7 +999,7 @@ Ext.onReady(function() {
 					<c:if test='${!fieldInfo.isAllowBlank}'>
 						,beforeLabelTextTpl: ['<span class="required">*</span>']
 					</c:if>
-					<c:if test='${fieldInfo.sysEnFieldAttr!=null}'>
+					<c:if test='${fieldInfo.sysEnFieldAttr!=null && fieldInfo.sysEnFieldAttr.configs!=null}'>
 						,${fieldInfo.sysEnFieldAttr.configs}
 					</c:if>
 				});
@@ -1031,7 +1092,7 @@ Ext.onReady(function() {
     var editWindow_${identifier} = new Ext.Window({
         id:'editWindow_${identifier}',
         title: '编辑窗口',
-        width:600,
+        width:550,
 		maxHeight:500,
 		scrollable:true,
         //autoHeight:true,
@@ -1041,7 +1102,11 @@ Ext.onReady(function() {
 		//closeAction : 'hide',   默认为destroy
         modal : true,
         plain:false,
-        //listeners   : {'hide':{fn: closeAddWindow${identifier}}},
+        //listeners   : {'hide':{fn: closeWindowPlatform}},
+		listeners   : {afterlayout:function(){
+					resetComLeft(resetLeftComboArray);
+				}
+		},
         items: [
             editPanel${identifier}
         ]
@@ -1051,7 +1116,9 @@ Ext.onReady(function() {
     });
 	
 	editWindow_${identifier}.show();
-	}
+	
+	resetComLeft(resetLeftComboArray);
+}
 	<%-- 编辑窗口方法结束 --%>
 
 	var searPanel${identifier}=new Ext.FormPanel({

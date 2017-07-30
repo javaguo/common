@@ -938,13 +938,22 @@ public class BaseController<T extends AbstractBaseBean> implements Serializable 
 				throw new PlatformException("加载下来框数据请求参数错误！");
 			}*/
 
+			String cascChild = request.getParameter("cascChild");
+			if( StringUtils.isNotBlank( cascChild ) && "true".equals( cascChild.trim() ) && StringUtils.isBlank( value ) ){
+				//级联框的非第一个下拉框请求数据时，value必须有值。
+				//value为父级联框选中的值。
+				throw new PlatformException("级联下拉框加载数据请求参数错误！");
+			}
+
 			//查询数据
 			List<Map<String,Object>> resList = this.loadComboBoxDataMap(request,response,bean,value);
 
 			JSONObject jo = JSONObject.fromObject("{}");
 			jo.put("comboboxData", resList );
 			json = jo.toString();
-		} catch(Exception e) {
+		} catch(PlatformException e) {
+			json = "{\"comboboxData\":[]}";
+		}catch(Exception e) {
 			e.printStackTrace();
 			json = "{\"comboboxData\":[]}";
 		}
