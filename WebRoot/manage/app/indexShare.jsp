@@ -39,8 +39,11 @@ String browserLang=request.getLocale().toString();
 
 	<script type="text/javascript"
 			  src="resource/js/platform/common/platformValidate.js"></script>
-	  <script type="text/javascript"
+	<script type="text/javascript"
 			  src="resource/js/extjs/common/extPlatformCommon.js"></script>
+	<script type="text/javascript"
+			  src="resource/js/extjs/extend/validate/PlatformVTypes.js"></script>
+
   </head>
   <body>
   	<div id="head-region-container">

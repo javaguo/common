@@ -115,15 +115,14 @@ public class ExampleBeanController extends BaseController<ExampleBean>{
         /***********************************************************************************************************
          * 隐藏域、文本框、密码框、文本域
          */
-        /*String formHiddenConfigs = "value:'hidden隐藏域值'";
-        String formTextConfigs = "labelWidth:100,width:400,emptyText:'文本提示信息',value:'初始值'";
+        String formHiddenConfigs = "value:'hidden隐藏域值'";
+        String formTextConfigs = "labelWidth:100,width:400,emptyText:'文本提示信息',value:'初始值',vtype:'chinese'";
         String formPasswordConfigs = "labelWidth:100,width:400,emptyText:'密码提示信息',value:'123456'";
         String formTextAreaConfigs = "labelWidth:100,width:400,height:80,emptyText:'文本域内容......',maxLength:50,maxLengthText:'最长为50个字',minLength:5,minLengthText:'最小为5个字'";
-*/
-        String formHiddenConfigs = "";
+/*        String formHiddenConfigs = "";
         String formTextConfigs = null;
         String formPasswordConfigs = null;
-        String formTextAreaConfigs = null;
+        String formTextAreaConfigs = null;*/
 
         controller.addFieldHidden( "formHidden","form隐藏域",true,true,true,formHiddenConfigs );
         controller.addFieldText("formText","文本框",true,true,true,true,true,false,formTextConfigs);

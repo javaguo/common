@@ -25,6 +25,6 @@ public class PlatformInfo {
      * @return
      */
 	public static String getAbsolutePath(HttpServletRequest request,String savePath){
-		return request.getServletContext().getRealPath( savePath );
+		return request.getSession().getServletContext().getRealPath( savePath );
 	}
 }

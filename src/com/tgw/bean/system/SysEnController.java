@@ -1,18 +1,37 @@
 package com.tgw.bean.system;
 
-import com.tgw.bean.base.AbstractBaseBean;
-import com.tgw.bean.system.form.field.*;
-import com.tgw.exception.PlatformException;
-import com.tgw.utils.PlatformUtils;
-import com.tgw.utils.config.PlatformSysConstant;
-import net.sf.json.JSONArray;
-import net.sf.json.JSONObject;
-import org.apache.commons.lang.StringUtils;
-
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
+
+import net.sf.json.JSONArray;
+import net.sf.json.JSONObject;
+
+import org.apache.commons.lang.StringUtils;
+
+import com.tgw.bean.base.AbstractBaseBean;
+import com.tgw.bean.system.form.field.SysEnFieldBase;
+import com.tgw.bean.system.form.field.SysEnFieldCheckbox;
+import com.tgw.bean.system.form.field.SysEnFieldCheckboxGroup;
+import com.tgw.bean.system.form.field.SysEnFieldComboBox;
+import com.tgw.bean.system.form.field.SysEnFieldComboBoxGroup;
+import com.tgw.bean.system.form.field.SysEnFieldComboBoxOption;
+import com.tgw.bean.system.form.field.SysEnFieldComboBoxTree;
+import com.tgw.bean.system.form.field.SysEnFieldDate;
+import com.tgw.bean.system.form.field.SysEnFieldDisplay;
+import com.tgw.bean.system.form.field.SysEnFieldFile;
+import com.tgw.bean.system.form.field.SysEnFieldHidden;
+import com.tgw.bean.system.form.field.SysEnFieldHtmlEditor;
+import com.tgw.bean.system.form.field.SysEnFieldNumber;
+import com.tgw.bean.system.form.field.SysEnFieldRadio;
+import com.tgw.bean.system.form.field.SysEnFieldRadioGroup;
+import com.tgw.bean.system.form.field.SysEnFieldTag;
+import com.tgw.bean.system.form.field.SysEnFieldText;
+import com.tgw.bean.system.form.field.SysEnFieldTextArea;
+import com.tgw.exception.PlatformException;
+import com.tgw.utils.PlatformUtils;
+import com.tgw.utils.config.PlatformSysConstant;
 
 /**
  * Created by zhaojg on 2016/10/20.
@@ -684,7 +703,7 @@ public class SysEnController extends AbstractBaseBean {
             if( StringUtils.isNotBlank( checkboxConfigs ) ){
                 checkbox.setConfigs( checkboxConfigs );
             }
-            if( tempJo.containsKey("checked") && (boolean)tempJo.get("checked")  ){
+            if( tempJo.containsKey("checked") && "true".equals( tempJo.get("checked") ) ){
                 checkbox.setChecked( "true" );
             }else{
                 checkbox.setChecked( "false" );
@@ -768,7 +787,7 @@ public class SysEnController extends AbstractBaseBean {
             if( StringUtils.isNotBlank( radioConfigs ) ){
                 radio.setConfigs( radioConfigs );
             }
-            if( tempJo.containsKey("checked") && (boolean)tempJo.get("checked")  ){
+            if( tempJo.containsKey("checked") && "true".equals( tempJo.get("checked") )  ){
                 radio.setChecked( "true" );
             }else{
                 radio.setChecked( "false" );
