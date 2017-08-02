@@ -55,85 +55,85 @@ public class ExampleBeanFormValController extends BaseController<ExampleBean>{
          */
 
         String extConfigsAlpha = "vtype:'alpha'";
-        controller.addFieldText("alpha","alpha",true,true,true,true,false,false,extConfigsAlpha);
+        controller.addFieldText("alpha","alpha",true,true,true,false,false,extConfigsAlpha);
 
         String extConfigsAlphanum = "vtype:'alphanum'";
-        controller.addFieldText("alphanum","alphanum",true,true,true,true,false,false,extConfigsAlphanum);
+        controller.addFieldText("alphanum","alphanum",true,true,true,false,true,extConfigsAlphanum);
 
         String extConfigsEmail = "vtype:'email'";
-        controller.addFieldText("email","email",true,true,true,true,false,false,extConfigsEmail);
+        controller.addFieldText("email","email",true,true,true,false,true,extConfigsEmail);
 
         String extConfigsUrl = "vtype:'url'";
-        controller.addFieldText("url","url",true,true,true,true,false,false,extConfigsUrl);
+        controller.addFieldText("url","url",true,true,true,false,true,extConfigsUrl);
 
         String extConfigsLetter = "vtype:'letter'";
-        controller.addFieldText("letter","letter",true,true,true,true,false,false,extConfigsLetter);
+        controller.addFieldText("letter","字母",true,true,true,false,true,extConfigsLetter);
 
         String extConfigsUpperCase = "vtype:'upperCase'";
-        controller.addFieldText("upperCase","upperCase",true,true,true,true,false,false,extConfigsUpperCase);
+        controller.addFieldText("upperCase","大写字母",true,true,true,false,true,extConfigsUpperCase);
 
         String extConfigsLowerCase = "vtype:'lowerCase'";
-        controller.addFieldText("lowerCase","lowerCase",true,true,true,true,false,false,extConfigsLowerCase);
+        controller.addFieldText("lowerCase","小写字母",true,true,true,false,true,extConfigsLowerCase);
 
         String extConfigsLetterNum = "vtype:'letterNum'";
-        controller.addFieldText("letterNum","letterNum",true,true,true,true,false,false,extConfigsLetterNum);
+        controller.addFieldText("letterNum","字母数字",true,true,true,false,true,extConfigsLetterNum);
 
-        String extConfigsLetterNumNnderline = "vtype:'letterNumNnderline'";
-        controller.addFieldText("letterNumNnderline","letterNumNnderline",true,true,true,true,false,false,extConfigsLetterNumNnderline);
+        String extConfigsLetterNumNnderline = "vtype:'letterNumUnderline'";
+        controller.addFieldText("letterNumUnderline","字母数字下划线",true,true,true,false,true,extConfigsLetterNumNnderline);
 
-        String extConfigsChineseletterNum = "vtype:'chineseletterNum'";
-        controller.addFieldText("chineseletterNum","chineseletterNum",true,true,true,true,false,false,extConfigsChineseletterNum);
+        String extConfigsChineseletterNum = "vtype:'chineseLetterNum'";
+        controller.addFieldText("chineseLetterNum","汉字字母数字",true,true,true,false,true,extConfigsChineseletterNum);
 
-        String extConfigsChineseletterNumNnderline = "vtype:'chineseletterNumNnderline'";
-        controller.addFieldText("chineseletterNumNnderline","chineseletterNumNnderline",true,true,true,true,false,false,extConfigsChineseletterNumNnderline);
+        String extConfigsChineseletterNumNnderline = "vtype:'chineseLetterNumUnderline'";
+        controller.addFieldText("chineseLetterNumUnderline","汉字字母数字下划线",true,true,true,false,true,extConfigsChineseletterNumNnderline);
 
         String extConfigsChinese = "vtype:'chinese'";
-        controller.addFieldText("chinese","chinese",true,true,true,true,false,false,extConfigsChinese);
+        controller.addFieldText("chinese","汉字",true,true,true,false,true,extConfigsChinese);
 
         String extConfigsCharacter50 = "vtype:'character50'";
-        controller.addFieldText("character50","character50",true,true,true,true,false,false,extConfigsCharacter50);
+        controller.addFieldText("character50","50个字符",true,true,true,false,true,extConfigsCharacter50);
 
         String extConfigsEmailPlatform = "vtype:'emailPlatform'";
-        controller.addFieldText("emailPlatform","emailPlatform",true,true,true,true,false,false,extConfigsEmailPlatform);
+        controller.addFieldText("emailPlatform","自定义email",true,true,true,false,true,extConfigsEmailPlatform);
 
         String extConfigsMobileNo = "vtype:'mobileNo'";
-        controller.addFieldText("mobileNo","mobileNo",true,true,true,true,false,false,extConfigsMobileNo);
+        controller.addFieldText("mobileNo","手机号",true,true,true,false,true,extConfigsMobileNo);
 
         String extConfigsPhoneNo = "vtype:'phoneNo'";
-        controller.addFieldText("phoneNo","phoneNo",true,true,true,true,false,false,extConfigsPhoneNo);
+        controller.addFieldText("phoneNo","电话号",true,true,true,false,true,extConfigsPhoneNo);
 
         String extConfigsPhoneNoMobileNo = "vtype:'phoneNoMobileNo'";
-        controller.addFieldText("phoneNoMobileNo","phoneNoMobileNo",true,true,true,true,false,false,extConfigsPhoneNoMobileNo);
+        controller.addFieldText("phoneNoMobileNo","电话或手机号",true,true,true,false,true,extConfigsPhoneNoMobileNo);
 
         String extConfigsIDNumber15 = "vtype:'IDNumber15'";
-        controller.addFieldText("IDNumber15","IDNumber15",true,true,true,true,false,false,extConfigsIDNumber15);
+        controller.addFieldText("IDNumber15","15位身份证",true,true,true,false,true,extConfigsIDNumber15);
 
         String extConfigsIDNumber18 = "vtype:'IDNumber18'";
-        controller.addFieldText("IDNumber18","IDNumber18",true,true,true,true,false,false,extConfigsIDNumber18);
+        controller.addFieldText("IDNumber18","18位身份证",true,true,true,false,true,extConfigsIDNumber18);
 
         String extConfigsIDNumber = "vtype:'IDNumber'";
-        controller.addFieldText("IDNumber","IDNumber",true,true,true,true,false,false,extConfigsIDNumber);
+        controller.addFieldText("IDNumber","身份证",true,true,true,false,true,extConfigsIDNumber);
 
         String extConfigsDateYMD = "vtype:'dateYMD'";
-        controller.addFieldText("dateYMD","dateYMD",true,true,true,true,false,false,extConfigsDateYMD);
+        controller.addFieldText("dateYMD","年月日",true,true,true,false,true,extConfigsDateYMD);
 
         String extConfigsQQ = "vtype:'QQ'";
-        controller.addFieldText("QQ","QQ",true,true,true,true,false,false,extConfigsQQ);
+        controller.addFieldText("QQ","QQ",true,true,true,false,true,extConfigsQQ);
 
         String extConfigsPostCode = "vtype:'postCode'";
-        controller.addFieldText("postCode","postCode",true,true,true,true,false,false,extConfigsPostCode);
+        controller.addFieldText("postCode","邮政编码",true,true,true,false,true,extConfigsPostCode);
 
         String extConfigsIP = "vtype:'IP'";
-        controller.addFieldText("IP","IP",true,true,true,true,false,false,extConfigsIP);
+        controller.addFieldText("IP","IP地址",true,true,true,false,true,extConfigsIP);
 
         String extConfigsAccountNumber = "vtype:'accountNumber'";
-        controller.addFieldText("accountNumber","accountNumber",true,true,true,true,false,false,extConfigsAccountNumber);
+        controller.addFieldText("accountNumber","账号",true,true,true,false,true,extConfigsAccountNumber);
 
-        String extConfigsDefaultPassword = "vtype:'defaultPassword'";
-        controller.addFieldPassword("defaultPassword","defaultPassword",true,true,true,false,false,extConfigsDefaultPassword);
+        String extConfigsDefaultPassword = "vtype:'generalPassword'";
+        controller.addFieldPassword("generalPassword","普通密码",true,true,true,false,true,extConfigsDefaultPassword);
 
         String extConfigsStrongPassword = "vtype:'strongPassword'";
-        controller.addFieldPassword("strongPassword","strongPassword",true,true,true,false,false,extConfigsStrongPassword);
+        controller.addFieldPassword("strongPassword","强密码",true,true,true,false,true,extConfigsStrongPassword);
         /***********************************************************************************************************
          */
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -141,12 +141,6 @@ public class ExampleBeanFormValController extends BaseController<ExampleBean>{
         String updateTimeConfigs = "value:'"+sdf.format( new Date() )+"'";
         controller.addFieldDatetime("insertTime","添加时间",true,true,false,false,false,insertTimeConfigs);
         controller.addFieldDatetime("updateTime","更新时间",true,true,true,false,false,updateTimeConfigs);
-    }
-
-    @Override
-    public void initFunction(SysEnController controller) {
-        controller.addFunction("menu1","新功能","baseConstant/pass.do",2,true,null,1);
-        controller.addFunction("menu2","功能2","baseConstant/notPass.do",2,false,"Applicationgo",2);
     }
 
 

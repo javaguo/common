@@ -181,7 +181,7 @@ public class SysEnController extends AbstractBaseBean {
     }
 
     /**
-     * 添加一个text字段
+     * 添加一个text字段，不需要传ext配置
      * @param name
      * @param fieldLabel
      * @param isValid
@@ -196,7 +196,7 @@ public class SysEnController extends AbstractBaseBean {
     }
 
     /**
-     * 添加一个text字段
+     * 添加一个text字段，可以传emptyText,vtype参数，不需要传ext配置
      * @param name
      * @param fieldLabel
      * @param isValid
@@ -213,7 +213,7 @@ public class SysEnController extends AbstractBaseBean {
     }
 
     /**
-     * 添加一个text字段
+     * 添加一个text字段，可以传emptyText,vtype,ext配置参数
      * @param name
      * @param fieldLabel
      * @param isValid
@@ -227,6 +227,14 @@ public class SysEnController extends AbstractBaseBean {
      */
     public void addFieldText( String name, String fieldLabel, boolean isValid, boolean isAllowAdd, boolean isAllowUpdate, boolean isAllowSearch, boolean isAllowBlank, String emptyText, String vtype,String configs ){
         String tempConfigs = "inputType:'"+PlatformSysConstant.FORM_INPUTTYPE_TEXT+"',emptyText:'"+emptyText+"',"+"vtype:'"+vtype+"'";
+        if( StringUtils.isNotBlank( configs ) ){
+            tempConfigs += ","+configs;
+        }
+        this.addFieldText(name,fieldLabel,isValid,isAllowAdd,isAllowUpdate,true,isAllowSearch,isAllowBlank,tempConfigs);
+    }
+
+    public void addFieldText( String name, String fieldLabel, boolean isValid, boolean isAllowAdd, boolean isAllowUpdate, boolean isAllowSearch, boolean isAllowBlank,String configs ){
+        String tempConfigs = "inputType:'"+PlatformSysConstant.FORM_INPUTTYPE_TEXT+"'";
         if( StringUtils.isNotBlank( configs ) ){
             tempConfigs += ","+configs;
         }
