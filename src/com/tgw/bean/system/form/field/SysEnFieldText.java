@@ -14,6 +14,8 @@ public class SysEnFieldText extends SysEnFieldBase {
     private String regexText;
     private String vtype;//字段正则验证类型
     private String vtypeText;
+    private String validatorFunName;//ext的validator函数要调用的函数名称。validatorFunName非ext控件的config属性。
+    private String validatorFunField;//与validatorFunName对应，作为validatorFunName的参数。表示要验证表单中的哪几个字段
 
     public String getEditable() {
         return editable;
@@ -93,5 +95,21 @@ public class SysEnFieldText extends SysEnFieldBase {
 
     public void setVtypeText(String vtypeText) {
         this.vtypeText = vtypeText;
+    }
+
+    public String getValidatorFunName() {
+        return validatorFunName;
+    }
+
+    public void setValidatorFunName(String validatorFunName) {
+        this.validatorFunName = validatorFunName;
+    }
+
+    public String getValidatorFunField() {
+        return validatorFunField;
+    }
+
+    public void setValidatorFunField(String validatorFunField) {
+        this.validatorFunField = validatorFunField;
     }
 }

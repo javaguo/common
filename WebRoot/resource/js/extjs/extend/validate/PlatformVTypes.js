@@ -7,7 +7,7 @@ Ext.define('Platform.form.field.VTypes', {
     /**
      * 自定义的正则验证
      */
-    //正则验证函数
+    //正则验证函数，以time举例说明
     time: function(value) {
         return this.timeRe.test(value);
     },
@@ -108,21 +108,21 @@ Ext.define('Platform.form.field.VTypes', {
     mobileNoMask:/\d/,
 
 
-    //电话号码
+    //固定电话号码
+    fixedPhoneNo: function(value) {
+        return this.fixedPhoneNoRe.test(value);
+    },
+    fixedPhoneNoRe:/^(\d{3,4}-|\d{3,4}-)?\d{7,8}$/,
+    fixedPhoneNoText:'电话号码不合法，正确格式如下：电话号或区号-电话号',
+    fixedPhoneNoMask:/\d|[-]/,
+
+    //联系电话（手机号或电话号码）
     phoneNo: function(value) {
         return this.phoneNoRe.test(value);
     },
-    phoneNoRe:/^(\d{3,4}-|\d{3,4}-)?\d{7,8}$/,
-    phoneNoText:'电话号码不合法，正确格式如下：电话号或区号-电话号',
+    phoneNoRe:/(^(\d{3,4}-|\d{3,4}-)?\d{7,8}$)|(^(13[0-9]|14[0-9]|15[0-9]|17[0-9]|18[0-9])\d{8}$)/,
+    phoneNoText:'手机号或电话号不合法',
     phoneNoMask:/\d|[-]/,
-
-    //手机号或电话号码
-    phoneNoMobileNo: function(value) {
-        return this.phoneNoMobileNoRe.test(value);
-    },
-    phoneNoMobileNoRe:/(^(\d{3,4}-|\d{3,4}-)?\d{7,8}$)|(^(13[0-9]|14[0-9]|15[0-9]|17[0-9]|18[0-9])\d{8}$)/,
-    phoneNoMobileNoText:'手机号或电话号不合法',
-    phoneNoMobileNoMask:/\d|[-]/,
 
     //15位身份证
     IDNumber15: function(value) {
@@ -136,7 +136,7 @@ Ext.define('Platform.form.field.VTypes', {
     IDNumber18: function(value) {
         return this.IDNumber18Re.test(value);
     },
-    IDNumber18Re:/^[1-9]\d{5}[1-9]\d{3}((0\d)|(1[0-2]))(([0|1|2]\d)|3[0-1])\d{4}$/,
+    IDNumber18Re:/^[1-9]\d{5}[1-9]\d{3}((0\d)|(1[0-2]))(([0|1|2]\d)|3[0-1])\d{3}([0-9]|X)$/,
     IDNumber18Text:'不合法的18位身份证号',
     IDNumber18Mask:/\d/,
 
@@ -144,10 +144,18 @@ Ext.define('Platform.form.field.VTypes', {
     IDNumber: function(value) {
         return this.IDNumberRe.test(value);
     },
-    IDNumberRe:/^([0-9]){7,18}(x|X)?$/,
+    IDNumberRe:/^[1-9]\d{7}((0\d)|(1[0-2]))(([0|1|2]\d)|3[0-1])\d{3}$|^[1-9]\d{5}[1-9]\d{3}((0\d)|(1[0-2]))(([0|1|2]\d)|3[0-1])\d{3}([0-9]|X)$/,
     IDNumberText:'不合法的身份证号',
-    IDNumberMask:/\d|[xX]/,
+    IDNumberMask:/\d|[X]/,
 
+	//年龄
+    age: function(value) {
+        return this.ageRe.test(value);
+    },
+    ageRe:/^[1-9]{1}$|^[1-9]{1}[0-9]{1}$|^[1]{1}[0]{1}[0]{1}$/,
+    ageText:'不合法的年龄，正确的年龄范围：1~100',
+    ageMask:/\d/,
+	
     //日期格式年月日
     dateYMD: function(value) {
         return this.dateYMDRe.test(value);

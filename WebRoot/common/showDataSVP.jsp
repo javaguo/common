@@ -28,8 +28,11 @@ String browserLang=request.getLocale().toString();
 	<!-- 语言包要在ext-all.js之后引入才能生效 -->	
 	<script type="text/javascript"
 		 	src="resource/js/extjs/extjs5/locale/ext-lang-<%=browserLang%>.js"></script>	 --%>
-			
-
+		
+	<c:if test='${controller.formValJsFileName!=null}'>
+		<script type="text/javascript"
+		 	src="resource/js/platform/manage/formVal/${controller.formValJsFileName}.js"></script>			
+	</c:if>
 	
 	 
 	<script type="text/javascript">
@@ -107,7 +110,7 @@ Ext.onReady(function() {
 			<%-- 定义下拉框store结束 --%>
 			
 			<%-- 定义下拉框 --%>
-			var  comboBox_${comboBoxInfo.comboBoxName}_${identifier} = Ext.create('Ext.form.ComboBox', {
+			var  field_${comboBoxInfo.comboBoxName}_${identifier} = Ext.create('Ext.form.ComboBox', {
 							id:'comboBoxId${comboBoxInfo.comboBoxName}${identifier}',
 							name:'${comboBoxInfo.comboBoxName}',
 							xtype: 'combobox',
@@ -124,30 +127,35 @@ Ext.onReady(function() {
 							<c:if test='${comboBoxInfo.configs!=null}'>
 								,${comboBoxInfo.configs}
 							</c:if>
+							<c:if test='${comboBoxInfo.validatorFunName!=null}'>
+							,validator: function(value){
+								return ${comboBoxInfo.validatorFunName}(value ${comboBoxInfo.validatorFunField});
+							}
+						</c:if>
 			});
 			<%-- 最后再设置值，防止comboBoxInfo.configs中的配置覆盖 --%>
 			if( '${comboBoxInfo.value}'.length>0 ){
-				comboBox_${comboBoxInfo.comboBoxName}_${identifier}.setValue( '${comboBoxInfo.value}' );
+				field_${comboBoxInfo.comboBoxName}_${identifier}.setValue( '${comboBoxInfo.value}' );
 			}
 			<c:if test='${comboBoxInfo.isCascade}'>
-				resetLeftComboArray.push( comboBox_${comboBoxInfo.comboBoxName}_${identifier} );	
+				resetLeftComboArray.push( field_${comboBoxInfo.comboBoxName}_${identifier} );	
 			</c:if>
 			
 			<c:choose>
 				<%-- 绑定下拉框级联事件 --%>
 				<c:when test='${ comboBoxInfo.loadDataImplModel=="sql" && comboBoxInfo.isCascade && !comboBoxInfo.isLast }'>
-					comboBox_${comboBoxInfo.comboBoxName}_${identifier}.on('select', function() {
+					field_${comboBoxInfo.comboBoxName}_${identifier}.on('select', function() {
 						<c:forEach items="${comboBoxInfo.cascadeList}" var="cascadeComboBoxInfo" varStatus="cascadeComboBoxStatus">
 							<%-- 给comboBox赋了初始值使用clearValue()方法不起作用，清除不了值。使用setValue("")清除。问题比较奇怪 --%>
-							//comboBox_${cascadeComboBoxInfo.comboBoxName}_${identifier}.clearValue();
-							comboBox_${cascadeComboBoxInfo.comboBoxName}_${identifier}.setValue( null );
-							comboBox_${cascadeComboBoxInfo.comboBoxName}_${identifier}.reset();
+							//field_${cascadeComboBoxInfo.comboBoxName}_${identifier}.clearValue();
+							field_${cascadeComboBoxInfo.comboBoxName}_${identifier}.setValue( null );
+							field_${cascadeComboBoxInfo.comboBoxName}_${identifier}.reset();
 							
 							comboBoxStore_${cascadeComboBoxInfo.comboBoxName}_${identifier}.removeAll();
 						</c:forEach>
 						Ext.apply(comboBoxStore_${comboBoxInfo.childComboBox}_${identifier}.proxy.extraParams, 
 									{"comboBoxFlag":"${comboBoxInfo.comboBoxFlag}",
-									 "value":comboBox_${comboBoxInfo.comboBoxName}_${identifier}.getValue()});
+									 "value":field_${comboBoxInfo.comboBoxName}_${identifier}.getValue()});
 						comboBoxStore_${comboBoxInfo.childComboBox}_${identifier}.load();
 						
 					}); 
@@ -166,7 +174,7 @@ Ext.onReady(function() {
 												"value":"${comboBoxInfo.firstComboBoxParamValue}"
 											</c:when>
 											<c:otherwise>
-												"value":comboBox_${comboBoxInfo.parentComboBox}_${identifier}.getValue()
+												"value":field_${comboBoxInfo.parentComboBox}_${identifier}.getValue()
 											</c:otherwise>
 										</c:choose>
 								});
@@ -178,7 +186,7 @@ Ext.onReady(function() {
 						</c:when>
 						<c:otherwise>
 							<%-- 加载级联下拉框数据(除第一个下拉框),父级联框有数据时才加载子级联框 --%>
-						    if( comboBox_${comboBoxInfo.parentComboBox}_${identifier}.getValue() ){
+						    if( field_${comboBoxInfo.parentComboBox}_${identifier}.getValue() ){
 								comboBoxStore_${comboBoxInfo.comboBoxName}_${identifier}.load();
 							}
 						</c:otherwise>
@@ -238,10 +246,10 @@ Ext.onReady(function() {
 		
 		<%-- 生成所有字段表单元素开始 --%>
 		<c:forEach items="${addFieldList}" var="fieldInfo" varStatus="validFieldStatus">
-			var  field_${fieldInfo.name}_${identifier} =
 			<c:choose>
 				<%-- 单选按钮开始 --%>
 				<c:when test='${fieldInfo.xtype=="radiogroup"}'>
+				var  field_${fieldInfo.name}_${identifier} =
 				Ext.create({
 					xtype: '${fieldInfo.xtype}',
 					id: field_${fieldInfo.name}_${identifier},
@@ -275,6 +283,7 @@ Ext.onReady(function() {
 				<%-- 单选按钮结束 --%>
 				<%-- 多选按钮开始 --%>
 				<c:when test='${fieldInfo.xtype=="checkboxgroup"}'>
+				var  field_${fieldInfo.name}_${identifier} =
 				Ext.create({
 					xtype: '${fieldInfo.xtype}',
 					id: field_${fieldInfo.name}_${identifier},
@@ -309,6 +318,7 @@ Ext.onReady(function() {
 				<%-- 下拉框开始 --%>
 				<c:when test='${fieldInfo.xtype=="combobox"}'>
 					<c:if test='${fieldInfo.sysEnFieldAttr.isCascade}'>
+					 var  field_${fieldInfo.name}_${identifier} =
 						Ext.create({
 							xtype: 'fieldcontainer',
 							id: field_${fieldInfo.name}_${identifier},
@@ -317,7 +327,7 @@ Ext.onReady(function() {
 							layout: 'hbox',
 							items:[
 								<c:forEach items="${fieldInfo.sysEnFieldAttr.comboBoxList}" var="comboBoxFieldInfo" varStatus="comboBoxFieldStatus">
-									comboBox_${comboBoxFieldInfo.comboBoxName}_${identifier}
+									field_${comboBoxFieldInfo.comboBoxName}_${identifier}
 									<c:choose>
 										<c:when test="${comboBoxFieldStatus.last}"></c:when>
 										<c:otherwise>,</c:otherwise>
@@ -335,10 +345,10 @@ Ext.onReady(function() {
 					<c:if test='${!fieldInfo.sysEnFieldAttr.isCascade}'>
 						<%-- 非级联下拉框comboBoxList的size一定为1 --%>
 						<c:forEach items="${fieldInfo.sysEnFieldAttr.comboBoxList}" var="comboBoxFieldInfo" varStatus="comboBoxFieldStatus">
-							comboBox_${comboBoxFieldInfo.comboBoxName}_${identifier};
-							comboBox_${comboBoxFieldInfo.comboBoxName}_${identifier}.fieldLabel='${fieldInfo.fieldLabel}';
+							//field_${comboBoxFieldInfo.comboBoxName}_${identifier};
+							field_${comboBoxFieldInfo.comboBoxName}_${identifier}.fieldLabel='${fieldInfo.fieldLabel}';
 							<c:if test='${!fieldInfo.isAllowBlank}'>
-								comboBox_${comboBoxFieldInfo.comboBoxName}_${identifier}.beforeLabelTextTpl= ['<span class="required">*</span>'];
+								field_${comboBoxFieldInfo.comboBoxName}_${identifier}.beforeLabelTextTpl= ['<span class="required">*</span>'];
 							</c:if>
 						</c:forEach>
 					</c:if>
@@ -347,32 +357,39 @@ Ext.onReady(function() {
 				<%-- 下拉框结束 --%>
 				<%-- Tag控件开始 --%>
 				<c:when test='${fieldInfo.xtype=="tagfield"}'>
+				var  field_${fieldInfo.name}_${identifier} =
 				Ext.create({
-							xtype: 'tagfield',
-							id:'field_${fieldInfo.name}_${identifier}',
-							name:'${fieldInfo.name}',
-							fieldLabel: '${fieldInfo.fieldLabel}',
-							store: tagStore_${fieldInfo.name}_${identifier},
-							mode: "local",
-							displayField: 'name',
-							valueField: 'id',
-							//filterPickList: true,
-							triggerAction: 'all',
-							//queryMode: 'local',
-							loadingText: '正在加载...',
-							emptyText: "请选择",
-							typeAhead: true  //延时查询
-							<c:if test='${!fieldInfo.isAllowBlank}'>
-								,beforeLabelTextTpl: ['<span class="required">*</span>']
-							</c:if>
-							<c:if test='${fieldInfo.sysEnFieldAttr!=null && fieldInfo.sysEnFieldAttr.configs!=null}'>
-								,${fieldInfo.sysEnFieldAttr.configs}
-							</c:if>
+						xtype: 'tagfield',
+						id:'field_${fieldInfo.name}_${identifier}',
+						name:'${fieldInfo.name}',
+						fieldLabel: '${fieldInfo.fieldLabel}',
+						store: tagStore_${fieldInfo.name}_${identifier},
+						mode: "local",
+						displayField: 'name',
+						valueField: 'id',
+						//filterPickList: true,
+						triggerAction: 'all',
+						//queryMode: 'local',
+						loadingText: '正在加载...',
+						emptyText: "请选择",
+						typeAhead: true  //延时查询
+						<c:if test='${!fieldInfo.isAllowBlank}'>
+							,beforeLabelTextTpl: ['<span class="required">*</span>']
+						</c:if>
+						<c:if test='${fieldInfo.sysEnFieldAttr!=null && fieldInfo.sysEnFieldAttr.configs!=null}'>
+							,${fieldInfo.sysEnFieldAttr.configs}
+						</c:if>
+						<c:if test='${fieldInfo.sysEnFieldAttr!=null && fieldInfo.sysEnFieldAttr.validatorFunName!=null}'>
+							,validator: function(value){
+								return ${fieldInfo.sysEnFieldAttr.validatorFunName}(value ${fieldInfo.sysEnFieldAttr.validatorFunField});
+							}
+						</c:if>
 				});
 				</c:when>
 				<%-- Tag控件结束 --%>
 				<%-- 下拉树开始 --%>
 				<c:when test='${fieldInfo.xtype=="comboboxtree"}'>
+				var  field_${fieldInfo.name}_${identifier} =
 				Ext.create("Ext.ux.ComboBoxTree",{
 					id:'field_${fieldInfo.name}_${identifier}',
 					name: '${fieldInfo.name}',
@@ -386,11 +403,17 @@ Ext.onReady(function() {
 					<c:if test='${fieldInfo.sysEnFieldAttr!=null && fieldInfo.sysEnFieldAttr.configs!=null}'>
 						,${fieldInfo.sysEnFieldAttr.configs}
 					</c:if>
+					<c:if test='${fieldInfo.sysEnFieldAttr!=null && fieldInfo.sysEnFieldAttr.validatorFunName!=null}'>
+						,validator: function(value){
+							return ${fieldInfo.sysEnFieldAttr.validatorFunName}(value ${fieldInfo.sysEnFieldAttr.validatorFunField});
+						}
+					</c:if>
 				});
 				</c:when>
 				<%-- 下拉树结束 --%>
 				<%-- 附件开始 --%>
 				<c:when test='${fieldInfo.xtype=="filefield"}'>
+				var  field_${fieldInfo.name}_${identifier} =
 				Ext.create({
 					xtype: '${fieldInfo.xtype}',
 					id:'field_${fieldInfo.name}_${identifier}',
@@ -414,11 +437,17 @@ Ext.onReady(function() {
 					<c:if test='${fieldInfo.sysEnFieldAttr!=null && fieldInfo.sysEnFieldAttr.configs!=null}'>
 						,${fieldInfo.sysEnFieldAttr.configs}
 					</c:if>
+					<c:if test='${fieldInfo.sysEnFieldAttr!=null && fieldInfo.sysEnFieldAttr.validatorFunName!=null}'>
+						,validator: function(value){
+							return ${fieldInfo.sysEnFieldAttr.validatorFunName}(value ${fieldInfo.sysEnFieldAttr.validatorFunField});
+						}
+					</c:if>
 				});
 				</c:when>
 				<%-- 附件结束 --%>
 				<%-- 富文本编辑器开始 --%>
 				<c:when test='${fieldInfo.xtype=="htmleditor"}'>
+				var  field_${fieldInfo.name}_${identifier} =
 				Ext.create({
 					xtype: '${fieldInfo.xtype}',
 					id:'field_${fieldInfo.name}_${identifier}',
@@ -435,8 +464,26 @@ Ext.onReady(function() {
 				});
 				</c:when>
 				<%-- 富文本编辑器结束 --%>
-				<%-- 表单元素开始 --%>
+				<%-- 隐藏域或display开始 --%>
+				<c:when test='${fieldInfo.xtype=="hiddenfield" || fieldInfo.xtype=="displayfield"}'>
+				var  field_${fieldInfo.name}_${identifier} =
+				Ext.create({
+					xtype: '${fieldInfo.xtype}',
+					id:'field_${fieldInfo.name}_${identifier}',
+					name: '${fieldInfo.name}',
+					fieldLabel: '${fieldInfo.fieldLabel}'
+					<c:if test='${!fieldInfo.isAllowBlank}'>
+						,beforeLabelTextTpl: ['<span class="required">*</span>']
+					</c:if>
+					<c:if test='${fieldInfo.sysEnFieldAttr!=null && fieldInfo.sysEnFieldAttr.configs!=null}'>
+						,${fieldInfo.sysEnFieldAttr.configs}
+					</c:if>
+				});
+				</c:when>
+				<%-- 隐藏域或display结束 --%>
+				<%-- 继承了text控件的表单元素开始 --%>
 				<c:otherwise>
+				var  field_${fieldInfo.name}_${identifier} =
 				Ext.create({
 					xtype: '${fieldInfo.xtype}',
 					id:'field_${fieldInfo.name}_${identifier}',
@@ -449,9 +496,14 @@ Ext.onReady(function() {
 					<c:if test='${fieldInfo.sysEnFieldAttr!=null && fieldInfo.sysEnFieldAttr.configs!=null}'>
 						,${fieldInfo.sysEnFieldAttr.configs}
 					</c:if>
+					<c:if test='${fieldInfo.sysEnFieldAttr!=null && fieldInfo.sysEnFieldAttr.validatorFunName!=null}'>
+						,validator: function(value){
+							return ${fieldInfo.sysEnFieldAttr.validatorFunName}(value ${fieldInfo.sysEnFieldAttr.validatorFunField});
+						}
+					</c:if>
 				});
 				</c:otherwise>
-				<%-- 表单元素结束 --%>
+				<%-- 继承了text控件的表单元素结束 --%>
 			</c:choose>
 		</c:forEach>
 		<%-- 生成所有字段表单元素结束 --%>
@@ -617,8 +669,8 @@ Ext.onReady(function() {
 			<%-- 定义下拉框store结束 --%>
 			
 			<%-- 定义下拉框 --%>
-			var  comboBox_${comboBoxInfo.comboBoxName}_${identifier} = Ext.create('Ext.form.ComboBox', {
-							id:'edit_${comboBoxInfo.comboBoxName}_${identifier}',
+			var  field_${comboBoxInfo.comboBoxName}_${identifier} = Ext.create('Ext.form.ComboBox', {
+							id:'field_${comboBoxInfo.comboBoxName}_${identifier}',
 							name:'${comboBoxInfo.comboBoxName}',
 							//value:beanValJson.${comboBoxInfo.comboBoxName},		
 							xtype: 'combobox',
@@ -635,37 +687,42 @@ Ext.onReady(function() {
 							<c:if test='${comboBoxInfo.configs!=null}'>
 								,${comboBoxInfo.configs}
 							</c:if>
+							<c:if test='${comboBoxInfo.validatorFunName!=null}'>
+								,validator: function(value){
+									return ${comboBoxInfo.validatorFunName}(value ${comboBoxInfo.validatorFunField});
+								}
+							</c:if>
 			});
 			<%-- 最后再设置值，防止comboBoxInfo.configs中的配置覆盖 --%>
 			if( '${comboBoxInfo.value}'.length>0 ){
 				<%-- 默认值 --%>
-				comboBox_${comboBoxInfo.comboBoxName}_${identifier}.setValue( '${comboBoxInfo.value}' );
+				field_${comboBoxInfo.comboBoxName}_${identifier}.setValue( '${comboBoxInfo.value}' );
 			}
 			if( beanValJson.${comboBoxInfo.comboBoxName} ){
 				<%-- 数据库中的值 --%>
-				comboBox_${comboBoxInfo.comboBoxName}_${identifier}.setValue( beanValJson.${comboBoxInfo.comboBoxName} );
+				field_${comboBoxInfo.comboBoxName}_${identifier}.setValue( beanValJson.${comboBoxInfo.comboBoxName} );
 			}
 			<c:if test='${comboBoxInfo.isCascade}'>
-				resetLeftComboArray.push( comboBox_${comboBoxInfo.comboBoxName}_${identifier} );	
+				resetLeftComboArray.push( field_${comboBoxInfo.comboBoxName}_${identifier} );	
 			</c:if>
 			
 			
 			<c:choose>
 				<%-- 绑定下拉框级联事件 --%>
 				<c:when test='${ comboBoxInfo.loadDataImplModel=="sql" && comboBoxInfo.isCascade && !comboBoxInfo.isLast }'>
-					comboBox_${comboBoxInfo.comboBoxName}_${identifier}.on('select', function() {
+					field_${comboBoxInfo.comboBoxName}_${identifier}.on('select', function() {
 						<c:forEach items="${comboBoxInfo.cascadeList}" var="cascadeComboBoxInfo" varStatus="cascadeComboBoxStatus">
 							<%-- 编辑时，给comboBox赋了初始值使用clearValue()方法不气作用，清除不了值。使用setValue("")清除。问题比较奇怪 --%>
-							//comboBox_${cascadeComboBoxInfo.comboBoxName}_${identifier}.clearValue();
-							comboBox_${cascadeComboBoxInfo.comboBoxName}_${identifier}.setValue( null );
-							comboBox_${cascadeComboBoxInfo.comboBoxName}_${identifier}.reset();
+							//field_${cascadeComboBoxInfo.comboBoxName}_${identifier}.clearValue();
+							field_${cascadeComboBoxInfo.comboBoxName}_${identifier}.setValue( null );
+							field_${cascadeComboBoxInfo.comboBoxName}_${identifier}.reset();
 							
 							comboBoxStore_${cascadeComboBoxInfo.comboBoxName}_${identifier}.removeAll();
 						</c:forEach>
 						
 						Ext.apply(comboBoxStore_${comboBoxInfo.childComboBox}_${identifier}.proxy.extraParams, 
 							{"comboBoxFlag":"${comboBoxInfo.comboBoxFlag}",
-							 "value":comboBox_${comboBoxInfo.comboBoxName}_${identifier}.getValue()});
+							 "value":field_${comboBoxInfo.comboBoxName}_${identifier}.getValue()});
 						comboBoxStore_${comboBoxInfo.childComboBox}_${identifier}.load();
 					}); 
 				</c:when>
@@ -685,7 +742,7 @@ Ext.onReady(function() {
 												"value":"${comboBoxInfo.firstComboBoxParamValue}"
 											</c:when>
 											<c:otherwise>
-												"value":comboBox_${comboBoxInfo.parentComboBox}_${identifier}.getValue()
+												"value":edit_${comboBoxInfo.parentComboBox}_${identifier}.getValue()
 											</c:otherwise>
 										</c:choose>
 								});
@@ -697,7 +754,7 @@ Ext.onReady(function() {
 						</c:when>
 						<c:otherwise>
 							<%-- 加载级联下拉框数据(除第一个下拉框),父级联框有数据时才加载子级联框 --%>
-						    if( comboBox_${comboBoxInfo.parentComboBox}_${identifier}.getValue() ){
+						    if( edit_${comboBoxInfo.parentComboBox}_${identifier}.getValue() ){
 								comboBoxStore_${comboBoxInfo.comboBoxName}_${identifier}.load();
 							}
 						</c:otherwise>
@@ -760,17 +817,17 @@ Ext.onReady(function() {
 			<c:choose>
 				<%-- 单选按钮开始 --%>
 				<c:when test='${fieldInfo.xtype=="radiogroup"}'>
-				var  edit_${fieldInfo.name}_${identifier} =
+				var  field_${fieldInfo.name}_${identifier} =
 				Ext.create({
 					xtype: '${fieldInfo.xtype}',
-					id: 'edit_${fieldInfo.name}_${identifier}',
+					id: 'field_${fieldInfo.name}_${identifier}',
 					fieldLabel: '${fieldInfo.fieldLabel}',
 					labelStyle:'vertical-align: middle;',
 					columns: 10,
 					vertical: true,
 					items: [
 						<c:forEach items="${fieldInfo.sysEnFieldAttr.radioList}" var="radioFieldInfo" varStatus="radioFieldStatus">
-							{id:'edit_${fieldInfo.name}_${radioFieldInfo.eleId}_${identifier}', 
+							{id:'field_${fieldInfo.name}_${radioFieldInfo.eleId}_${identifier}', 
 							 boxLabel: '${radioFieldInfo.boxLabel}', name: '${fieldInfo.name}',
 							 inputValue: '${radioFieldInfo.inputValue}',
 							 checked:${radioFieldInfo.checked},width:60
@@ -801,17 +858,17 @@ Ext.onReady(function() {
 						var val_${fieldInfo.name}_${checkboxFieldInfo.eleId}_${identifier}=isCheckedCheckbox( beanValJson.${fieldInfo.name},'${checkboxFieldInfo.inputValue}' );
 					</c:forEach>
 				
-				var  edit_${fieldInfo.name}_${identifier} =
+				var  field_${fieldInfo.name}_${identifier} =
 				Ext.create({
 					xtype: '${fieldInfo.xtype}',
-					id: 'edit_${fieldInfo.name}_${identifier}',
+					id: 'field_${fieldInfo.name}_${identifier}',
 					fieldLabel: '${fieldInfo.fieldLabel}',
 					labelStyle:'vertical-align: middle;',
 					columns: 10,
 					vertical: true,
 					items: [
 						<c:forEach items="${fieldInfo.sysEnFieldAttr.checkboxList}" var="checkboxFieldInfo" varStatus="checkboxFieldStatus">
-								{   id:'edit_${fieldInfo.name}_${checkboxFieldInfo.eleId}_${identifier}',
+								{   id:'field_${fieldInfo.name}_${checkboxFieldInfo.eleId}_${identifier}',
 									boxLabel: '${checkboxFieldInfo.boxLabel}', name: '${fieldInfo.name}',
 									inputValue: '${checkboxFieldInfo.inputValue}',
 									checked:${checkboxFieldInfo.checked},width:60
@@ -838,9 +895,10 @@ Ext.onReady(function() {
 				<%-- 多选按钮结束 --%>
 				<%-- 下拉框开始 --%>
 				<c:when test='${fieldInfo.xtype=="combobox"}'>
-					var  edit_${fieldInfo.name}_${identifier} =
+					
 					<c:if test='${fieldInfo.sysEnFieldAttr.isCascade}'>	
 						<%-- 生成级联下拉框 --%>
+						var  field_${fieldInfo.name}_${identifier} =
 						Ext.create({
 							xtype: 'fieldcontainer',
 							id: 'fieldcontainer_${fieldInfo.name}_${identifier}',
@@ -849,7 +907,7 @@ Ext.onReady(function() {
 							layout: 'hbox',
 							items:[
 								<c:forEach items="${fieldInfo.sysEnFieldAttr.comboBoxList}" var="comboBoxFieldInfo" varStatus="comboBoxFieldStatus">
-									comboBox_${comboBoxFieldInfo.comboBoxName}_${identifier}
+									field_${comboBoxFieldInfo.comboBoxName}_${identifier}
 									<c:choose>
 										<c:when test="${comboBoxFieldStatus.last}"></c:when>
 										<c:otherwise>,</c:otherwise>
@@ -868,10 +926,10 @@ Ext.onReady(function() {
 						<%-- 生成单个下拉框 --%>
 						<%-- 非级联下拉框comboBoxList的size一定为1 --%>
 						<c:forEach items="${fieldInfo.sysEnFieldAttr.comboBoxList}" var="comboBoxFieldInfo" varStatus="comboBoxFieldStatus">
-							comboBox_${comboBoxFieldInfo.comboBoxName}_${identifier};
-							comboBox_${comboBoxFieldInfo.comboBoxName}_${identifier}.fieldLabel='${fieldInfo.fieldLabel}';
+							//field_${comboBoxFieldInfo.comboBoxName}_${identifier};
+							field_${comboBoxFieldInfo.comboBoxName}_${identifier}.fieldLabel='${fieldInfo.fieldLabel}';
 							<c:if test='${!fieldInfo.isAllowBlank}'>
-								comboBox_${comboBoxFieldInfo.comboBoxName}_${identifier}.beforeLabelTextTpl= ['<span class="required">*</span>'];
+								field_${comboBoxFieldInfo.comboBoxName}_${identifier}.beforeLabelTextTpl= ['<span class="required">*</span>'];
 							</c:if>
 						</c:forEach>
 					</c:if>
@@ -880,10 +938,10 @@ Ext.onReady(function() {
 				<%-- 下拉框结束 --%>
 				<%-- Tag控件开始 --%>
 				<c:when test='${fieldInfo.xtype=="tagfield"}'>
-				var  edit_${fieldInfo.name}_${identifier} =
+				var  field_${fieldInfo.name}_${identifier} =
 				Ext.create({
 							xtype: 'tagfield',
-							id:'edit_${fieldInfo.name}_${identifier}',
+							id:'field_${fieldInfo.name}_${identifier}',
 							name:'${fieldInfo.name}',
 							fieldLabel: '${fieldInfo.fieldLabel}',
 							store: tagStore_${fieldInfo.name}_${identifier},
@@ -902,18 +960,23 @@ Ext.onReady(function() {
 							<c:if test='${fieldInfo.sysEnFieldAttr!=null && fieldInfo.sysEnFieldAttr.configs!=null}'>
 								,${fieldInfo.sysEnFieldAttr.configs}
 							</c:if>
+							<c:if test='${fieldInfo.sysEnFieldAttr!=null && fieldInfo.sysEnFieldAttr.validatorFunName!=null}'>
+								,validator: function(value){
+									return ${fieldInfo.sysEnFieldAttr.validatorFunName}(value ${fieldInfo.sysEnFieldAttr.validatorFunField});
+								}
+							</c:if>
 				});
 				if( beanValJson.${fieldInfo.name} ){
 					<%-- 最后设置值，防止fieldInfo.sysEnFieldAttr.configs中的配置覆盖 --%>
-					edit_${fieldInfo.name}_${identifier}.setValue( beanValJson.${fieldInfo.name} );
+					field_${fieldInfo.name}_${identifier}.setValue( beanValJson.${fieldInfo.name} );
 				}
 				</c:when>
 				<%-- Tag控件结束 --%>
 				<%-- 下拉树开始 --%>
 				<c:when test='${fieldInfo.xtype=="comboboxtree"}'>
-				var  edit_${fieldInfo.name}_${identifier} =
+				var  field_${fieldInfo.name}_${identifier} =
 				Ext.create("Ext.ux.ComboBoxTree",{
-					id: 'edit_${fieldInfo.name}_${identifier}',
+					id: 'field_${fieldInfo.name}_${identifier}',
 					name: '${fieldInfo.name}',
 					fieldLabel: '${fieldInfo.fieldLabel}',
 					editable: false,
@@ -924,6 +987,11 @@ Ext.onReady(function() {
 					<c:if test='${fieldInfo.sysEnFieldAttr!=null && fieldInfo.sysEnFieldAttr.configs!=null}'>
 						,${fieldInfo.sysEnFieldAttr.configs}
 					</c:if>
+					<c:if test='${fieldInfo.sysEnFieldAttr!=null && fieldInfo.sysEnFieldAttr.validatorFunName!=null}'>
+						,validator: function(value){
+							return ${fieldInfo.sysEnFieldAttr.validatorFunName}(value ${fieldInfo.sysEnFieldAttr.validatorFunField});
+						}
+					</c:if>
 					<%-- 最后再设置值，防止fieldInfo.sysEnFieldAttr.configs中的配置覆盖 --%>
 					,selectedIds:beanValJson.${fieldInfo.name}
 				});
@@ -931,10 +999,10 @@ Ext.onReady(function() {
 				<%-- 下拉树结束 --%>
 				<%-- 附件开始 --%>
 				<c:when test='${fieldInfo.xtype=="filefield"}'>
-				var  edit_${fieldInfo.name}_${identifier} =
+				var  field_${fieldInfo.name}_${identifier} =
 				Ext.create({
 					xtype: '${fieldInfo.xtype}',
-					id:'edit_${fieldInfo.name}_${identifier}',
+					id:'field_${fieldInfo.name}_${identifier}',
 					name: '${fieldInfo.name}',
 					//value: beanValJson.${fieldInfo.name},
 					fieldLabel: '${fieldInfo.fieldLabel}',
@@ -956,19 +1024,24 @@ Ext.onReady(function() {
 					<c:if test='${fieldInfo.sysEnFieldAttr!=null && fieldInfo.sysEnFieldAttr.configs!=null}'>
 						,${fieldInfo.sysEnFieldAttr.configs}
 					</c:if>
+					<c:if test='${fieldInfo.sysEnFieldAttr!=null && fieldInfo.sysEnFieldAttr.validatorFunName!=null}'>
+						,validator: function(value){
+							return ${fieldInfo.sysEnFieldAttr.validatorFunName}(value ${fieldInfo.sysEnFieldAttr.validatorFunField});
+						}
+					</c:if>
 				});
 				if( beanValJson.${fieldInfo.name} ){
 					<%-- 初始化配置value不起作用，使用如下方法在文本框中显示文件名称 --%>
-					edit_${fieldInfo.name}_${identifier}.setRawValue( beanValJson.${fieldInfo.name} );
+					field_${fieldInfo.name}_${identifier}.setRawValue( beanValJson.${fieldInfo.name} );
 				}
 				</c:when>
 				<%-- 附件结束 --%>
 				<%-- 富文本编辑器开始 --%>
 				<c:when test='${fieldInfo.xtype=="htmleditor"}'>
-				var  edit_${fieldInfo.name}_${identifier} =
+				var  field_${fieldInfo.name}_${identifier} =
 				Ext.create({
 					xtype: '${fieldInfo.xtype}',
-					id: 'edit_${fieldInfo.name}_${identifier}',
+					id: 'field_${fieldInfo.name}_${identifier}',
 					name: '${fieldInfo.name}',
 					//value: beanValJson.${fieldInfo.name},
 					fieldLabel: '${fieldInfo.fieldLabel}',
@@ -982,16 +1055,16 @@ Ext.onReady(function() {
 				});
 				if( beanValJson.${fieldInfo.name} ){
 					<%-- 最后再设置值，防止fieldInfo.sysEnFieldAttr.configs中的配置覆盖 --%>
-					edit_${fieldInfo.name}_${identifier}.setValue( beanValJson.${fieldInfo.name} );
+					field_${fieldInfo.name}_${identifier}.setValue( beanValJson.${fieldInfo.name} );
 				}
 				</c:when>
 				<%-- 富文本编辑器结束 --%>
-				<%-- 表单元素开始 --%>
-				<c:otherwise>
-				var  edit_${fieldInfo.name}_${identifier} =
+				<%-- 隐藏域或display开始 --%>
+				<c:when test='${fieldInfo.xtype=="hiddenfield" || fieldInfo.xtype=="displayfield"}'>
+				var  field_${fieldInfo.name}_${identifier} =
 				Ext.create({
 					xtype: '${fieldInfo.xtype}',
-					id: 'edit_${fieldInfo.name}_${identifier}',
+					id: 'field_${fieldInfo.name}_${identifier}',
 					name: '${fieldInfo.name}',
 					//value: beanValJson.${fieldInfo.name},
 					fieldLabel: '${fieldInfo.fieldLabel}'
@@ -1005,10 +1078,38 @@ Ext.onReady(function() {
 				});
 				if( beanValJson.${fieldInfo.name} ){
 					<%-- 最后设置值，防止fieldInfo.sysEnFieldAttr.configs中的配置覆盖 --%>
-					edit_${fieldInfo.name}_${identifier}.setValue( beanValJson.${fieldInfo.name} );
+					field_${fieldInfo.name}_${identifier}.setValue( beanValJson.${fieldInfo.name} );
+				}
+				</c:when>
+				<%-- 隐藏域或display结束 --%>
+				<%-- 继承了text控件的表单元素开始 --%>
+				<c:otherwise>
+				var  field_${fieldInfo.name}_${identifier} =
+				Ext.create({
+					xtype: '${fieldInfo.xtype}',
+					id: 'field_${fieldInfo.name}_${identifier}',
+					name: '${fieldInfo.name}',
+					//value: beanValJson.${fieldInfo.name},
+					fieldLabel: '${fieldInfo.fieldLabel}'
+					//afterLabelTextTpl:['<font color=red>*</font>']
+					<c:if test='${!fieldInfo.isAllowBlank}'>
+						,beforeLabelTextTpl: ['<span class="required">*</span>']
+					</c:if>
+					<c:if test='${fieldInfo.sysEnFieldAttr!=null && fieldInfo.sysEnFieldAttr.configs!=null}'>
+						,${fieldInfo.sysEnFieldAttr.configs}
+					</c:if>
+					<c:if test='${fieldInfo.sysEnFieldAttr!=null && fieldInfo.sysEnFieldAttr.validatorFunName!=null}'>
+						,validator: function(value){
+							return ${fieldInfo.sysEnFieldAttr.validatorFunName}(value ${fieldInfo.sysEnFieldAttr.validatorFunField});
+						}
+					</c:if>
+				});
+				if( beanValJson.${fieldInfo.name} ){
+					<%-- 最后设置值，防止fieldInfo.sysEnFieldAttr.configs中的配置覆盖 --%>
+					field_${fieldInfo.name}_${identifier}.setValue( beanValJson.${fieldInfo.name} );
 				}
 				</c:otherwise>
-				<%-- 表单元素结束 --%>
+				<%-- 继承了text控件的表单元素结束 --%>
 			</c:choose>
 		</c:forEach>
 		<%-- 生成所有字段表单元素结束 --%>		
@@ -1033,7 +1134,7 @@ Ext.onReady(function() {
         },
         items: [
 			<c:forEach items="${updateFieldList}" var="fieldInfo" varStatus="fieldStatus">
-						edit_${fieldInfo.name}_${identifier}
+						field_${fieldInfo.name}_${identifier}
 						<c:choose>
 							<c:when test="${fieldStatus.last}"></c:when>
 							<c:otherwise>,</c:otherwise>

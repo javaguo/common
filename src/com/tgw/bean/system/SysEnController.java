@@ -44,6 +44,12 @@ public class SysEnController extends AbstractBaseBean {
     private String controllerBaseUrl;//控制器的请求地址
     private String addWindowConfigs;//添加窗口(Ext.Window)的配置
     private String editWindowConfigs;//编辑窗口(Ext.Window)的配置
+    /**
+     * 自定义函数js文件名，不需要带后缀，此js文件中写自己的表单验证函数。
+     * js文件必须放在resource/js/platform/manage/formVal目录下。
+     * 文件名示例：exampleBeanFormVal或path1/path2/exampleBeanFormVal
+     */
+    private String formValJsFileName;
 
     private List<SysEnControllerField> sysEnControllerFieldList = new ArrayList<SysEnControllerField>();
     private List<SysEnControllerFunction> sysEnControllerFunctionList = new ArrayList<SysEnControllerFunction>();
@@ -59,77 +65,30 @@ public class SysEnController extends AbstractBaseBean {
     }
 
     /**
-     * 暂时先保留此方法，框架编写完成后删除
-     * 添加列表页面每一个字段的相关属性
-     * @param name
-     * @param fieldLabel
-     * @param type
-     * @param xtype
-     * @param isValid
-     * @param isAllowAdd
-     * @param isAllowUpdate
-     * @param isAllowSearch
-     * @param isAllowBlank
-     * @param emptyText
-     * @param vtype
+     * 处理ext的特殊配置。
+     * @param formField
+     * @param extConfigsTransform
      */
-    /*public void addField(String name, String fieldLabel, String type, String xtype, boolean isValid, boolean isAllowAdd, boolean isAllowUpdate, boolean isAllowSearch, boolean isAllowBlank, String emptyText, String vtype){
-        SysEnControllerField  sysEnControllerField = new SysEnControllerField(name,fieldLabel,type,xtype,isValid,isAllowAdd,isAllowUpdate,isAllowSearch,isAllowBlank);
-        this.getSysEnControllerFieldList().add( sysEnControllerField );
-    }*/
+    private void dealExtConfigsTransform(SysEnFieldText formField,String extConfigsTransform){
+        if( StringUtils.isNotBlank( extConfigsTransform ) ){
+            JSONObject jo = JSONObject.fromObject( "{"+extConfigsTransform+"}" );
+            if( jo.containsKey("validatorFunName") ){//方法名称
+                String validator = (String)jo.get("validatorFunName");
+                formField.setValidatorFunName( validator );
+            }
 
+            if( jo.containsKey("validatorFunField") ){//方法参数
+                String validatorField = (String)jo.get("validatorFunField");
+                String[] filedArra = validatorField.split(",");
 
-
-    /**
-     * 暂时先保留此方法，框架编写完成后删除
-     * 添加列表页面每一个字段的相关属性
-     * @param name
-     * @param fieldLabel
-     * @param type
-     */
-    /*public void addField( String name, String fieldLabel, String type ){
-        this.addField(name,fieldLabel,type,null,true,true,true,true,true,null,null);
-    }*/
-
-    /**
-     * 将JSONObject的键值赋值给SysEnFormField对应的字段
-     * @param sysEnField
-     * @param jo
-     */
-    public void dealFormFieldAttr(SysEnFieldBase sysEnField, JSONObject jo ){
-        Class fieldClass = sysEnField.getClass();
-
-        SysEnFieldBase formFieldBase = new SysEnFieldBase();
-        Class baseClass = formFieldBase.getClass();
-        String baseClassInfo = baseClass.toString();
-
-        boolean endFlag = false;
-        while( !endFlag ){
-            /**
-             *getDeclaredFields只能获取类本身声明的字段，父类声明的字段获取不到
-             * 所以要通过循环设置所有的字段属性值
-             */
-            Field[] fields = fieldClass.getDeclaredFields();
-            for( Field field : fields ){
-                try{
-                    String fieldName = field.getName();
-                    if( jo.containsKey(fieldName) ){
-                        Method method = fieldClass.getDeclaredMethod( "set"+ PlatformUtils.firstLetterToUpperCase( fieldName ),String.class );
-                        method.invoke(sysEnField,jo.get(fieldName).toString() );
-                    }
-                }catch( Exception e ){
-                    e.printStackTrace();
+                StringBuffer fieldRes = new StringBuffer();
+                for( int i=0;i<filedArra.length;i++ ){
+                    fieldRes.append( ",field_"+filedArra[i]+"_"+this.getIdentifier() );
                 }
+                formField.setValidatorFunField( fieldRes.toString() );
             }
 
-            String fieldClassInfo = fieldClass.toString();
-            if( baseClassInfo.equals( fieldClassInfo ) ){
-                endFlag = true;
-            }else{
-                fieldClass = fieldClass.getSuperclass();
-            }
         }
-
     }
 
     /**
@@ -181,7 +140,8 @@ public class SysEnController extends AbstractBaseBean {
     }
 
     /**
-     * 添加一个text字段，不需要传ext配置
+     *  添加一个text字段。
+     *
      * @param name
      * @param fieldLabel
      * @param isValid
@@ -189,109 +149,22 @@ public class SysEnController extends AbstractBaseBean {
      * @param isAllowUpdate
      * @param isAllowSearch
      * @param isAllowBlank
+     * @param extConfigs
      */
-    public void addFieldText( String name, String fieldLabel, boolean isValid, boolean isAllowAdd, boolean isAllowUpdate, boolean isAllowSearch, boolean isAllowBlank ){
+    public void addFieldText( String name, String fieldLabel, boolean isValid, boolean isAllowAdd, boolean isAllowUpdate, boolean isAllowSearch, boolean isAllowBlank,String extConfigs){
         String tempConfigs = "inputType:'"+PlatformSysConstant.FORM_INPUTTYPE_TEXT+"'";
-        this.addFieldText(name,fieldLabel,isValid,isAllowAdd,isAllowUpdate,true,isAllowSearch,isAllowBlank,tempConfigs);
-    }
-
-    /**
-     * 添加一个text字段，可以传emptyText,vtype参数，不需要传ext配置
-     * @param name
-     * @param fieldLabel
-     * @param isValid
-     * @param isAllowAdd
-     * @param isAllowUpdate
-     * @param isAllowSearch
-     * @param isAllowBlank
-     * @param emptyText
-     * @param vtype
-     */
-    public void addFieldText( String name, String fieldLabel, boolean isValid, boolean isAllowAdd, boolean isAllowUpdate, boolean isAllowSearch, boolean isAllowBlank, String emptyText, String vtype ){
-        String tempConfigs = "inputType:'"+PlatformSysConstant.FORM_INPUTTYPE_TEXT+"',emptyText:'"+emptyText+"',"+"vtype:'"+vtype+"'";
-        this.addFieldText(name,fieldLabel,isValid,isAllowAdd,isAllowUpdate,true,isAllowSearch,isAllowBlank,tempConfigs);
-    }
-
-    /**
-     * 添加一个text字段，可以传emptyText,vtype,ext配置参数
-     * @param name
-     * @param fieldLabel
-     * @param isValid
-     * @param isAllowAdd
-     * @param isAllowUpdate
-     * @param isAllowSearch
-     * @param isAllowBlank
-     * @param emptyText
-     * @param vtype
-     * @param configs
-     */
-    public void addFieldText( String name, String fieldLabel, boolean isValid, boolean isAllowAdd, boolean isAllowUpdate, boolean isAllowSearch, boolean isAllowBlank, String emptyText, String vtype,String configs ){
-        String tempConfigs = "inputType:'"+PlatformSysConstant.FORM_INPUTTYPE_TEXT+"',emptyText:'"+emptyText+"',"+"vtype:'"+vtype+"'";
-        if( StringUtils.isNotBlank( configs ) ){
-            tempConfigs += ","+configs;
+        if( StringUtils.isNotBlank(extConfigs) ){
+            tempConfigs += ","+ extConfigs;
         }
-        this.addFieldText(name,fieldLabel,isValid,isAllowAdd,isAllowUpdate,true,isAllowSearch,isAllowBlank,tempConfigs);
+        this.addFieldText(name,fieldLabel,isValid,isAllowAdd,isAllowUpdate,true,isAllowSearch,isAllowBlank,tempConfigs,null);
     }
 
-    public void addFieldText( String name, String fieldLabel, boolean isValid, boolean isAllowAdd, boolean isAllowUpdate, boolean isAllowSearch, boolean isAllowBlank,String configs ){
+    public void addFieldText( String name, String fieldLabel, boolean isValid, boolean isAllowAdd, boolean isAllowUpdate, boolean isAllowSearch, boolean isAllowBlank,String extConfigs,String extConfigsTransform){
         String tempConfigs = "inputType:'"+PlatformSysConstant.FORM_INPUTTYPE_TEXT+"'";
-        if( StringUtils.isNotBlank( configs ) ){
-            tempConfigs += ","+configs;
+        if( StringUtils.isNotBlank(extConfigs) ){
+            tempConfigs += ","+ extConfigs;
         }
-        this.addFieldText(name,fieldLabel,isValid,isAllowAdd,isAllowUpdate,true,isAllowSearch,isAllowBlank,tempConfigs);
-    }
-
-    /**
-     * 添加一个Password字段
-     * @param name
-     * @param fieldLabel
-     * @param isValid
-     * @param isAllowAdd
-     * @param isAllowUpdate
-     * @param isAllowSearch
-     * @param isAllowBlank
-     */
-    public void addFieldPassword( String name, String fieldLabel, boolean isValid, boolean isAllowAdd, boolean isAllowUpdate, boolean isAllowSearch, boolean isAllowBlank ){
-        String tempConfigs = "inputType:'"+PlatformSysConstant.FORM_INPUTTYPE_PASSWORD+"'";
-        this.addFieldText(name,fieldLabel,isValid,isAllowAdd,isAllowUpdate,false,isAllowSearch,isAllowBlank,tempConfigs);
-    }
-
-    /**
-     * 添加一个Password字段
-     * @param name
-     * @param fieldLabel
-     * @param isValid
-     * @param isAllowAdd
-     * @param isAllowUpdate
-     * @param isAllowSearch
-     * @param isAllowBlank
-     * @param emptyText
-     * @param vtype
-     */
-    public void addFieldPassword( String name, String fieldLabel, boolean isValid, boolean isAllowAdd, boolean isAllowUpdate, boolean isAllowSearch, boolean isAllowBlank, String emptyText, String vtype ){
-        String tempConfigs = "inputType:'"+PlatformSysConstant.FORM_INPUTTYPE_PASSWORD+"',emptyText:'"+emptyText+"',"+"vtype:'"+vtype+"'";
-        this.addFieldText(name,fieldLabel,isValid,isAllowAdd,isAllowUpdate,false,isAllowSearch,isAllowBlank,tempConfigs);
-    }
-
-    /**
-     * 添加一个Password字段
-     * @param name
-     * @param fieldLabel
-     * @param isValid
-     * @param isAllowAdd
-     * @param isAllowUpdate
-     * @param isAllowSearch
-     * @param isAllowBlank
-     * @param emptyText
-     * @param vtype
-     * @param configs
-     */
-    public void addFieldPassword( String name, String fieldLabel, boolean isValid, boolean isAllowAdd, boolean isAllowUpdate, boolean isAllowSearch, boolean isAllowBlank, String emptyText, String vtype,String configs ){
-        String tempConfigs = "inputType:'"+PlatformSysConstant.FORM_INPUTTYPE_PASSWORD+"',emptyText:'"+emptyText+"',"+"vtype:'"+vtype+"'";
-        if( StringUtils.isNotBlank( configs ) ){
-            tempConfigs += ","+configs;
-        }
-        this.addFieldText(name,fieldLabel,isValid,isAllowAdd,isAllowUpdate,false,isAllowSearch,isAllowBlank,tempConfigs);
+        this.addFieldText(name,fieldLabel,isValid,isAllowAdd,isAllowUpdate,true,isAllowSearch,isAllowBlank,tempConfigs,extConfigsTransform);
     }
 
     /**
@@ -310,7 +183,15 @@ public class SysEnController extends AbstractBaseBean {
         if( StringUtils.isNotBlank( configs ) ){
             tempConfigs += ","+configs;
         }
-        this.addFieldText(name,fieldLabel,isValid,isAllowAdd,isAllowUpdate,false,isAllowSearch,isAllowBlank,tempConfigs);
+        this.addFieldText(name,fieldLabel,isValid,isAllowAdd,isAllowUpdate,false,isAllowSearch,isAllowBlank,tempConfigs,null);
+    }
+
+    public void addFieldPassword( String name, String fieldLabel, boolean isValid, boolean isAllowAdd, boolean isAllowUpdate, boolean isAllowSearch, boolean isAllowBlank,String configs,String extConfigsTransform ){
+        String tempConfigs = "inputType:'"+PlatformSysConstant.FORM_INPUTTYPE_PASSWORD+"'";
+        if( StringUtils.isNotBlank( configs ) ){
+            tempConfigs += ","+configs;
+        }
+        this.addFieldText(name,fieldLabel,isValid,isAllowAdd,isAllowUpdate,false,isAllowSearch,isAllowBlank,tempConfigs,extConfigsTransform);
     }
 
     /**
@@ -322,25 +203,28 @@ public class SysEnController extends AbstractBaseBean {
      * @param isAllowUpdate
      * @param isAllowSearch
      * @param isAllowBlank
-     * @param configs
+     * @param extConfigs  ext控件原生配置，json串
+     * @param extConfigsTransform  需要经过转换后传再配置ext属性。
      */
-    public void addFieldText( String name, String fieldLabel, boolean isValid, boolean isAllowAdd, boolean isAllowUpdate,boolean isShowList, boolean isAllowSearch, boolean isAllowBlank,String configs ){
+    public void addFieldText( String name, String fieldLabel, boolean isValid, boolean isAllowAdd, boolean isAllowUpdate,boolean isShowList, boolean isAllowSearch, boolean isAllowBlank,String extConfigs,String extConfigsTransform){
         SysEnControllerField  sysEnControllerField = new SysEnControllerField(name,fieldLabel,PlatformSysConstant.FORM_XTYPE_TEXT,isValid,isAllowAdd,isAllowUpdate,isShowList,isAllowSearch,isAllowBlank);
 
         SysEnFieldText formField = new SysEnFieldText();
-        if( StringUtils.isNotBlank( configs ) ){
-            configs = "allowBlank:"+isAllowBlank+","+configs;
+        if( StringUtils.isNotBlank(extConfigs) ){
+            extConfigs = "allowBlank:"+isAllowBlank+","+ extConfigs;
         }else{
-            configs = "allowBlank:"+isAllowBlank;
+            extConfigs = "allowBlank:"+isAllowBlank;
         }
 
-        if( StringUtils.isNotBlank( configs ) ){
-            formField.setConfigs( configs );
+        if( StringUtils.isNotBlank(extConfigs) ){
+            formField.setConfigs(extConfigs);
         }
 		/*if( StringUtils.isNotBlank( configs ) ){
 			JSONObject jo = JSONObject.fromObject( "{"+configs+"}" );
 			this.dealFormFieldAttr( formField,jo );
 		}*/
+
+        dealExtConfigsTransform(formField,extConfigsTransform);
 
         sysEnControllerField.setSysEnFieldAttr( formField );
         this.getSysEnControllerFieldList().add( sysEnControllerField );
@@ -358,8 +242,13 @@ public class SysEnController extends AbstractBaseBean {
      * @param configs
      */
     public void addFieldTextArea( String name, String fieldLabel, boolean isValid, boolean isAllowAdd, boolean isAllowUpdate, boolean isAllowSearch, boolean isAllowBlank,String configs ){
-        this.addFieldTextArea(name,fieldLabel,isValid,isAllowAdd,isAllowUpdate,true,isAllowSearch,isAllowBlank,configs);
+        this.addFieldTextArea(name,fieldLabel,isValid,isAllowAdd,isAllowUpdate,true,isAllowSearch,isAllowBlank,configs,null);
     }
+
+    public void addFieldTextArea( String name, String fieldLabel, boolean isValid, boolean isAllowAdd, boolean isAllowUpdate, boolean isAllowSearch, boolean isAllowBlank,String configs,String extConfigsTransform ){
+        this.addFieldTextArea(name,fieldLabel,isValid,isAllowAdd,isAllowUpdate,true,isAllowSearch,isAllowBlank,configs,extConfigsTransform);
+    }
+
     /**
      * 添加一个TextArea字段
      * @param name
@@ -371,7 +260,7 @@ public class SysEnController extends AbstractBaseBean {
      * @param isAllowBlank
      * @param configs
      */
-    public void addFieldTextArea( String name, String fieldLabel, boolean isValid, boolean isAllowAdd, boolean isAllowUpdate,boolean isShowList, boolean isAllowSearch, boolean isAllowBlank,String configs ){
+    public void addFieldTextArea( String name, String fieldLabel, boolean isValid, boolean isAllowAdd, boolean isAllowUpdate,boolean isShowList, boolean isAllowSearch, boolean isAllowBlank,String configs,String extConfigsTransform ){
         SysEnControllerField  sysEnControllerField = new SysEnControllerField(name,fieldLabel,PlatformSysConstant.FORM_XTYPE_TEXTAREA,isValid,isAllowAdd,isAllowUpdate,isShowList,isAllowSearch,isAllowBlank);
 
         SysEnFieldTextArea formField = new SysEnFieldTextArea();
@@ -388,6 +277,7 @@ public class SysEnController extends AbstractBaseBean {
 			JSONObject jo = JSONObject.fromObject( "{"+configs+"}" );
 			this.dealFormFieldAttr( formField,jo );
 		}*/
+        dealExtConfigsTransform(formField,extConfigsTransform);
 
         sysEnControllerField.setSysEnFieldAttr( formField );
         this.getSysEnControllerFieldList().add( sysEnControllerField );
@@ -405,8 +295,13 @@ public class SysEnController extends AbstractBaseBean {
      * @param configs
      */
     public void addFieldNumber(String name, String fieldLabel, boolean isValid, boolean isAllowAdd, boolean isAllowUpdate, boolean isAllowSearch, boolean isAllowBlank,String configs){
-        this.addFieldNumber(name,fieldLabel,isValid,isAllowAdd,isAllowUpdate,true,isAllowSearch,isAllowBlank,configs);
+        this.addFieldNumber(name,fieldLabel,isValid,isAllowAdd,isAllowUpdate,true,isAllowSearch,isAllowBlank,configs,null);
     }
+
+    public void addFieldNumber(String name, String fieldLabel, boolean isValid, boolean isAllowAdd, boolean isAllowUpdate, boolean isAllowSearch, boolean isAllowBlank,String configs,String extConfigsTransform){
+        this.addFieldNumber(name,fieldLabel,isValid,isAllowAdd,isAllowUpdate,true,isAllowSearch,isAllowBlank,configs,extConfigsTransform);
+    }
+
     /**
      * 添加一个Number字段
      * @param name
@@ -418,7 +313,7 @@ public class SysEnController extends AbstractBaseBean {
      * @param isAllowBlank
      * @param configs
      */
-    public void addFieldNumber(String name, String fieldLabel, boolean isValid, boolean isAllowAdd, boolean isAllowUpdate,boolean isShowList, boolean isAllowSearch, boolean isAllowBlank,String configs){
+    public void addFieldNumber(String name, String fieldLabel, boolean isValid, boolean isAllowAdd, boolean isAllowUpdate,boolean isShowList, boolean isAllowSearch, boolean isAllowBlank,String configs,String extConfigsTransform){
         SysEnControllerField  sysEnControllerField = new SysEnControllerField(name,fieldLabel,PlatformSysConstant.FORM_XTYPE_NUMBER,isValid,isAllowAdd,isAllowUpdate,isShowList,isAllowSearch,isAllowBlank);
 
         SysEnFieldNumber formField = new SysEnFieldNumber();
@@ -435,6 +330,7 @@ public class SysEnController extends AbstractBaseBean {
 			JSONObject jo = JSONObject.fromObject( "{"+configs+"}" );
 			this.dealFormFieldAttr( formField,jo );
 		}*/
+        dealExtConfigsTransform(formField,extConfigsTransform);
 
         sysEnControllerField.setSysEnFieldAttr( formField );
         this.getSysEnControllerFieldList().add( sysEnControllerField );
@@ -453,7 +349,11 @@ public class SysEnController extends AbstractBaseBean {
      * @param configs
      */
     public void addFieldDate(String name, String fieldLabel, boolean isValid, boolean isAllowAdd, boolean isAllowUpdate, boolean isAllowSearch, boolean isAllowBlank,String configs){
-        this.addFieldDate(name,fieldLabel,isValid,isAllowAdd,isAllowUpdate,true,isAllowSearch,isAllowBlank,configs);
+        this.addFieldDate(name,fieldLabel,isValid,isAllowAdd,isAllowUpdate,true,isAllowSearch,isAllowBlank,configs,null);
+    }
+
+    public void addFieldDate(String name, String fieldLabel, boolean isValid, boolean isAllowAdd, boolean isAllowUpdate, boolean isAllowSearch, boolean isAllowBlank,String configs,String extConfigsTransform){
+        this.addFieldDate(name,fieldLabel,isValid,isAllowAdd,isAllowUpdate,true,isAllowSearch,isAllowBlank,configs,extConfigsTransform);
     }
 
     /**
@@ -467,7 +367,7 @@ public class SysEnController extends AbstractBaseBean {
      * @param isAllowBlank
      * @param configs
      */
-    public void addFieldDate(String name, String fieldLabel, boolean isValid, boolean isAllowAdd, boolean isAllowUpdate,boolean isShowList, boolean isAllowSearch, boolean isAllowBlank,String configs){
+    public void addFieldDate(String name, String fieldLabel, boolean isValid, boolean isAllowAdd, boolean isAllowUpdate,boolean isShowList, boolean isAllowSearch, boolean isAllowBlank,String configs,String extConfigsTransform){
         SysEnControllerField  sysEnControllerField = new SysEnControllerField(name,fieldLabel,PlatformSysConstant.FORM_XTYPE_DATE,isValid,isAllowAdd,isAllowUpdate,isShowList,isAllowSearch,isAllowBlank);
 
         SysEnFieldDate fieldDate = new SysEnFieldDate();
@@ -519,6 +419,7 @@ public class SysEnController extends AbstractBaseBean {
 		}
 		fieldDate.setFormat( PlatformSysConstant.DATE_FORMAT_EXT_YMD );
 		*/
+        dealExtConfigsTransform(fieldDate,extConfigsTransform);
 
         sysEnControllerField.setSysEnFieldAttr( fieldDate );
         this.getSysEnControllerFieldList().add( sysEnControllerField );
@@ -536,7 +437,11 @@ public class SysEnController extends AbstractBaseBean {
      * @param configs
      */
     public void addFieldDatetime(String name, String fieldLabel, boolean isValid, boolean isAllowAdd, boolean isAllowUpdate, boolean isAllowSearch, boolean isAllowBlank,String configs){
-        this.addFieldDatetime(name,fieldLabel,isValid,isAllowAdd,isAllowUpdate,true,isAllowSearch,isAllowBlank,configs);
+        this.addFieldDatetime(name,fieldLabel,isValid,isAllowAdd,isAllowUpdate,true,isAllowSearch,isAllowBlank,configs,null);
+    }
+
+    public void addFieldDatetime(String name, String fieldLabel, boolean isValid, boolean isAllowAdd, boolean isAllowUpdate, boolean isAllowSearch, boolean isAllowBlank,String configs,String extConfigsTransform){
+        this.addFieldDatetime(name,fieldLabel,isValid,isAllowAdd,isAllowUpdate,true,isAllowSearch,isAllowBlank,configs,extConfigsTransform);
     }
 
     /**
@@ -550,7 +455,7 @@ public class SysEnController extends AbstractBaseBean {
      * @param isAllowBlank
      * @param configs
      */
-    public void addFieldDatetime(String name, String fieldLabel, boolean isValid, boolean isAllowAdd, boolean isAllowUpdate,boolean isShowList, boolean isAllowSearch, boolean isAllowBlank,String configs){
+    public void addFieldDatetime(String name, String fieldLabel, boolean isValid, boolean isAllowAdd, boolean isAllowUpdate,boolean isShowList, boolean isAllowSearch, boolean isAllowBlank,String configs,String extConfigsTransform){
         SysEnControllerField  sysEnControllerField = new SysEnControllerField(name,fieldLabel,PlatformSysConstant.FORM_XTYPE_DATE_TIME,isValid,isAllowAdd,isAllowUpdate,isShowList,isAllowSearch,isAllowBlank);
 
         SysEnFieldDate fieldDate = new SysEnFieldDate();
@@ -602,6 +507,8 @@ public class SysEnController extends AbstractBaseBean {
 		}
 		fieldDate.setFormat( PlatformSysConstant.DATE_FORMAT_EXT_YMD );
 */
+        dealExtConfigsTransform(fieldDate,extConfigsTransform);
+
         sysEnControllerField.setSysEnFieldAttr( fieldDate );
         this.getSysEnControllerFieldList().add( sysEnControllerField );
     }
@@ -821,7 +728,11 @@ public class SysEnController extends AbstractBaseBean {
      * @param tagConfigs
      */
     public void addFieldTagByJSON( String name, String fieldLabel,  boolean isValid, boolean isAllowAdd, boolean isAllowUpdate, boolean isAllowSearch, boolean isAllowBlank,String jsonData,String tagConfigs ){
-        this.addFieldTagByJSON(name,fieldLabel,isValid,isAllowAdd,isAllowUpdate,true,isAllowSearch,isAllowBlank,jsonData,tagConfigs);
+        this.addFieldTagByJSON(name,fieldLabel,isValid,isAllowAdd,isAllowUpdate,true,isAllowSearch,isAllowBlank,jsonData,tagConfigs,null);
+    }
+
+    public void addFieldTagByJSON( String name, String fieldLabel,  boolean isValid, boolean isAllowAdd, boolean isAllowUpdate, boolean isAllowSearch, boolean isAllowBlank,String jsonData,String tagConfigs,String extConfigsTransform ){
+        this.addFieldTagByJSON(name,fieldLabel,isValid,isAllowAdd,isAllowUpdate,true,isAllowSearch,isAllowBlank,jsonData,tagConfigs,extConfigsTransform);
     }
 
     /**
@@ -838,7 +749,7 @@ public class SysEnController extends AbstractBaseBean {
      * @param jsonData
      * @param tagConfigs
      */
-    public void addFieldTagByJSON( String name, String fieldLabel,  boolean isValid, boolean isAllowAdd, boolean isAllowUpdate,boolean isShowList, boolean isAllowSearch, boolean isAllowBlank,String jsonData,String tagConfigs ){
+    public void addFieldTagByJSON( String name, String fieldLabel,  boolean isValid, boolean isAllowAdd, boolean isAllowUpdate,boolean isShowList, boolean isAllowSearch, boolean isAllowBlank,String jsonData,String tagConfigs,String extConfigsTransform ){
         SysEnControllerField  sysEnControllerField = new SysEnControllerField(name,fieldLabel,PlatformSysConstant.FORM_XTYPE_TAG,isValid,isAllowAdd,isAllowUpdate,isShowList,isAllowSearch,isAllowBlank);
 
         //tag继承combox，使用combobox属性即可
@@ -874,6 +785,8 @@ public class SysEnController extends AbstractBaseBean {
             tag.getComboBoxOptionList().add( comboBoxOption );
         }
 
+        dealExtConfigsTransform(tag,extConfigsTransform);
+
         sysEnControllerField.setSysEnFieldAttr( tag );
         this.getSysEnControllerFieldList().add(sysEnControllerField);
     }
@@ -893,7 +806,11 @@ public class SysEnController extends AbstractBaseBean {
      * @param tagConfigs
      */
     public void addFieldTagBySQL( String name, String fieldLabel,  boolean isValid, boolean isAllowAdd, boolean isAllowUpdate, boolean isAllowSearch, boolean isAllowBlank,String comboBoxFlag,String firstComboBoxParamValue,String tagConfigs){
-        this.addFieldTagBySQL(name,fieldLabel,isValid,isAllowAdd,isAllowUpdate,true,isAllowSearch,isAllowBlank,comboBoxFlag,firstComboBoxParamValue,tagConfigs);
+        this.addFieldTagBySQL(name,fieldLabel,isValid,isAllowAdd,isAllowUpdate,true,isAllowSearch,isAllowBlank,comboBoxFlag,firstComboBoxParamValue,tagConfigs,null);
+    }
+
+    public void addFieldTagBySQL( String name, String fieldLabel,  boolean isValid, boolean isAllowAdd, boolean isAllowUpdate, boolean isAllowSearch, boolean isAllowBlank,String comboBoxFlag,String firstComboBoxParamValue,String tagConfigs,String extConfigsTransform){
+        this.addFieldTagBySQL(name,fieldLabel,isValid,isAllowAdd,isAllowUpdate,true,isAllowSearch,isAllowBlank,comboBoxFlag,firstComboBoxParamValue,tagConfigs,extConfigsTransform);
     }
 
     /**
@@ -911,7 +828,7 @@ public class SysEnController extends AbstractBaseBean {
      * @param firstComboBoxParamValue
      * @param tagConfigs
      */
-    public void addFieldTagBySQL( String name, String fieldLabel,  boolean isValid, boolean isAllowAdd, boolean isAllowUpdate,boolean isShowList, boolean isAllowSearch, boolean isAllowBlank,String comboBoxFlag,String firstComboBoxParamValue,String tagConfigs){
+    public void addFieldTagBySQL( String name, String fieldLabel,  boolean isValid, boolean isAllowAdd, boolean isAllowUpdate,boolean isShowList, boolean isAllowSearch, boolean isAllowBlank,String comboBoxFlag,String firstComboBoxParamValue,String tagConfigs,String extConfigsTransform){
         SysEnControllerField  sysEnControllerField = new SysEnControllerField(name,fieldLabel,PlatformSysConstant.FORM_XTYPE_TAG,isValid,isAllowAdd,isAllowUpdate,isShowList,isAllowSearch,isAllowBlank);
 
         SysEnFieldTag tag = new SysEnFieldTag();
@@ -931,6 +848,8 @@ public class SysEnController extends AbstractBaseBean {
             tag.setConfigs( tagConfigs );
         }
 
+        dealExtConfigsTransform(tag,extConfigsTransform);
+
         sysEnControllerField.setSysEnFieldAttr( tag );
         this.getSysEnControllerFieldList().add(sysEnControllerField);
     }
@@ -949,7 +868,11 @@ public class SysEnController extends AbstractBaseBean {
      * @param comboBoxConfigs
      */
     public void addFieldComboBoxBySQL( String name, String fieldLabel,  boolean isValid, boolean isAllowAdd, boolean isAllowUpdate, boolean isAllowSearch, boolean isAllowBlank,String comboBoxFlag,String firstComboBoxParamValue,String comboBoxConfigs){
-        this.addFieldComboBoxBySQL(name,fieldLabel,isValid,isAllowAdd,isAllowUpdate,true,isAllowSearch,isAllowBlank,comboBoxFlag,firstComboBoxParamValue,comboBoxConfigs);
+        this.addFieldComboBoxBySQL(name,fieldLabel,isValid,isAllowAdd,isAllowUpdate,true,isAllowSearch,isAllowBlank,comboBoxFlag,firstComboBoxParamValue,comboBoxConfigs,null);
+    }
+
+    public void addFieldComboBoxBySQL( String name, String fieldLabel,  boolean isValid, boolean isAllowAdd, boolean isAllowUpdate, boolean isAllowSearch, boolean isAllowBlank,String comboBoxFlag,String firstComboBoxParamValue,String comboBoxConfigs,String extConfigsTransform){
+        this.addFieldComboBoxBySQL(name,fieldLabel,isValid,isAllowAdd,isAllowUpdate,true,isAllowSearch,isAllowBlank,comboBoxFlag,firstComboBoxParamValue,comboBoxConfigs,extConfigsTransform);
     }
 
     /**
@@ -966,7 +889,7 @@ public class SysEnController extends AbstractBaseBean {
      * @param firstComboBoxParamValue
      * @param comboBoxConfigs
      */
-    public void addFieldComboBoxBySQL( String name, String fieldLabel,  boolean isValid, boolean isAllowAdd, boolean isAllowUpdate,boolean isShowList, boolean isAllowSearch, boolean isAllowBlank,String comboBoxFlag,String firstComboBoxParamValue,String comboBoxConfigs){
+    public void addFieldComboBoxBySQL( String name, String fieldLabel,  boolean isValid, boolean isAllowAdd, boolean isAllowUpdate,boolean isShowList, boolean isAllowSearch, boolean isAllowBlank,String comboBoxFlag,String firstComboBoxParamValue,String comboBoxConfigs,String extConfigsTransform){
         SysEnControllerField  sysEnControllerField = new SysEnControllerField(name,fieldLabel,PlatformSysConstant.FORM_XTYPE_COMBOBOX,isValid,isAllowAdd,isAllowUpdate,isShowList,isAllowSearch,isAllowBlank);
 
         SysEnFieldComboBox comboBox = new SysEnFieldComboBox();
@@ -985,11 +908,13 @@ public class SysEnController extends AbstractBaseBean {
         if( StringUtils.isNotBlank( comboBoxConfigs ) ){
             comboBox.setConfigs( comboBoxConfigs );
         }
+        dealExtConfigsTransform(comboBox,extConfigsTransform);
 
         SysEnFieldComboBoxGroup comboBoxGroup = new SysEnFieldComboBoxGroup();
         comboBoxGroup.setCascade( false );
         comboBoxGroup.getComboBoxList().add( comboBox );
        // comboBoxGroup.setConfigs( comboBoxGroupConfigs );
+
 
         sysEnControllerField.setSysEnFieldAttr( comboBoxGroup );
         this.getSysEnControllerFieldList().add(sysEnControllerField);
@@ -1008,7 +933,11 @@ public class SysEnController extends AbstractBaseBean {
      * @param comboBoxConfigs
      */
     public void addFieldComboBoxByJSON( String name, String fieldLabel,  boolean isValid, boolean isAllowAdd, boolean isAllowUpdate, boolean isAllowSearch, boolean isAllowBlank,String jsonData,String comboBoxConfigs ){
-        this.addFieldComboBoxByJSON(name,fieldLabel,isValid,isAllowAdd,isAllowUpdate,true,isAllowSearch,isAllowBlank,jsonData,comboBoxConfigs);
+        this.addFieldComboBoxByJSON(name,fieldLabel,isValid,isAllowAdd,isAllowUpdate,true,isAllowSearch,isAllowBlank,jsonData,comboBoxConfigs,null);
+    }
+
+    public void addFieldComboBoxByJSON( String name, String fieldLabel,  boolean isValid, boolean isAllowAdd, boolean isAllowUpdate, boolean isAllowSearch, boolean isAllowBlank,String jsonData,String comboBoxConfigs,String extConfigsTransform ){
+        this.addFieldComboBoxByJSON(name,fieldLabel,isValid,isAllowAdd,isAllowUpdate,true,isAllowSearch,isAllowBlank,jsonData,comboBoxConfigs,extConfigsTransform);
     }
 
     /**
@@ -1024,7 +953,7 @@ public class SysEnController extends AbstractBaseBean {
      * @param jsonData
      * @param comboBoxConfigs
      */
-    public void addFieldComboBoxByJSON( String name, String fieldLabel,  boolean isValid, boolean isAllowAdd, boolean isAllowUpdate,boolean isShowList, boolean isAllowSearch, boolean isAllowBlank,String jsonData,String comboBoxConfigs ){
+    public void addFieldComboBoxByJSON( String name, String fieldLabel,  boolean isValid, boolean isAllowAdd, boolean isAllowUpdate,boolean isShowList, boolean isAllowSearch, boolean isAllowBlank,String jsonData,String comboBoxConfigs,String extConfigsTransform ){
         SysEnControllerField  sysEnControllerField = new SysEnControllerField(name,fieldLabel,PlatformSysConstant.FORM_XTYPE_COMBOBOX,isValid,isAllowAdd,isAllowUpdate,isShowList,isAllowSearch,isAllowBlank);
 
         SysEnFieldComboBox comboBox = new SysEnFieldComboBox();
@@ -1059,10 +988,13 @@ public class SysEnController extends AbstractBaseBean {
             comboBox.getComboBoxOptionList().add( comboBoxOption );
         }
 
+        dealExtConfigsTransform(comboBox,extConfigsTransform);
+
         SysEnFieldComboBoxGroup comboBoxGroup = new SysEnFieldComboBoxGroup();
         comboBoxGroup.setCascade( false );
         comboBoxGroup.getComboBoxList().add( comboBox );
 //        comboBoxGroup.setConfigs( comboBoxGroupConfigs );
+
 
         sysEnControllerField.setSysEnFieldAttr( comboBoxGroup );
         this.getSysEnControllerFieldList().add(sysEnControllerField);
@@ -1239,7 +1171,11 @@ public class SysEnController extends AbstractBaseBean {
      * @param loadDataUrl
      */
     public void addFieldComboBoxTree(String name, String fieldLabel, boolean isValid, boolean isAllowAdd, boolean isAllowUpdate, boolean isAllowSearch, boolean isAllowBlank,String configs,String loadDataUrl){
-        this.addFieldComboBoxTree(name,fieldLabel,isValid,isAllowAdd,isAllowUpdate,true,isAllowSearch,isAllowBlank,configs,loadDataUrl);
+        this.addFieldComboBoxTree(name,fieldLabel,isValid,isAllowAdd,isAllowUpdate,true,isAllowSearch,isAllowBlank,configs,loadDataUrl,null);
+    }
+
+    public void addFieldComboBoxTree(String name, String fieldLabel, boolean isValid, boolean isAllowAdd, boolean isAllowUpdate, boolean isAllowSearch, boolean isAllowBlank,String configs,String loadDataUrl,String extConfigsTransform){
+        this.addFieldComboBoxTree(name,fieldLabel,isValid,isAllowAdd,isAllowUpdate,true,isAllowSearch,isAllowBlank,configs,loadDataUrl,extConfigsTransform);
     }
 
     /**
@@ -1255,7 +1191,7 @@ public class SysEnController extends AbstractBaseBean {
      * @param configs
      * @param loadDataUrl
      */
-    public void addFieldComboBoxTree(String name, String fieldLabel, boolean isValid, boolean isAllowAdd, boolean isAllowUpdate,boolean isShowList, boolean isAllowSearch, boolean isAllowBlank,String configs,String loadDataUrl){
+    public void addFieldComboBoxTree(String name, String fieldLabel, boolean isValid, boolean isAllowAdd, boolean isAllowUpdate,boolean isShowList, boolean isAllowSearch, boolean isAllowBlank,String configs,String loadDataUrl,String extConfigsTransform){
         SysEnControllerField  sysEnControllerField = new SysEnControllerField(name,fieldLabel,PlatformSysConstant.FORM_XTYPE_COMBOBOXTREE,isValid,isAllowAdd,isAllowUpdate,isShowList,isAllowSearch,isAllowBlank);
 
         SysEnFieldComboBoxTree fieldComboBoxTree = new SysEnFieldComboBoxTree();
@@ -1280,54 +1216,20 @@ public class SysEnController extends AbstractBaseBean {
         if( StringUtils.isNotBlank( configs ) ){
             fieldComboBoxTree.setConfigs( configs );
         }
+        dealExtConfigsTransform(fieldComboBoxTree,extConfigsTransform);
 
         sysEnControllerField.setSysEnFieldAttr( fieldComboBoxTree );
         this.getSysEnControllerFieldList().add( sysEnControllerField );
     }
 
-    /**
-     * 添加一个Display表单控件   isShowList:true
-     * @param name
-     * @param fieldLabel
-     * @param isValid
-     * @param isAllowAdd
-     * @param isAllowUpdate
-     * @param isAllowSearch
-     * @param configs
-     */
-    public void addFieldDisplay(String name, String fieldLabel, boolean isValid, boolean isAllowAdd, boolean isAllowUpdate, boolean isAllowSearch,String configs){
-        this.addFieldDisplay(name,fieldLabel,isValid,isAllowAdd,isAllowUpdate,true,isAllowSearch,configs);
-    }
 
-    /**
-     * 添加一个Display表单控件
-     * @param name
-     * @param fieldLabel
-     * @param isValid
-     * @param isAllowAdd
-     * @param isAllowUpdate
-     * @param isAllowSearch
-     * @param configs
-     */
-    public void addFieldDisplay(String name, String fieldLabel, boolean isValid, boolean isAllowAdd, boolean isAllowUpdate,boolean isShowList, boolean isAllowSearch,String configs){
-        SysEnControllerField  sysEnControllerField = new SysEnControllerField(name,fieldLabel,PlatformSysConstant.FORM_XTYPE_DISPLAY,isValid,isAllowAdd,isAllowUpdate,isShowList,isAllowSearch,true);
-
-        SysEnFieldDisplay formField = new SysEnFieldDisplay();
-
-        if( StringUtils.isNotBlank( configs ) ){
-            formField.setConfigs( configs );
-        }
-		/*if( StringUtils.isNotBlank(configs) ){
-			JSONObject jo = JSONObject.fromObject( "{"+ configs +"}" );
-			this.dealFormFieldAttr( formField,jo );
-		}*/
-
-        sysEnControllerField.setSysEnFieldAttr( formField );
-        this.getSysEnControllerFieldList().add( sysEnControllerField );
-    }
 
     public void addFieldFile(String name, String fieldLabel, boolean isValid, boolean isAllowAdd, boolean isAllowUpdate,boolean isAllowBlank, String extConfigs, String serviceConfigs ){
-        this.addFieldFile(name,fieldLabel,isValid, isAllowAdd, isAllowUpdate,true,isAllowBlank, extConfigs, serviceConfigs );
+        this.addFieldFile(name,fieldLabel,isValid, isAllowAdd, isAllowUpdate,true,isAllowBlank, extConfigs, serviceConfigs,null);
+    }
+
+    public void addFieldFile(String name, String fieldLabel, boolean isValid, boolean isAllowAdd, boolean isAllowUpdate,boolean isAllowBlank, String extConfigs, String serviceConfigs,String extConfigsTransform ){
+        this.addFieldFile(name,fieldLabel,isValid, isAllowAdd, isAllowUpdate,true,isAllowBlank, extConfigs, serviceConfigs,extConfigsTransform );
     }
 
     /**
@@ -1341,7 +1243,7 @@ public class SysEnController extends AbstractBaseBean {
      * @param extConfigs
      * @param serviceConfigs  json格式
      */
-    public void addFieldFile(String name, String fieldLabel, boolean isValid, boolean isAllowAdd, boolean isAllowUpdate, boolean isShowList,boolean isAllowBlank, String extConfigs, String serviceConfigs ){
+    public void addFieldFile(String name, String fieldLabel, boolean isValid, boolean isAllowAdd, boolean isAllowUpdate, boolean isShowList,boolean isAllowBlank, String extConfigs, String serviceConfigs,String extConfigsTransform ){
         SysEnControllerField  sysEnControllerField = new SysEnControllerField(name,fieldLabel,PlatformSysConstant.FORM_XTYPE_FILE,isValid,isAllowAdd,isAllowUpdate,false,false,isAllowBlank);
 
         SysEnFieldFile formField = new SysEnFieldFile();
@@ -1385,14 +1287,59 @@ public class SysEnController extends AbstractBaseBean {
             throw new PlatformException("上传文件缺少配置！");
         }
 
+        dealExtConfigsTransform(formField,extConfigsTransform);
+
         sysEnControllerField.setSysEnFieldAttr( formField );
         this.getSysEnControllerFieldList().add( sysEnControllerField );
 
         if( isShowList ){
             //列表中显示附件名称
-            this.addFieldText(name+"OrigFileName",fieldLabel,isValid,false,false,false,true);
+            this.addFieldText(name+"OrigFileName",fieldLabel,isValid,false,false,false,true,null);
         }
     }
+
+    /**
+     * 添加一个Display表单控件   isShowList:true
+     * @param name
+     * @param fieldLabel
+     * @param isValid
+     * @param isAllowAdd
+     * @param isAllowUpdate
+     * @param isAllowSearch
+     * @param configs
+     */
+    public void addFieldDisplay(String name, String fieldLabel, boolean isValid, boolean isAllowAdd, boolean isAllowUpdate, boolean isAllowSearch,String configs){
+        this.addFieldDisplay(name,fieldLabel,isValid,isAllowAdd,isAllowUpdate,true,isAllowSearch,configs);
+    }
+
+    /**
+     * 添加一个Display表单控件
+     * @param name
+     * @param fieldLabel
+     * @param isValid
+     * @param isAllowAdd
+     * @param isAllowUpdate
+     * @param isAllowSearch
+     * @param configs
+     */
+    public void addFieldDisplay(String name, String fieldLabel, boolean isValid, boolean isAllowAdd, boolean isAllowUpdate,boolean isShowList, boolean isAllowSearch,String configs){
+        SysEnControllerField  sysEnControllerField = new SysEnControllerField(name,fieldLabel,PlatformSysConstant.FORM_XTYPE_DISPLAY,isValid,isAllowAdd,isAllowUpdate,isShowList,isAllowSearch,true);
+
+        SysEnFieldDisplay formField = new SysEnFieldDisplay();
+
+        if( StringUtils.isNotBlank( configs ) ){
+            formField.setConfigs( configs );
+        }
+		/*if( StringUtils.isNotBlank(configs) ){
+			JSONObject jo = JSONObject.fromObject( "{"+ configs +"}" );
+			this.dealFormFieldAttr( formField,jo );
+		}*/
+
+        sysEnControllerField.setSysEnFieldAttr( formField );
+        this.getSysEnControllerFieldList().add( sysEnControllerField );
+    }
+
+
 
     /**
      * 添加菜单按钮
@@ -1409,6 +1356,188 @@ public class SysEnController extends AbstractBaseBean {
         this.getSysEnControllerFunctionList().add( sysEnControllerFunction );
     }
 
+    /**
+     * 添加一个text字段，不需要传ext配置
+     * @param name
+     * @param fieldLabel
+     * @param isValid
+     * @param isAllowAdd
+     * @param isAllowUpdate
+     * @param isAllowSearch
+     * @param isAllowBlank
+     */
+/*    public void addFieldText( String name, String fieldLabel, boolean isValid, boolean isAllowAdd, boolean isAllowUpdate, boolean isAllowSearch, boolean isAllowBlank ){
+        String tempConfigs = "inputType:'"+PlatformSysConstant.FORM_INPUTTYPE_TEXT+"'";
+        this.addFieldText(name,fieldLabel,isValid,isAllowAdd,isAllowUpdate,true,isAllowSearch,isAllowBlank,tempConfigs,null);
+    }*/
+
+    /**
+     * 添加一个text字段，可以传emptyText,vtype参数，不需要传ext配置
+     * @param name
+     * @param fieldLabel
+     * @param isValid
+     * @param isAllowAdd
+     * @param isAllowUpdate
+     * @param isAllowSearch
+     * @param isAllowBlank
+     * @param emptyText
+     * @param vtype
+     */
+/*    public void addFieldText( String name, String fieldLabel, boolean isValid, boolean isAllowAdd, boolean isAllowUpdate, boolean isAllowSearch, boolean isAllowBlank, String emptyText, String vtype ){
+        String tempConfigs = "inputType:'"+PlatformSysConstant.FORM_INPUTTYPE_TEXT+"',emptyText:'"+emptyText+"',"+"vtype:'"+vtype+"'";
+        this.addFieldText(name,fieldLabel,isValid,isAllowAdd,isAllowUpdate,true,isAllowSearch,isAllowBlank,tempConfigs,null);
+    }*/
+
+    /**
+     * 添加一个text字段，可以传emptyText,vtype,ext配置参数
+     * @param name
+     * @param fieldLabel
+     * @param isValid
+     * @param isAllowAdd
+     * @param isAllowUpdate
+     * @param isAllowSearch
+     * @param isAllowBlank
+     * @param emptyText
+     * @param vtype
+     * @param configs
+     */
+/*    public void addFieldText( String name, String fieldLabel, boolean isValid, boolean isAllowAdd, boolean isAllowUpdate, boolean isAllowSearch, boolean isAllowBlank, String emptyText, String vtype,String configs ){
+        String tempConfigs = "inputType:'"+PlatformSysConstant.FORM_INPUTTYPE_TEXT+"',emptyText:'"+emptyText+"',"+"vtype:'"+vtype+"'";
+        if( StringUtils.isNotBlank( configs ) ){
+            tempConfigs += ","+configs;
+        }
+        this.addFieldText(name,fieldLabel,isValid,isAllowAdd,isAllowUpdate,true,isAllowSearch,isAllowBlank,tempConfigs,null);
+    }*/
+
+    /**
+     * 添加一个Password字段。
+     * 最简化的操作，不需要传extConfig。
+     * @param name
+     * @param fieldLabel
+     * @param isValid
+     * @param isAllowAdd
+     * @param isAllowUpdate
+     * @param isAllowSearch
+     * @param isAllowBlank
+     */
+/*    public void addFieldPassword( String name, String fieldLabel, boolean isValid, boolean isAllowAdd, boolean isAllowUpdate, boolean isAllowSearch, boolean isAllowBlank ){
+        String tempConfigs = "inputType:'"+PlatformSysConstant.FORM_INPUTTYPE_PASSWORD+"'";
+        this.addFieldText(name,fieldLabel,isValid,isAllowAdd,isAllowUpdate,false,isAllowSearch,isAllowBlank,tempConfigs,null);
+    }*/
+
+    /**
+     * 添加一个Password字段
+     * 可以传emptyText、vtype参数，不需要传extConfig。
+     * @param name
+     * @param fieldLabel
+     * @param isValid
+     * @param isAllowAdd
+     * @param isAllowUpdate
+     * @param isAllowSearch
+     * @param isAllowBlank
+     * @param emptyText
+     * @param vtype
+     */
+/*    public void addFieldPassword( String name, String fieldLabel, boolean isValid, boolean isAllowAdd, boolean isAllowUpdate, boolean isAllowSearch, boolean isAllowBlank, String emptyText, String vtype ){
+        String tempConfigs = "inputType:'"+PlatformSysConstant.FORM_INPUTTYPE_PASSWORD+"',emptyText:'"+emptyText+"',"+"vtype:'"+vtype+"'";
+        this.addFieldText(name,fieldLabel,isValid,isAllowAdd,isAllowUpdate,false,isAllowSearch,isAllowBlank,tempConfigs,null);
+    }*/
+
+    /**
+     * 添加一个Password字段。
+     * 可以传emptyText、vtype、extConfig参数。
+     * @param name
+     * @param fieldLabel
+     * @param isValid
+     * @param isAllowAdd
+     * @param isAllowUpdate
+     * @param isAllowSearch
+     * @param isAllowBlank
+     * @param emptyText
+     * @param vtype
+     * @param configs
+     */
+/*    public void addFieldPassword( String name, String fieldLabel, boolean isValid, boolean isAllowAdd, boolean isAllowUpdate, boolean isAllowSearch, boolean isAllowBlank, String emptyText, String vtype,String configs ){
+        String tempConfigs = "inputType:'"+PlatformSysConstant.FORM_INPUTTYPE_PASSWORD+"',emptyText:'"+emptyText+"',"+"vtype:'"+vtype+"'";
+        if( StringUtils.isNotBlank( configs ) ){
+            tempConfigs += ","+configs;
+        }
+        this.addFieldText(name,fieldLabel,isValid,isAllowAdd,isAllowUpdate,false,isAllowSearch,isAllowBlank,tempConfigs,null);
+    }*/
+
+    /**
+     * 暂时先保留此方法，框架编写完成后删除
+     * 添加列表页面每一个字段的相关属性
+     * @param name
+     * @param fieldLabel
+     * @param type
+     * @param xtype
+     * @param isValid
+     * @param isAllowAdd
+     * @param isAllowUpdate
+     * @param isAllowSearch
+     * @param isAllowBlank
+     * @param emptyText
+     * @param vtype
+     */
+    /*public void addField(String name, String fieldLabel, String type, String xtype, boolean isValid, boolean isAllowAdd, boolean isAllowUpdate, boolean isAllowSearch, boolean isAllowBlank, String emptyText, String vtype){
+        SysEnControllerField  sysEnControllerField = new SysEnControllerField(name,fieldLabel,type,xtype,isValid,isAllowAdd,isAllowUpdate,isAllowSearch,isAllowBlank);
+        this.getSysEnControllerFieldList().add( sysEnControllerField );
+    }*/
+
+
+
+    /**
+     * 暂时先保留此方法，框架编写完成后删除
+     * 添加列表页面每一个字段的相关属性
+     * @param name
+     * @param fieldLabel
+     * @param type
+     */
+    /*public void addField( String name, String fieldLabel, String type ){
+        this.addField(name,fieldLabel,type,null,true,true,true,true,true,null,null);
+    }*/
+
+    /**
+     * 将JSONObject的键值赋值给SysEnFormField对应的字段
+     * @param sysEnField
+     * @param jo
+     */
+    public void dealFormFieldAttr(SysEnFieldBase sysEnField, JSONObject jo ){
+        Class fieldClass = sysEnField.getClass();
+
+        SysEnFieldBase formFieldBase = new SysEnFieldBase();
+        Class baseClass = formFieldBase.getClass();
+        String baseClassInfo = baseClass.toString();
+
+        boolean endFlag = false;
+        while( !endFlag ){
+            /**
+             *getDeclaredFields只能获取类本身声明的字段，父类声明的字段获取不到
+             * 所以要通过循环设置所有的字段属性值
+             */
+            Field[] fields = fieldClass.getDeclaredFields();
+            for( Field field : fields ){
+                try{
+                    String fieldName = field.getName();
+                    if( jo.containsKey(fieldName) ){
+                        Method method = fieldClass.getDeclaredMethod( "set"+ PlatformUtils.firstLetterToUpperCase( fieldName ),String.class );
+                        method.invoke(sysEnField,jo.get(fieldName).toString() );
+                    }
+                }catch( Exception e ){
+                    e.printStackTrace();
+                }
+            }
+
+            String fieldClassInfo = fieldClass.toString();
+            if( baseClassInfo.equals( fieldClassInfo ) ){
+                endFlag = true;
+            }else{
+                fieldClass = fieldClass.getSuperclass();
+            }
+        }
+
+    }
 
     public Integer getId() {
         return id;
@@ -1464,6 +1593,14 @@ public class SysEnController extends AbstractBaseBean {
 
     public void setEditWindowConfigs(String editWindowConfigs) {
         this.editWindowConfigs = editWindowConfigs;
+    }
+
+    public String getFormValJsFileName() {
+        return formValJsFileName;
+    }
+
+    public void setFormValJsFileName(String formValJsFileName) {
+        this.formValJsFileName = formValJsFileName;
     }
 
     public List<SysEnControllerField> getSysEnControllerFieldList() {

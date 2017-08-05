@@ -1,8 +1,10 @@
 package com.tgw.controller.example;
 
 import com.tgw.bean.example.ExampleBean;
+import com.tgw.bean.example.ExampleBeanFormVal;
 import com.tgw.bean.system.SysEnController;
 import com.tgw.controller.base.BaseController;
+import com.tgw.service.example.ExampleBeanFormValService;
 import com.tgw.service.example.ExampleBeanService;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,16 +23,16 @@ import java.util.Map;
  */
 @Controller
 @RequestMapping("/exampleBeanFormVal")
-public class ExampleBeanFormValController extends BaseController<ExampleBean>{
+public class ExampleBeanFormValController extends BaseController<ExampleBeanFormVal>{
 
     @Resource
-    private ExampleBeanService exampleBeanService;
+    private ExampleBeanFormValService exampleBeanFormValService;
 
     @Override
-    public void initSearch(HttpServletRequest request, HttpServletResponse response,ModelAndView modelAndView,SysEnController controller, ExampleBean bean ) {
+    public void initSearch(HttpServletRequest request, HttpServletResponse response,ModelAndView modelAndView,SysEnController controller, ExampleBeanFormVal bean ) {
 
-        if( null!=this.getExampleBeanService() ){
-            super.initService(  this.getExampleBeanService()  );
+        if( null!=this.getExampleBeanFormValService() ){
+            super.initService(  this.getExampleBeanFormValService()  );
         }else{
 
         }
@@ -99,32 +101,35 @@ public class ExampleBeanFormValController extends BaseController<ExampleBean>{
         String extConfigsMobileNo = "vtype:'mobileNo'";
         controller.addFieldText("mobileNo","手机号",true,true,true,false,true,extConfigsMobileNo);
 
-        String extConfigsPhoneNo = "vtype:'phoneNo'";
-        controller.addFieldText("phoneNo","电话号",true,true,true,false,true,extConfigsPhoneNo);
+        String extConfigsPhoneNo = "vtype:'fixedPhoneNo'";
+        controller.addFieldText("fixedPhoneNo","固定电话号",true,true,true,false,true,extConfigsPhoneNo);
 
-        String extConfigsPhoneNoMobileNo = "vtype:'phoneNoMobileNo'";
-        controller.addFieldText("phoneNoMobileNo","电话或手机号",true,true,true,false,true,extConfigsPhoneNoMobileNo);
+        String extConfigsPhoneNoMobileNo = "vtype:'phoneNo'";
+        controller.addFieldText("phoneNo","电话或手机号",true,true,true,false,true,extConfigsPhoneNoMobileNo);
 
         String extConfigsIDNumber15 = "vtype:'IDNumber15'";
-        controller.addFieldText("IDNumber15","15位身份证",true,true,true,false,true,extConfigsIDNumber15);
+        controller.addFieldText("IdNumber15","15位身份证",true,true,true,false,true,extConfigsIDNumber15);
 
         String extConfigsIDNumber18 = "vtype:'IDNumber18'";
-        controller.addFieldText("IDNumber18","18位身份证",true,true,true,false,true,extConfigsIDNumber18);
+        controller.addFieldText("IdNumber18","18位身份证",true,true,true,false,true,extConfigsIDNumber18);
 
         String extConfigsIDNumber = "vtype:'IDNumber'";
-        controller.addFieldText("IDNumber","身份证",true,true,true,false,true,extConfigsIDNumber);
+        controller.addFieldText("IdNumber","身份证",true,true,true,false,true,extConfigsIDNumber);
+
+        String extConfigsAge = "vtype:'age'";
+        controller.addFieldNumber("age","年龄",true,true,true,true,true,extConfigsAge);
 
         String extConfigsDateYMD = "vtype:'dateYMD'";
-        controller.addFieldText("dateYMD","年月日",true,true,true,false,true,extConfigsDateYMD);
+        controller.addFieldText("dateYmd","年月日",true,true,true,false,true,extConfigsDateYMD);
 
         String extConfigsQQ = "vtype:'QQ'";
-        controller.addFieldText("QQ","QQ",true,true,true,false,true,extConfigsQQ);
+        controller.addFieldText("qq","QQ",true,true,true,false,true,extConfigsQQ);
 
         String extConfigsPostCode = "vtype:'postCode'";
         controller.addFieldText("postCode","邮政编码",true,true,true,false,true,extConfigsPostCode);
 
         String extConfigsIP = "vtype:'IP'";
-        controller.addFieldText("IP","IP地址",true,true,true,false,true,extConfigsIP);
+        controller.addFieldText("ip","IP地址",true,true,true,false,true,extConfigsIP);
 
         String extConfigsAccountNumber = "vtype:'accountNumber'";
         controller.addFieldText("accountNumber","账号",true,true,true,false,true,extConfigsAccountNumber);
@@ -134,6 +139,97 @@ public class ExampleBeanFormValController extends BaseController<ExampleBean>{
 
         String extConfigsStrongPassword = "vtype:'strongPassword'";
         controller.addFieldPassword("strongPassword","强密码",true,true,true,false,true,extConfigsStrongPassword);
+
+        //regex正则验证
+        String extConfigsRegex = "regex:/^[12]{1}[0-9]{1}$/,regexText:'输入值非法，正确范围：10-29'";
+        controller.addFieldText("regex","自定义regex",true,true,true,true,true,extConfigsRegex);
+
+        //vtype与regex可同时使用，两个都会去进行验证。
+        String extConfigsRegexVtype = "vtype:'age',regex:/^\\d{3}$/,regexText:'输入值非法，只能输入三位数的整数'";
+        controller.addFieldText("regexVtype","regex+vtype",true,true,true,true,true,extConfigsRegexVtype);
+
+        /**
+         * validator验证，自定义validator验证函数。
+         *
+         * 使用validator验证注意事项：
+         * regex、vtype进行验证时，如果输入值为空，则不会进行正则验证。
+         * 但validator不论值是否为空，都会进行正则验证，所以使用validator验证时要做好判空处理。
+         */
+        controller.setFormValJsFileName("exampleBeanFormVal");
+        String extConfigsTranText = "validatorFunName:'valText'";
+        controller.addFieldText("valText","valText",true,true,true,true,true,null,extConfigsTranText);
+
+        String extConfigsTranTextParam = "validatorFunName:'valTextParam',validatorFunField:'alpha,chinese'";//validatorFunField为要验证的字段名
+        controller.addFieldText("valTextParam","valTextParam",true,true,true,true,true,null,extConfigsTranTextParam);
+
+        String extConfigsTranPassword = "validatorFunName:'valPassword'";
+        controller.addFieldPassword("valPassword","valPassword",true,true,true,true,true,null,extConfigsTranPassword);
+
+        String extConfigsTranPasswordParam = "validatorFunName:'valPasswordParam',validatorFunField:'alpha'";
+        controller.addFieldPassword("valPasswordParam","valPasswordParam",true,true,true,true,true,null,extConfigsTranPasswordParam);
+
+        String extConfigsTranTextAreaPassword = "validatorFunName:'valTextArea'";
+        controller.addFieldTextArea("valTextArea","valTextArea",true,true,true,true,true,null,extConfigsTranTextAreaPassword);
+
+        String extConfigsTranTextAreaParam = "validatorFunName:'valTextAreaParam',validatorFunField:'alpha'";
+        controller.addFieldTextArea("valTextAreaParam","valTextAreaParam",true,true,true,true,true,null,extConfigsTranTextAreaParam);
+
+        String extConfigsTranNumber = "validatorFunName:'valNumber'";
+        controller.addFieldNumber("valNumber","valNumber",true,true,true,true,true,null,extConfigsTranNumber);
+
+        String extConfigsTranNumberParam = "validatorFunName:'valNumberParam',validatorFunField:'alpha'";
+        controller.addFieldNumber("valNumberParam","valNumberParam",true,true,true,true,true,null,extConfigsTranNumberParam);
+
+        String extConfigsTranTag = "validatorFunName:'valTag'";
+        String tagJson = "[{name:'优',value:'90'},{name:'良',value:'80'},{name:'中',value:'70'},{name:'及格',value:'60'},{name:'差',value:'50'}]";
+        controller.addFieldTagByJSON( "valTag","valTag",true,true,true,false,false,tagJson,null,extConfigsTranTag );
+
+        String extConfigsTranTagParam = "validatorFunName:'valTagParam',validatorFunField:'alpha'";
+        controller.addFieldTagByJSON( "valTagParam","valTagParam",true,true,true,false,false,tagJson,null,extConfigsTranTagParam );
+
+        String extConfigsTranDate = "validatorFunName:'valDate'";
+        controller.addFieldDate("valDate","valDate",true,true,true,true,true,null,extConfigsTranDate);
+
+        String extConfigsTranDateParam = "validatorFunName:'valDateParam',validatorFunField:'alpha'";
+        controller.addFieldDate("valDateParam","valDateParam",true,true,true,true,true,null,extConfigsTranDateParam);
+
+        String comboBoxJson = "[{name:'优',value:'90'},{name:'良',value:'80'},{name:'中',value:'70'},{name:'及格',value:'60'},{name:'差',value:'50'}]";
+        String extConfigsTranComboBox = "validatorFunName:'valComboBox'";
+        controller.addFieldComboBoxByJSON("valComboBox","valComboBox",true,true,true,false,false,comboBoxJson,null,extConfigsTranComboBox);
+
+        String extConfigsComboBoxParam = "validatorFunName:'valComboBoxParam',validatorFunField:'alpha'";
+        controller.addFieldComboBoxByJSON("valComboBoxParam","valComboBoxParam",true,true,true,false,false,comboBoxJson,null,extConfigsComboBoxParam);
+
+/*        String extConfigsTranComboBoxCascade = "validatorFunName:'valComboBoxCascade'";
+        controller.addFieldText("valComboBoxCascade","valComboBoxCascade",true,true,true,true,true,null,extConfigsTranComboBoxCascade);
+
+        String extConfigsTranComboBoxCascadeParam = "validatorFunName:'valComboBoxCascade',validatorFunField:'alpha'";
+        controller.addFieldText("valComboBoxCascade","valComboBoxCascade",true,true,true,true,true,null,extConfigsTranComboBoxCascadeParam);*/
+
+        String treeUrl6 = "exampleBean/loadTreeData.do?fieldMap=id:id,text:name,parentId:parent_id&treeFlag=district&resType=map&multiSelect=false";
+        String extConfigsTranTree = "validatorFunName:'valTree'";
+        controller.addFieldComboBoxTree( "valTree","valTree",true,true,true,false,true,null,treeUrl6,extConfigsTranTree );
+
+        String extConfigsTranTreeParam = "validatorFunName:'valTreeParam',validatorFunField:'alpha'";
+        controller.addFieldComboBoxTree( "valTreeParam","valTreeParam",true,true,true,false,true,null,treeUrl6,extConfigsTranTreeParam );
+
+        String formFileServiceConfigs1 = "savePath:'/upload/doc/',allowFileType:'doc,docx'";
+        String extConfigsTranFile = "validatorFunName:'valFile'";
+        controller.addFieldFile("valFile","valFile",true,true,true,true,null,formFileServiceConfigs1,extConfigsTranFile);
+
+        String extConfigsTranFileParam = "validatorFunName:'valFileParam',validatorFunField:'alpha'";
+        controller.addFieldFile("valFileParam","valFileParam",true,true,true,true,null,formFileServiceConfigs1,extConfigsTranFileParam);
+
+        /**
+         * regex、vtype、validator可同时使用。三个都会去进行验证。
+         * 三都验证顺序：validator、vtype、regex
+         */
+        String extConfigsRegexVtypeValidator = "regex:/^\\d{3}$/,regexText:'输入值非法，只能输入三位数的整数',vtype:'age'";
+        String extConfigsRegexVtypeValidatorTra = "validatorFunName:'valText'";
+        controller.addFieldText("regexVtypeValidator","regex+vtype+validator",true,true,true,true,true,extConfigsRegexVtypeValidator,extConfigsRegexVtypeValidatorTra);
+
+
+
         /***********************************************************************************************************
          */
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -143,12 +239,11 @@ public class ExampleBeanFormValController extends BaseController<ExampleBean>{
         controller.addFieldDatetime("updateTime","更新时间",true,true,true,false,false,updateTimeConfigs);
     }
 
-
-    public ExampleBeanService getExampleBeanService() {
-        return exampleBeanService;
+    public ExampleBeanFormValService getExampleBeanFormValService() {
+        return exampleBeanFormValService;
     }
 
-    public void setExampleBeanService(ExampleBeanService exampleBeanService) {
-        this.exampleBeanService = exampleBeanService;
+    public void setExampleBeanFormValService(ExampleBeanFormValService exampleBeanFormValService) {
+        this.exampleBeanFormValService = exampleBeanFormValService;
     }
 }
