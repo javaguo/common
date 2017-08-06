@@ -1,11 +1,9 @@
 package com.tgw.controller.example;
 
-import com.tgw.bean.example.ExampleBean;
 import com.tgw.bean.example.ExampleBeanFormVal;
 import com.tgw.bean.system.SysEnController;
 import com.tgw.controller.base.BaseController;
 import com.tgw.service.example.ExampleBeanFormValService;
-import com.tgw.service.example.ExampleBeanService;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
@@ -15,8 +13,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.List;
-import java.util.Map;
 
 /**
  * Created by zhaojg on 2017/08/01
@@ -53,9 +49,13 @@ public class ExampleBeanFormValController extends BaseController<ExampleBeanForm
         controller.addFieldId("id","ID",null);
 
         /***********************************************************************************************************
-         * 表单验证示例
+         * 表单验证示例，包括vtype、validator、regex三种验证。
          */
 
+
+        /**
+         * vtype示例
+         */
         String extConfigsAlpha = "vtype:'alpha'";
         controller.addFieldText("alpha","alpha",true,true,true,false,false,extConfigsAlpha);
 
@@ -140,16 +140,18 @@ public class ExampleBeanFormValController extends BaseController<ExampleBeanForm
         String extConfigsStrongPassword = "vtype:'strongPassword'";
         controller.addFieldPassword("strongPassword","强密码",true,true,true,false,true,extConfigsStrongPassword);
 
-        //regex正则验证
+        /**
+         * regex验证示例
+         */
         String extConfigsRegex = "regex:/^[12]{1}[0-9]{1}$/,regexText:'输入值非法，正确范围：10-29'";
         controller.addFieldText("regex","自定义regex",true,true,true,true,true,extConfigsRegex);
 
-        //vtype与regex可同时使用，两个都会去进行验证。
-        String extConfigsRegexVtype = "vtype:'age',regex:/^\\d{3}$/,regexText:'输入值非法，只能输入三位数的整数'";
-        controller.addFieldText("regexVtype","regex+vtype",true,true,true,true,true,extConfigsRegexVtype);
-
         /**
-         * validator验证，自定义validator验证函数。
+         * validator验证示例，自定义validator验证函数。
+         *
+         * 提供了两种方式（下方有举例说明）：
+         * 1.验证方法参数只传验证字段本身的值
+         * 2.验证方法参数传公证字段本身的值外，还可以传其它字段。
          *
          * 使用validator验证注意事项：
          * regex、vtype进行验证时，如果输入值为空，则不会进行正则验证。
@@ -219,6 +221,12 @@ public class ExampleBeanFormValController extends BaseController<ExampleBeanForm
 
         String extConfigsTranFileParam = "validatorFunName:'valFileParam',validatorFunField:'alpha'";
         controller.addFieldFile("valFileParam","valFileParam",true,true,true,true,null,formFileServiceConfigs1,extConfigsTranFileParam);
+
+        /**
+         *vtype与regex可同时使用，两个都会去进行验证。
+         */
+        String extConfigsRegexVtype = "vtype:'age',regex:/^\\d{3}$/,regexText:'输入值非法，只能输入三位数的整数'";
+        controller.addFieldText("regexVtype","regex+vtype",true,true,true,true,true,extConfigsRegexVtype);
 
         /**
          * regex、vtype、validator可同时使用。三个都会去进行验证。

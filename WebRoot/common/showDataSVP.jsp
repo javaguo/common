@@ -742,7 +742,7 @@ Ext.onReady(function() {
 												"value":"${comboBoxInfo.firstComboBoxParamValue}"
 											</c:when>
 											<c:otherwise>
-												"value":edit_${comboBoxInfo.parentComboBox}_${identifier}.getValue()
+												"value":field_${comboBoxInfo.parentComboBox}_${identifier}.getValue()
 											</c:otherwise>
 										</c:choose>
 								});
@@ -754,7 +754,7 @@ Ext.onReady(function() {
 						</c:when>
 						<c:otherwise>
 							<%-- 加载级联下拉框数据(除第一个下拉框),父级联框有数据时才加载子级联框 --%>
-						    if( edit_${comboBoxInfo.parentComboBox}_${identifier}.getValue() ){
+						    if( field_${comboBoxInfo.parentComboBox}_${identifier}.getValue() ){
 								comboBoxStore_${comboBoxInfo.comboBoxName}_${identifier}.load();
 							}
 						</c:otherwise>
@@ -895,7 +895,6 @@ Ext.onReady(function() {
 				<%-- 多选按钮结束 --%>
 				<%-- 下拉框开始 --%>
 				<c:when test='${fieldInfo.xtype=="combobox"}'>
-					
 					<c:if test='${fieldInfo.sysEnFieldAttr.isCascade}'>	
 						<%-- 生成级联下拉框 --%>
 						var  field_${fieldInfo.name}_${identifier} =
@@ -933,7 +932,6 @@ Ext.onReady(function() {
 							</c:if>
 						</c:forEach>
 					</c:if>
-				
 				</c:when>
 				<%-- 下拉框结束 --%>
 				<%-- Tag控件开始 --%>
@@ -1222,6 +1220,7 @@ Ext.onReady(function() {
 }
 	<%-- 编辑窗口方法结束 --%>
 
+	<%-- 搜索区域开始 --%>
 	var searPanel${identifier}=new Ext.FormPanel({
         id:'searPanel${identifier}',
 		title:'查询条件',
@@ -1313,14 +1312,37 @@ Ext.onReady(function() {
 		//直接重新加载stroe无法刷新分页栏及Ext.grid.RowNumberer()的值
 		//gridPanel${identifier}.getStore().load({params:{page:1,start:0,limit:${pageSize}}});
 	}
-
+	<%-- 搜索区域结束 --%>
+	
+	<%-- 加载数据列表开始 --%>
 	var sm${identifier} = new Ext.selection.CheckboxModel({checkOnly: false});
 
 	Ext.define("Platform.model.Entity${identifier}", {
     	extend: "Ext.data.Model",
     	fields: [
        		 <c:forEach items="${showFieldList}" var="fieldInfo" varStatus="fieldStatus">
-           	 	{ name: '${fieldInfo.name}', type: '${fieldInfo.type}' }
+				<c:choose>
+					<c:when test='${fieldInfo.xtype=="combobox"}'>
+						<c:choose>
+							<c:when test='${fieldInfo.sysEnFieldAttr.isCascade}'>
+								<c:forEach items="${fieldInfo.sysEnFieldAttr.comboBoxList}" var="comboBoxFieldInfo" varStatus="comboBoxFieldStatus">
+									{ name: '${comboBoxFieldInfo.comboBoxName}', type: '' }
+									<c:if test='${!comboBoxFieldStatus.last}'>,
+									</c:if>										
+								</c:forEach>
+							</c:when>
+							<c:when test='${!fieldInfo.sysEnFieldAttr.isCascade}'>
+								{ name: '${fieldInfo.name}', type: '${fieldInfo.type}' }
+							</c:when>
+							<c:otherwise>
+							</c:otherwise>
+						</c:choose>
+					</c:when>
+					<c:otherwise>
+						{ name: '${fieldInfo.name}', type: '${fieldInfo.type}' }
+					</c:otherwise>
+				</c:choose>
+           	 	
            	 	<c:choose>
                	 	<c:when test="${fieldStatus.last}"></c:when>
                	 	<c:otherwise>,</c:otherwise>
@@ -1363,23 +1385,61 @@ Ext.onReady(function() {
 	var columnsHead${identifier} = [
 	       			new Ext.grid.RowNumberer(),
 					<c:forEach items="${showFieldList}" var="fieldInfo" varStatus="fieldStatus">
-						{ header:'${fieldInfo.fieldLabel}',
-						  dataIndex:'${fieldInfo.name}',
-						  sortable:true,
-						  hidden:
-							<c:choose>
-								<c:when test='${fieldInfo.isShowList}'>false</c:when>
-								<c:otherwise>true</c:otherwise>
-							</c:choose>
-						}
+						<c:choose>
+							<c:when test='${fieldInfo.xtype=="combobox"}'>
+								<c:choose>
+									<c:when test='${fieldInfo.sysEnFieldAttr.isCascade}'>
+										<c:forEach items="${fieldInfo.sysEnFieldAttr.comboBoxList}" var="comboBoxFieldInfo" varStatus="comboBoxFieldStatus">
+											{ header:'${comboBoxFieldInfo.comboBoxFieldLabel}',
+											  dataIndex:'${comboBoxFieldInfo.comboBoxName}',
+											  sortable:true,
+											  hidden:
+											  	<c:choose>
+											  		<c:when test='${fieldInfo.isShowList}'>false</c:when>
+											  		<c:otherwise>true</c:otherwise>
+											  	</c:choose>
+											}
+											<c:if test='${!comboBoxFieldStatus.last}'>,
+											</c:if>										
+										</c:forEach>
+									</c:when>
+									<c:when test='${!fieldInfo.sysEnFieldAttr.isCascade}'>
+										{ header:'${fieldInfo.fieldLabel}',
+										  dataIndex:'${fieldInfo.name}',
+										  sortable:true,
+										  hidden:
+											<c:choose>
+												<c:when test='${fieldInfo.isShowList}'>false</c:when>
+												<c:otherwise>true</c:otherwise>
+											</c:choose>
+										}
+									</c:when>
+									<c:otherwise>
+									</c:otherwise>
+								</c:choose>
+							</c:when>
+							<c:otherwise>
+								{ header:'${fieldInfo.fieldLabel}',
+								  dataIndex:'${fieldInfo.name}',
+								  sortable:true,
+								  hidden:
+								  	<c:choose>
+								  		<c:when test='${fieldInfo.isShowList}'>false</c:when>
+								  		<c:otherwise>true</c:otherwise>
+								  	</c:choose>
+								}
+							</c:otherwise>
+						</c:choose>
+						
 						<c:choose>
 							<c:when test="${fieldStatus.last}"></c:when>
 							<c:otherwise>,</c:otherwise>
 						</c:choose>
 					</c:forEach>
 	           ];
+	<%-- 加载数据列表结束 --%>
 	
-	
+	<%-- 数据列表操作按钮开始 --%>
 	var operateMenu${identifier} = [
 		<c:forEach items="${functionBarList}" var="functionInfo" varStatus="functionStatus">
 			{
@@ -1489,7 +1549,9 @@ Ext.onReady(function() {
         padding: "0 20 0 20",
         items: pagingBarMenu${identifier}
     });
+	<%-- 数据列表操作按钮结束 --%>
 	
+	<%-- 数据列表面板开始 --%>
 	var gridPanel${identifier} = new Ext.grid.GridPanel({
 		title:'查询结果',
 		region: 'center',
@@ -1547,7 +1609,9 @@ Ext.onReady(function() {
 		}
 
     });
-    
+    <%-- 数据列表面板结束 --%>
+	
+	<%-- 组装渲染展示列表页面开始 --%>
     var pagePanel${identifier} =new Ext.container.Container({
         id:'pagePanel${identifier}',  
         //renderTo:'pageContainer${identifier}',
@@ -1579,10 +1643,10 @@ Ext.onReady(function() {
 	 * 			pagePanel不指定renderTo属性，使用Ext.getCmp(parentId).add( pagePanel )方法加载页面
 	 */
 	Ext.getCmp('right_tab_${identifier}').add( pagePanel${identifier} );
-
+	<%-- 组装渲染展示列表页面结束 --%>
+	
 	/**onReady结束*/
 }); 	
-
 	</script>
   </head>
   <body>

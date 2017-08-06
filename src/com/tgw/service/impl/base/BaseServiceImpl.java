@@ -43,7 +43,7 @@ public  class BaseServiceImpl  implements BaseService,Serializable {
     }*/
 
     @Override
-    public Object searchData(int pageNum, int pageSize,Object object) {
+    public Page searchData(int pageNum, int pageSize,Object object) {
         System.out.println("----------------- 父类BaseServiceImpl --> searchData-----------------");
 
         //this.initSearchData(pageNum,pageSize,object);
@@ -53,15 +53,12 @@ public  class BaseServiceImpl  implements BaseService,Serializable {
         BaseModelMapper baseModelMappertemp = this.getBaseModelMapper();
         List<Map<String,Object>> queryResList =this.getBaseModelMapper().searchData(object);
         Page queryResPage = (Page) queryResList;
-        List items = queryResPage.getResult();
+
         System.out.println("总数："+queryResPage.getTotal() +"   页数："+queryResPage.getPages()+"    第几页："+queryResPage.getPageNum() + "   每页大小："+queryResPage.getPageSize() );
 
-        //组装查询结果
-        JSONObject jo = JSONObject.fromObject("{}");
-        jo.put("total",queryResPage.getTotal() );
-        jo.put("items", items );
 
-        return jo.toString();
+
+        return queryResPage;
     }
 
     @Override

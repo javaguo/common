@@ -66,6 +66,7 @@ public class SysEnController extends AbstractBaseBean {
 
     /**
      * 处理ext的特殊配置。
+     * 将一些自定义的配置转为ext的配置。
      * @param formField
      * @param extConfigsTransform
      */
@@ -1016,8 +1017,12 @@ public class SysEnController extends AbstractBaseBean {
      * @param comboBoxConfigs
      */
     public void addFieldComboBoxCascadeBySQL(  String fieldLabel,  boolean isValid, boolean isAllowAdd, boolean isAllowUpdate, boolean isAllowSearch, boolean isAllowBlank,
-                                               String comboBoxGroupName,String firstComboBoxParamValue,String[] comboBoxNames,String[] comboBoxFlag,String comboBoxGroupConfigs,String comboBoxConfigs,String[] comboBoxInitVal ){
-        this.addFieldComboBoxCascadeBySQL(fieldLabel,isValid,isAllowAdd,isAllowUpdate,true,isAllowSearch,isAllowBlank,comboBoxGroupName,firstComboBoxParamValue,comboBoxNames,comboBoxFlag,comboBoxGroupConfigs,comboBoxConfigs,comboBoxInitVal);
+                                               String comboBoxGroupName,String firstComboBoxParamValue,
+                                               String[] comboBoxFieldLabel,String[] comboBoxNames,String[] comboBoxFlag,
+                                               String comboBoxGroupConfigs,String comboBoxConfigs,String[] comboBoxInitVal ){
+        this.addFieldComboBoxCascadeBySQL(fieldLabel,isValid,isAllowAdd,isAllowUpdate,true,isAllowSearch,isAllowBlank,
+                                            comboBoxGroupName,firstComboBoxParamValue,
+                                            comboBoxFieldLabel,comboBoxNames,comboBoxFlag,comboBoxGroupConfigs,comboBoxConfigs,comboBoxInitVal);
     }
 
     /**
@@ -1037,8 +1042,12 @@ public class SysEnController extends AbstractBaseBean {
      * @param comboBoxConfigs
      */
     public void addFieldComboBoxCascadeBySQL(  String fieldLabel,  boolean isValid, boolean isAllowAdd, boolean isAllowUpdate, boolean isAllowSearch, boolean isAllowBlank,
-                                               String comboBoxGroupName,String firstComboBoxParamValue,String[] comboBoxNames,String[] comboBoxFlag,String comboBoxGroupConfigs,String comboBoxConfigs ){
-        this.addFieldComboBoxCascadeBySQL(fieldLabel,isValid,isAllowAdd,isAllowUpdate,true,isAllowSearch,isAllowBlank,comboBoxGroupName,firstComboBoxParamValue,comboBoxNames,comboBoxFlag,comboBoxGroupConfigs,comboBoxConfigs,null);
+                                               String comboBoxGroupName,String firstComboBoxParamValue,
+                                               String[] comboBoxFieldLabel,String[] comboBoxNames,String[] comboBoxFlag,
+                                               String comboBoxGroupConfigs,String comboBoxConfigs ){
+        this.addFieldComboBoxCascadeBySQL(fieldLabel,isValid,isAllowAdd,isAllowUpdate,true,isAllowSearch,isAllowBlank,
+                                            comboBoxGroupName,firstComboBoxParamValue,
+                                            comboBoxFieldLabel,comboBoxNames,comboBoxFlag,comboBoxGroupConfigs,comboBoxConfigs,null);
     }
 
     /**
@@ -1058,8 +1067,10 @@ public class SysEnController extends AbstractBaseBean {
      * @param comboBoxConfigs
      */
     public void addFieldComboBoxCascadeBySQL(  String fieldLabel,  boolean isValid, boolean isAllowAdd, boolean isAllowUpdate,boolean isShowList, boolean isAllowSearch, boolean isAllowBlank,
-                                               String comboBoxGroupName,String firstComboBoxParamValue,String[] comboBoxNames,String[] comboBoxFlag,String comboBoxGroupConfigs,String comboBoxConfigs,String[] comboBoxInitVal ){
-        if( comboBoxNames==null || comboBoxFlag ==null || ( comboBoxNames.length!=comboBoxFlag.length )  ){
+                                               String comboBoxGroupName,String firstComboBoxParamValue,
+                                               String[] comboBoxFieldLabel,String[] comboBoxNames,String[] comboBoxFlag,
+                                               String comboBoxGroupConfigs,String comboBoxConfigs,String[] comboBoxInitVal ){
+        if( comboBoxFieldLabel==null || comboBoxNames==null || comboBoxFlag ==null || ( comboBoxNames.length!=comboBoxFlag.length )  || ( comboBoxNames.length!=comboBoxFieldLabel.length ) ){
             throw new PlatformException("构造下拉框出错！参数错误！");
         }
 
@@ -1088,6 +1099,7 @@ public class SysEnController extends AbstractBaseBean {
 
             SysEnFieldComboBox tempComboBox = new SysEnFieldComboBox();
             tempComboBox.setComboBoxName( comboBoxNames[i] );
+            tempComboBox.setComboBoxFieldLabel( comboBoxFieldLabel[i] );
             tempComboBox.setLoadDataImplModel("sql");
             if( i==0 ){
                 tempComboBox.setFirstComboBoxParamValue( firstComboBoxParamValue );

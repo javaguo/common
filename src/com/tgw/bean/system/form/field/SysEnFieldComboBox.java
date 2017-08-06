@@ -10,6 +10,7 @@ public class SysEnFieldComboBox extends SysEnFieldPicker {
 
     private String comboBoxFlag;//下拉框获取数据唯一标识(在具体业务的controller中获取数据使用)
     private String comboBoxName;//下拉框名称
+    private String comboBoxFieldLabel;//下拉框字段标签
     /**
      * 加载下拉框数据的实现方式，两种实现方式：
      * 1.通过sql查询数据库（自己实现查询下拉框数据方法，覆写baseController中的方法）
@@ -48,6 +49,14 @@ public class SysEnFieldComboBox extends SysEnFieldPicker {
 
     public void setComboBoxName(String comboBoxName) {
         this.comboBoxName = comboBoxName;
+    }
+
+    public String getComboBoxFieldLabel() {
+        return comboBoxFieldLabel;
+    }
+
+    public void setComboBoxFieldLabel(String comboBoxFieldLabel) {
+        this.comboBoxFieldLabel = comboBoxFieldLabel;
     }
 
     public String getLoadDataImplModel() {

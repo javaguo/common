@@ -1,5 +1,6 @@
 package com.tgw.controller.base;
 
+import com.github.pagehelper.Page;
 import com.tgw.bean.base.AbstractBaseBean;
 import com.tgw.bean.system.*;
 import com.tgw.bean.system.form.field.*;
@@ -316,8 +317,16 @@ public class BaseController<T extends AbstractBaseBean> implements Serializable 
 			int pageSize = Integer.parseInt(pageSizeStr);
 
 			//查询数据
-			String json = (String)this.getBaseService().searchData(pageNum,pageSize,bean);
-			modelAndView.addObject( PlatformSysConstant.JSONSTR, json );
+			Page queryResPage = this.getBaseService().searchData(pageNum,pageSize,bean);
+			List items = queryResPage.getResult();
+			items = dealSearchData(request,response,bean,items);
+
+			//组装查询结果
+			JSONObject jo = JSONObject.fromObject("{}");
+			jo.put("total",queryResPage.getTotal() );
+			jo.put("items", items );
+
+			modelAndView.addObject( PlatformSysConstant.JSONSTR, jo.toString() );
 
 		} catch(Exception e) {
 			e.printStackTrace();
@@ -325,6 +334,18 @@ public class BaseController<T extends AbstractBaseBean> implements Serializable 
 
 		modelAndView.setViewName( this.getJsonView() );
 		return modelAndView;
+	}
+
+	/**
+	 * 对查询结果进行处理。
+	 * 如果需要对从数据库中查询出的结果进行处理，可以在具体业务中覆写此方法。
+	 * @param request
+	 * @param response
+	 * @param bean
+	 * @param dataList
+     */
+	public List dealSearchData(HttpServletRequest request, HttpServletResponse response, T bean,List dataList){
+		return dataList;
 	}
 
 	public void beforeAdd(){
