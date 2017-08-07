@@ -106,4 +106,10 @@ order by exam.update_time desc
 		select tree.id,tree.name,tree.parent_id
 		from example_bean_tree tree
 	</select>
+
+	<select id="queryAllDistrict"  resultType="map">
+		select tree.id,tree.name,tree.parent_id
+ 		  from example_bean_tree tree
+		order by tree.id
+	</select>
 </mapper>

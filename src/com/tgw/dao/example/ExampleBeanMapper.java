@@ -1,8 +1,8 @@
 package com.tgw.dao.example;
 
-import com.tgw.bean.base.BaseEnConstant;
 import com.tgw.bean.example.ExampleBean;
 import com.tgw.dao.base.BaseModelMapper;
+import com.tgw.exception.PlatformException;
 
 import java.util.List;
 import java.util.Map;
@@ -44,5 +44,12 @@ public interface ExampleBeanMapper extends BaseModelMapper<ExampleBean> {
      * @return
      */
     public abstract List<Map<String,Object>> queryMenuTreeMap();
+
+    /**
+     * 查询所有的行政区划信息
+     * @return
+     * @throws PlatformException
+     */
+    public abstract List<Map<String,Object>> queryAllDistrict();
 
 }

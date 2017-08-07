@@ -2,8 +2,13 @@ package com.tgw.controller.base;
 
 import com.github.pagehelper.Page;
 import com.tgw.bean.base.AbstractBaseBean;
-import com.tgw.bean.system.*;
-import com.tgw.bean.system.form.field.*;
+import com.tgw.bean.system.SysEnController;
+import com.tgw.bean.system.SysEnControllerField;
+import com.tgw.bean.system.SysEnControllerFunction;
+import com.tgw.bean.system.form.field.SysEnFieldComboBox;
+import com.tgw.bean.system.form.field.SysEnFieldComboBoxGroup;
+import com.tgw.bean.system.form.field.SysEnFieldDate;
+import com.tgw.bean.system.form.field.SysEnFieldTag;
 import com.tgw.bean.system.tree.SysEnTreeNode;
 import com.tgw.exception.PlatformException;
 import com.tgw.platform.propertyeditors.PlatformCustomDateEditor;
@@ -12,12 +17,10 @@ import com.tgw.utils.PlatformInfo;
 import com.tgw.utils.PlatformUtils;
 import com.tgw.utils.config.PlatformSysConstant;
 import com.tgw.utils.file.PlatformFileUtils;
+import com.tgw.utils.string.PlatformStringUtils;
 import com.tgw.utils.tree.PlatformTreeUtils;
-import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
-import org.apache.commons.collections.ArrayStack;
 import org.apache.commons.lang.StringUtils;
-import org.springframework.beans.propertyeditors.CustomDateEditor;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.InitBinder;
@@ -33,7 +36,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.Serializable;
-import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -475,8 +477,8 @@ public class BaseController<T extends AbstractBaseBean> implements Serializable 
 						}
 						try{
 							Class beanClass = bean.getClass();
-							Method fileUrlMethod = beanClass.getDeclaredMethod( "set"+PlatformUtils.firstLetterToUpperCase(file.getName()+"Url"),String.class );
-							Method fileNameMethod = beanClass.getDeclaredMethod( "set"+PlatformUtils.firstLetterToUpperCase(file.getName()+"OrigFileName"),String.class );
+							Method fileUrlMethod = beanClass.getDeclaredMethod( "set"+ PlatformStringUtils.firstLetterToUpperCase(file.getName()+"Url"),String.class );
+							Method fileNameMethod = beanClass.getDeclaredMethod( "set"+PlatformStringUtils.firstLetterToUpperCase(file.getName()+"OrigFileName"),String.class );
 							fileUrlMethod.invoke(bean,savePath);
 							fileNameMethod.invoke(bean,file.getOriginalFilename());
 						}catch (NoSuchMethodException e){
@@ -584,14 +586,14 @@ public class BaseController<T extends AbstractBaseBean> implements Serializable 
                                  * 遍历级联下拉框组的每一个下拉框
 								 */
 								for( SysEnFieldComboBox sysEnFieldComboBox:comboBoxList ){
-									met=obj.getClass().getDeclaredMethod( "get"+PlatformUtils.firstLetterToUpperCase( sysEnFieldComboBox.getComboBoxName() ) );
+									met=obj.getClass().getDeclaredMethod( "get"+PlatformStringUtils.firstLetterToUpperCase( sysEnFieldComboBox.getComboBoxName() ) );
 									tempObj = met.invoke(obj);
 
 									objJSON.put( sysEnFieldComboBox.getComboBoxName(),tempObj );
 								}
 
 							}else{//单个下拉框
-								met=obj.getClass().getDeclaredMethod( "get"+PlatformUtils.firstLetterToUpperCase(updateField.getName()) );
+								met=obj.getClass().getDeclaredMethod( "get"+PlatformStringUtils.firstLetterToUpperCase(updateField.getName()) );
 								tempObj = met.invoke(obj);
 
 								objJSON.put( updateField.getName(),tempObj );
@@ -599,7 +601,7 @@ public class BaseController<T extends AbstractBaseBean> implements Serializable 
 
 						}else if( PlatformSysConstant.FORM_XTYPE_FILE.equals( updateField.getXtype() ) ){
 							//编辑页面中显示文件的原始文件名
-							met=obj.getClass().getDeclaredMethod( "get"+PlatformUtils.firstLetterToUpperCase(updateField.getName())+"OrigFileName" );
+							met=obj.getClass().getDeclaredMethod( "get"+PlatformStringUtils.firstLetterToUpperCase(updateField.getName())+"OrigFileName" );
 							tempObj = met.invoke(obj);
 
 							objJSON.put( updateField.getName(),tempObj );
@@ -609,7 +611,7 @@ public class BaseController<T extends AbstractBaseBean> implements Serializable 
                              * 保存文件的路径，此字段为框架自动加的，不需要给赋值，具体业务的controller在添加附件字段时已经给此字段配置了值。
 							 */
 						}else{//其他类型字段
-							met=obj.getClass().getDeclaredMethod( "get"+PlatformUtils.firstLetterToUpperCase(updateField.getName()) );
+							met=obj.getClass().getDeclaredMethod( "get"+PlatformStringUtils.firstLetterToUpperCase(updateField.getName()) );
 							tempObj = met.invoke(obj);
 
 							Class returnClass = met.getReturnType();
@@ -735,18 +737,18 @@ public class BaseController<T extends AbstractBaseBean> implements Serializable 
 								 * 遍历级联下拉框组的每一个下拉框
 								 */
 								for( SysEnFieldComboBox sysEnFieldComboBox:comboBoxList ){
-									getMet=beanClass.getDeclaredMethod( "get"+PlatformUtils.firstLetterToUpperCase(sysEnFieldComboBox.getComboBoxName()) );
+									getMet=beanClass.getDeclaredMethod( "get"+PlatformStringUtils.firstLetterToUpperCase(sysEnFieldComboBox.getComboBoxName()) );
 									tempObj = getMet.invoke( bean );
 
-									setMet=beanClass.getDeclaredMethod( "set"+PlatformUtils.firstLetterToUpperCase(sysEnFieldComboBox.getComboBoxName()),getMet.getReturnType() );
+									setMet=beanClass.getDeclaredMethod( "set"+PlatformStringUtils.firstLetterToUpperCase(sysEnFieldComboBox.getComboBoxName()),getMet.getReturnType() );
 									setMet.invoke(oldObj,tempObj);
 								}
 
 							}else{//单个下拉框
-								getMet=beanClass.getDeclaredMethod( "get"+PlatformUtils.firstLetterToUpperCase(updateField.getName()) );
+								getMet=beanClass.getDeclaredMethod( "get"+PlatformStringUtils.firstLetterToUpperCase(updateField.getName()) );
 								tempObj = getMet.invoke( bean );
 
-								setMet=beanClass.getDeclaredMethod( "set"+PlatformUtils.firstLetterToUpperCase(updateField.getName()),getMet.getReturnType() );
+								setMet=beanClass.getDeclaredMethod( "set"+PlatformStringUtils.firstLetterToUpperCase(updateField.getName()),getMet.getReturnType() );
 								setMet.invoke(oldObj,tempObj);
 							}
 
@@ -759,10 +761,10 @@ public class BaseController<T extends AbstractBaseBean> implements Serializable 
 							 * 保存文件的路径，此字段为框架自动加的，不需要处理，在后面处理附件时使用。
 							 */
 						}else{//其它类型字段
-							getMet=beanClass.getDeclaredMethod( "get"+PlatformUtils.firstLetterToUpperCase(updateField.getName()) );
+							getMet=beanClass.getDeclaredMethod( "get"+PlatformStringUtils.firstLetterToUpperCase(updateField.getName()) );
 							tempObj = getMet.invoke( bean );
 
-							setMet=beanClass.getDeclaredMethod( "set"+PlatformUtils.firstLetterToUpperCase(updateField.getName()),getMet.getReturnType() );
+							setMet=beanClass.getDeclaredMethod( "set"+PlatformStringUtils.firstLetterToUpperCase(updateField.getName()),getMet.getReturnType() );
 							setMet.invoke(oldObj,tempObj);
 						}
 
@@ -841,8 +843,8 @@ public class BaseController<T extends AbstractBaseBean> implements Serializable 
 									savePath = savePath+File.separator+renameFileName;
 								}
 								try{
-									Method fileUrlMethod = beanClass.getDeclaredMethod( "set"+PlatformUtils.firstLetterToUpperCase(file.getName()+"Url"),String.class );
-									Method fileNameMethod = beanClass.getDeclaredMethod( "set"+PlatformUtils.firstLetterToUpperCase(file.getName()+"OrigFileName"),String.class );
+									Method fileUrlMethod = beanClass.getDeclaredMethod( "set"+PlatformStringUtils.firstLetterToUpperCase(file.getName()+"Url"),String.class );
+									Method fileNameMethod = beanClass.getDeclaredMethod( "set"+PlatformStringUtils.firstLetterToUpperCase(file.getName()+"OrigFileName"),String.class );
 									fileUrlMethod.invoke(oldObj,savePath);
 									fileNameMethod.invoke(oldObj,file.getOriginalFilename());
 								}catch (NoSuchMethodException e){

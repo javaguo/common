@@ -2,7 +2,7 @@ package com.tgw.utils.tree;
 
 import com.tgw.bean.system.tree.SysEnTreeNode;
 import com.tgw.exception.PlatformException;
-import com.tgw.utils.PlatformUtils;
+import com.tgw.utils.string.PlatformStringUtils;
 import net.sf.json.JSONArray;
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.lang.StringUtils;
@@ -137,7 +137,7 @@ public class PlatformTreeUtils {
 					String treeNodeFieldName = fieldMap[0];//树节点对象的字段属性名称
 					String orgFieldName = fieldMap[1];//源对象的字段属性名称
 
-					Method met=orgTreeNode.getClass().getDeclaredMethod( "get"+ PlatformUtils.firstLetterToUpperCase(orgFieldName.trim()) );
+					Method met=orgTreeNode.getClass().getDeclaredMethod( "get"+ PlatformStringUtils.firstLetterToUpperCase(orgFieldName.trim()) );
 					Object tempVal = met.invoke(orgTreeNode);
 
 					BeanUtils.copyProperty( sysEnTreeNode,treeNodeFieldName,tempVal.toString() );

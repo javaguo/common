@@ -1,37 +1,18 @@
 package com.tgw.bean.system;
 
+import com.tgw.bean.base.AbstractBaseBean;
+import com.tgw.bean.system.form.field.*;
+import com.tgw.exception.PlatformException;
+import com.tgw.utils.config.PlatformSysConstant;
+import com.tgw.utils.string.PlatformStringUtils;
+import net.sf.json.JSONArray;
+import net.sf.json.JSONObject;
+import org.apache.commons.lang.StringUtils;
+
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
-
-import net.sf.json.JSONArray;
-import net.sf.json.JSONObject;
-
-import org.apache.commons.lang.StringUtils;
-
-import com.tgw.bean.base.AbstractBaseBean;
-import com.tgw.bean.system.form.field.SysEnFieldBase;
-import com.tgw.bean.system.form.field.SysEnFieldCheckbox;
-import com.tgw.bean.system.form.field.SysEnFieldCheckboxGroup;
-import com.tgw.bean.system.form.field.SysEnFieldComboBox;
-import com.tgw.bean.system.form.field.SysEnFieldComboBoxGroup;
-import com.tgw.bean.system.form.field.SysEnFieldComboBoxOption;
-import com.tgw.bean.system.form.field.SysEnFieldComboBoxTree;
-import com.tgw.bean.system.form.field.SysEnFieldDate;
-import com.tgw.bean.system.form.field.SysEnFieldDisplay;
-import com.tgw.bean.system.form.field.SysEnFieldFile;
-import com.tgw.bean.system.form.field.SysEnFieldHidden;
-import com.tgw.bean.system.form.field.SysEnFieldHtmlEditor;
-import com.tgw.bean.system.form.field.SysEnFieldNumber;
-import com.tgw.bean.system.form.field.SysEnFieldRadio;
-import com.tgw.bean.system.form.field.SysEnFieldRadioGroup;
-import com.tgw.bean.system.form.field.SysEnFieldTag;
-import com.tgw.bean.system.form.field.SysEnFieldText;
-import com.tgw.bean.system.form.field.SysEnFieldTextArea;
-import com.tgw.exception.PlatformException;
-import com.tgw.utils.PlatformUtils;
-import com.tgw.utils.config.PlatformSysConstant;
 
 /**
  * Created by zhaojg on 2016/10/20.
@@ -1533,7 +1514,7 @@ public class SysEnController extends AbstractBaseBean {
                 try{
                     String fieldName = field.getName();
                     if( jo.containsKey(fieldName) ){
-                        Method method = fieldClass.getDeclaredMethod( "set"+ PlatformUtils.firstLetterToUpperCase( fieldName ),String.class );
+                        Method method = fieldClass.getDeclaredMethod( "set"+ PlatformStringUtils.firstLetterToUpperCase( fieldName ),String.class );
                         method.invoke(sysEnField,jo.get(fieldName).toString() );
                     }
                 }catch( Exception e ){

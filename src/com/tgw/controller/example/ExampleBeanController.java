@@ -4,6 +4,8 @@ import com.tgw.bean.example.ExampleBean;
 import com.tgw.bean.system.SysEnController;
 import com.tgw.controller.base.BaseController;
 import com.tgw.service.example.ExampleBeanService;
+import com.tgw.utils.collections.PlatformCollectionsUtils;
+import com.tgw.utils.string.PlatformStringUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
@@ -339,18 +341,94 @@ public class ExampleBeanController extends BaseController<ExampleBean>{
         return  modelAndView;
     }*/
 
+    @Override
     public List dealSearchData(HttpServletRequest request, HttpServletResponse response,ExampleBean bean,List dataList){
         System.out.println("可以在具体业务的controller中对数据库的查询结果进行处理。");
+        /**
+         *具体业务controller中可以覆写dealSearchData方法，可以对数据库的查询结果进行加工处理。
+         *
+         * 本示例中，将查询结果的某些列的值进行了处理。将ids转为names。查询列表中最后展示names。
+         */
+
+        Map<String,Object> formBooleanDataMap =getFormBooleanDataMap();
+        Map<String,Object> formTagJson =getFormTagDataMap();
+        Map<String,Object> formRadioDataMap =getFormRadioDataMap();
+        Map<String,Object> formCheckboxDataMap =getFormCheckboxDataMap();
+
+        List<Map<String, Object>> allDisRes = this.getExampleBeanService().queryAllDistrict();
+        Map<String,Object> disMap = PlatformCollectionsUtils.convertListMapToMap( allDisRes,"id","name" );
 
         for( int i=0;i<dataList.size();i++ ){
             HashMap<String,Object> map = (HashMap<String,Object>)dataList.get(i);
-            if( map.containsKey( "formText" ) ){
-                map.put("formText","已处理--"+map.get( "formText" ).toString() );
+
+            if( map.get("formBoolean")!=null ){
+                map.put("formBoolean", PlatformStringUtils.strKeyToName( map.get("formBoolean").toString(),formBooleanDataMap ));
+            }
+
+            if( map.get("formTagSql")!=null ){
+                map.put("formTagSql", PlatformStringUtils.strKeyToName( map.get("formTagSql").toString(),disMap ));
+            }
+
+            if( map.get("formRadio")!=null ){
+                map.put("formRadio", PlatformStringUtils.strKeyToName( map.get("formRadio").toString(),formRadioDataMap ));
+            }
+
+            if( map.get("formCheckbox")!=null ){
+                map.put("formCheckbox", PlatformStringUtils.strKeyToName( map.get("formCheckbox").toString(),formCheckboxDataMap ));
+            }
+
+            if( map.get("formComboBoxTree4")!=null ){
+                map.put("formComboBoxTree4", PlatformStringUtils.strKeyToName( map.get("formComboBoxTree4").toString(),disMap ));
+            }
+
+            if( map.get("formComboBoxTree5")!=null ){
+                map.put("formComboBoxTree5", PlatformStringUtils.strKeyToName( map.get("formComboBoxTree5").toString(),disMap ));
+            }
+
+            if( map.get("formComboBoxTree6")!=null ){
+                map.put("formComboBoxTree6", PlatformStringUtils.strKeyToName( map.get("formComboBoxTree6").toString(),disMap ));
             }
 
             dataList.set(i,map);
         }
         return dataList;
+    }
+
+    private Map<String,Object> getFormBooleanDataMap(){
+        Map<String,Object> map = new HashMap<String,Object>();
+        map.put("1","是");
+        map.put("0","否");
+
+        return map;
+    }
+
+    private Map<String,Object> getFormTagDataMap(){
+        Map<String,Object> map = new HashMap<String,Object>();
+        map.put("90","优");
+        map.put("80","良");
+        map.put("70","中");
+        map.put("60","及格");
+        map.put("50","差");
+
+        return map;
+    }
+
+    private Map<String,Object> getFormRadioDataMap(){
+        Map<String,Object> map = new HashMap<String,Object>();
+        map.put("90","优秀");
+        map.put("80","良好");
+        map.put("70","中等");
+
+        return map;
+    }
+
+    private Map<String,Object> getFormCheckboxDataMap(){
+        Map<String,Object> map = new HashMap<String,Object>();
+        map.put("readbook","读书");
+        map.put("running","跑步");
+        map.put("swimming","游泳");
+
+        return map;
     }
 
     @Override

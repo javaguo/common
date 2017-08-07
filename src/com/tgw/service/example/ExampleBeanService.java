@@ -38,4 +38,11 @@ public interface ExampleBeanService extends BaseService{
      * @throws PlatformException
      */
     public abstract List<Map<String,Object>> queryMenuTreeMap() throws PlatformException;
+
+    /**
+     * 查询所有的行政区划信息
+     * @return
+     * @throws PlatformException
+     */
+    public abstract List<Map<String,Object>> queryAllDistrict() throws PlatformException;
 }

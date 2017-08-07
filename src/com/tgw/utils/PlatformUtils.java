@@ -45,14 +45,4 @@ public class PlatformUtils {
 		return list;
 	}
 
-	/**
-	 * 第一个字母转为大写
-	 * @param old
-	 * @return
-	 */
-	public static String firstLetterToUpperCase(String old){
-		String str=old.substring(0,1).toUpperCase()+old.substring(1);
-		return str;
-	}
-
 }
