@@ -2,6 +2,7 @@ package com.tgw.controller.example;
 
 import com.tgw.bean.example.ExampleBean;
 import com.tgw.bean.system.SysEnController;
+import com.tgw.bean.system.SysEnControllerField;
 import com.tgw.controller.base.BaseController;
 import com.tgw.service.example.ExampleBeanService;
 import com.tgw.utils.collections.PlatformCollectionsUtils;
@@ -14,7 +15,10 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created by zhaojg on 2017/03/25
@@ -101,6 +105,8 @@ public class ExampleBeanController extends BaseController<ExampleBean>{
 
         /***********************************************************************************************************
          * 隐藏域、文本框、密码框、文本域
+         *
+         * 添加、编辑窗口中的显示样式相同，在各controller中分别配置，搜索区域样式已在前端页面中统一配置好。
          */
         String formHiddenConfigs = "value:'hidden隐藏域值'";
         String formTextConfigs = "labelWidth:100,width:400,emptyText:'文本提示信息',value:'初始值'";
@@ -113,8 +119,8 @@ public class ExampleBeanController extends BaseController<ExampleBean>{
 
         controller.addFieldHidden( "formHidden","form隐藏域",true,true,true,formHiddenConfigs );
         controller.addFieldText("formText","文本框",true,true,true,true,false,formTextConfigs);
-        controller.addFieldPassword("formPassword","密码框",true,true,true,false,false,formPasswordConfigs);
-        controller.addFieldTextArea("formTextArea","文本域",true,true,true,true,false,formTextAreaConfigs);
+        controller.addFieldPassword("formPassword","密码框",true,true,true,false,formPasswordConfigs);
+        controller.addFieldTextArea("formTextArea","文本域",true,true,true,false,false,formTextAreaConfigs);
 
         /***********************************************************************************************************
          * 数字控件
@@ -123,6 +129,8 @@ public class ExampleBeanController extends BaseController<ExampleBean>{
          *
          * 基本类型的数据目前提交表单时还存在问题。当值为空的时候，表单提交报400错误。
          * 所以项目中定义数据变量时使用包装类型
+         *
+         * 添加、编辑窗口中的显示样式相同，在各controller中分别配置，搜索区域样式已在前端页面中统一配置好。
          */
         String formNumberIntConfigs = "labelWidth:100,width:300,height:25,emptyText:'整数',allowDecimals:false,maxValue:20,maxText:'最大为20',minValue:6,minText:'最小为6'";
         String formNumberDoubleConfigs = "labelWidth:100,width:300,height:25,emptyText:'小数',maxValue:999.9,maxText:'最大为999.9',minValue:0.1,minText:'最小为0.1',step:100,value:'109.58'";
@@ -143,10 +151,12 @@ public class ExampleBeanController extends BaseController<ExampleBean>{
         controller.addFieldNumber("formNumberDoubleBase","double",true,true,true,false,true,formNumberDoubleConfigs);
         controller.addFieldRadioInitDataByJson("formBooleanBase","boolean",true,true,false,false,false,booleanJson,formRadioGroupConfigs,formRadioConfigs);*/
 
-        controller.addFieldNumber("formNumberShort","Short",true,true,true,true,true,formNumberIntConfigs);
+        SysEnControllerField fieldFormNumberShort = controller.addFieldNumber("formNumberShort","Short",true,true,true,true,true,formNumberIntConfigs);
+        fieldFormNumberShort.setSearByRange( true );
         controller.addFieldNumber("formNumberInteger","Integer",true,true,true,true,true,formNumberIntConfigs);
-        controller.addFieldNumber("formNumberLong","Long",true,true,true,true,true,formNumberIntConfigs);
-        controller.addFieldNumber("formNumberFloat","Float",true,true,true,true,true,formNumberDoubleConfigs);
+        SysEnControllerField fieldFormNumberLong = controller.addFieldNumber("formNumberLong","Long",true,true,true,false,true,formNumberIntConfigs);
+        //fieldFormNumberLong.setSearByRange( true );
+        controller.addFieldNumber("formNumberFloat","Float",true,true,true,false,true,formNumberDoubleConfigs);
         controller.addFieldNumber("formNumberDouble","Double",true,true,true,true,true,formNumberDoubleConfigs);
         String booleanJson = "[{name:'是',value:'true',eleId:'formBooleanShi',checked:true},{name:'否',value:'false',eleId:'formBooleanFou'}]";
         controller.addFieldRadioInitDataByJson("formBoolean","Boolean",true,true,true,false,true,booleanJson,formRadioGroupConfigsBoolean,formRadioConfigsBoolean);
@@ -155,6 +165,8 @@ public class ExampleBeanController extends BaseController<ExampleBean>{
          * Tag控件，ext的Tag控件继承自combobox
          *
          *目前存在的bug，点击tag控件后，总是要回跳到formPanel顶部。radioGroup与checkGroup也存在相同的问题。
+         *
+         * 添加、编辑窗口中的显示样式相同，在各controller中分别配置，搜索区域样式已在前端页面中统一配置好。
          */
         String formTagJsonConfigs = "";
         String formTagSqlConfigs = "value:'130000,140000'";
@@ -163,27 +175,33 @@ public class ExampleBeanController extends BaseController<ExampleBean>{
         String tagJson = "[{name:'优',value:'90'},{name:'良',value:'80'},{name:'中',value:'70'},{name:'及格',value:'60'},{name:'差',value:'50'}]";
 
         controller.addFieldTagByJSON( "formTagJson","tag控件(json)",true,true,true,false,false,tagJson,formTagJsonConfigs );
-        controller.addFieldTagBySQL( "formTagSql","tag控件(sql)",true,true,true,false,true,"loadTag",null,formTagSqlConfigs );
+        controller.addFieldTagBySQL( "formTagSql","tag控件(sql)",true,true,true,true,true,"loadTag",null,formTagSqlConfigs );
 
         /***********************************************************************************************************
          * 日期、时间控件
+         *
+         * 添加、编辑窗口中的显示样式相同，在各controller中分别配置，搜索区域样式已在前端页面中统一配置好。
          */
         String formDateConfigs = "labelWidth:100,width:300,height:25,emptyText:'录入日期',editable:false,maxValue:'2017-12-31',maxText:'不能超过2017-12-31',minValue:'2015-03-21',minText:'最小为2015-03-21',value:'2017-01-01'";
         String formDateTimeConfigs = "labelWidth:100,width:300,height:25,emptyText:'精确时间',value:'2017-01-01 09:01:01'";
         /*String formDateConfigs = null;
         String formDateTimeConfigs = null;*/
 
-        controller.addFieldDate("formDateString","日期(String)",true,true,true,true,false,formDateConfigs);
-        controller.addFieldDate("formDateDate","日期(Date)",true,true,true,false,true,formDateConfigs);
-        controller.addFieldDatetime("formDatetimeString","时间(String)",true,true,true,false,false,formDateTimeConfigs);
-        controller.addFieldDatetime("formDatetimeDate","时间(Date)",true,true,true,false,true,formDateTimeConfigs);
+        SysEnControllerField formDateStringField = controller.addFieldDate("formDateString","日期(String)",true,true,true,true,false,formDateConfigs);
+        formDateStringField.setSearByRange( true );
+        controller.addFieldDate("formDateDate","日期(Date)",true,true,true,true,true,formDateConfigs);
+        controller.addFieldDatetime("formDatetimeString","时间(String)",true,true,true,true,false,formDateTimeConfigs);
+        SysEnControllerField formDatetimeDateField = controller.addFieldDatetime("formDatetimeDate","时间(Date)",true,true,true,true,true,formDateTimeConfigs);
+        formDatetimeDateField.setSearByRange( true );
         /***********************************************************************************************************
         * 单选及多选控件
+         *
+         * 添加、编辑窗口、搜索区域中的显示样式相同，在各controller中分别配置。
         */
-        String formRadioGroupConfigs = "labelWidth:100,width:500";
-        String formRadioConfigs = "width:80";//是否初始选中checked，不要在此处配置中设置，此处设置控制所有的Radio；checkBox同理。
-        String formCheckboxGroupConfigs = "labelWidth:100,width:500";
-        String formCheckboxConfigs = "width:80";
+        String formRadioGroupConfigs = "labelWidth:100,width:300";
+        String formRadioConfigs = "width:60";//是否初始选中checked，不要在此处配置中设置，此处设置控制所有的Radio；checkBox同理。
+        String formCheckboxGroupConfigs = "labelWidth:100,width:300";
+        String formCheckboxConfigs = "width:60";
         /*String formRadioGroupConfigs = null;
         String formRadioConfigs = null;//是否初始选中checked，不要在此处配置中设置，此处设置控制所有的Radio；checkBox同理。
         String formCheckboxGroupConfigs = "";
@@ -197,12 +215,14 @@ public class ExampleBeanController extends BaseController<ExampleBean>{
         controller.addFieldCheckboxInitDataByJson("formCheckbox","多选",true,true,true,true,false,checkboxJson,formCheckboxGroupConfigs,formCheckboxConfigs);
         /***********************************************************************************************************
          * 下拉框控件
+         *
+         * 添加、编辑窗口、搜索区域中的显示样式相同，在各controller中分别配置。
          */
-        String formComBoxConfigs = "labelWidth:100,emptyText:'选择类型',width:200,value:'90'";
-        String formComBoxSqlConfigs = "labelWidth:100,emptyText:'选择',width:200";
-        String formComboboxGroup1Configs = "labelWidth:100";
-        String formComboboxGroup1ComConfigs = "emptyText:'请选择',width:100";
-        String formComboboxGroup2Configs = "labelWidth:100,width:500";
+        String formComBoxConfigs = "labelWidth:100,emptyText:'选择类型',width:250,value:'90'";
+        String formComBoxSqlConfigs = "labelWidth:100,emptyText:'选择',width:250";
+        String formComboboxGroup1Configs = "labelWidth:100,width:450";
+        String formComboboxGroup1ComConfigs = "emptyText:'请选择',width:150";
+        String formComboboxGroup2Configs = "labelWidth:100,width:420";
         String formComboboxGroup2ComConfigs = "emptyText:'请选择...'";//,width:100
         /*String formComBoxConfigs = null;
         String formComBoxSqlConfigs = null;
@@ -222,14 +242,16 @@ public class ExampleBeanController extends BaseController<ExampleBean>{
         String[] formComboboxGroup2Val = new String[] {"140000","140200","140222"};
 
 
-        controller.addFieldComboBoxByJSON("formComboBoxJson","下拉框(json)",true,true,true,false,false,comboBoxJson,formComBoxConfigs);
-        controller.addFieldComboBoxBySQL("formComboBoxSql","下拉框(sql)",true,true,true,false,true,"loadDistrict",null,formComBoxSqlConfigs);
+        controller.addFieldComboBoxByJSON("formComboBoxJson","下拉框(json)",true,true,true,true,false,comboBoxJson,formComBoxConfigs);
+        controller.addFieldComboBoxBySQL("formComboBoxSql","下拉框(sql)",true,true,true,true,true,"loadDistrict",null,formComBoxSqlConfigs);
         //级联框组名与每个下拉框的名称不能相同。级联框的组名自己定义，没有特殊要求，同一个controller中级联框组名不要重复就可以。
-        controller.addFieldComboBoxCascadeBySQL("二级级联",true,true,true,false,true,"formComboboxGroup1","140000",formComboboxGroup1FieldLabel,formComboboxGroup1Name,formComboboxGroup1Flag,formComboboxGroup1Configs,formComboboxGroup1ComConfigs);
-        controller.addFieldComboBoxCascadeBySQL("三级级联",true,true,true,false,false,"formComboboxGroup2",null,formComboboxGroup2FieldLabel,formComboboxGroup2Name,formComboboxGroup2Flag,formComboboxGroup2Configs,formComboboxGroup2ComConfigs,formComboboxGroup2Val);
+        controller.addFieldComboBoxCascadeBySQL("二级级联",true,true,true,true,true,"formComboboxGroup1","140000",formComboboxGroup1FieldLabel,formComboboxGroup1Name,formComboboxGroup1Flag,formComboboxGroup1Configs,formComboboxGroup1ComConfigs);
+        controller.addFieldComboBoxCascadeBySQL("三级级联",true,true,true,true,false,"formComboboxGroup2",null,formComboboxGroup2FieldLabel,formComboboxGroup2Name,formComboboxGroup2Flag,formComboboxGroup2Configs,formComboboxGroup2ComConfigs,formComboboxGroup2Val);
 
         /***********************************************************************************************************
          * 树控件
+         *
+         * 添加、编辑窗口中的显示样式相同，在各controller中分别配置，搜索区域样式已在前端页面中统一配置好。
          */
         String formComboBoxTreeConfigs1 = "labelWidth:100,width:400,multiSelect:true,multiCascade:true,selectedIds:'A,A1,A2,A13'";
         String formComboBoxTreeConfigs2 = "labelWidth:100,width:400,multiSelect:true,multiCascade:false";
@@ -256,8 +278,9 @@ public class ExampleBeanController extends BaseController<ExampleBean>{
         controller.addFieldComboBoxTree( "formComboBoxTree2","树(多选不级联)",true,true,true,false,true,formComboBoxTreeConfigs2,treeUrl2 );
         controller.addFieldComboBoxTree( "formComboBoxTree3","树(单选)",true,true,true,false,true,formComboBoxTreeConfigs3,treeUrl3 );
         controller.addFieldComboBoxTree( "formComboBoxTree4","行政区划(多选级联)",true,true,true,false,true,formComboBoxTreeConfigs4,treeUrl4 );
-        controller.addFieldComboBoxTree( "formComboBoxTree5","行政区划(多选不级联)",true,true,true,false,true,formComboBoxTreeConfigs5,treeUrl5 );
-        controller.addFieldComboBoxTree( "formComboBoxTree6","行政区划(单选)",true,true,true,false,true,formComboBoxTreeConfigs6,treeUrl6 );
+        controller.addFieldComboBoxTree( "formComboBoxTree5","行政区划(多选不级联)",true,true,true,true,true,formComboBoxTreeConfigs5,treeUrl5 );
+        controller.addFieldComboBoxTree( "formComboBoxTree6","行政区划(单选)",true,true,true,true,true,formComboBoxTreeConfigs6,treeUrl6 );
+
         /***********************************************************************************************************
          * 富文本编辑器控件
          *
@@ -268,6 +291,7 @@ public class ExampleBeanController extends BaseController<ExampleBean>{
 //        String formHtmlEditorConfigs = null;
 
         controller.addFieldHtmlEditor("formHtmlEditor","编辑器",true,true,true,false,formHtmlEditorConfigs);
+
         /***********************************************************************************************************
          * 附件控件
          *
@@ -287,13 +311,14 @@ public class ExampleBeanController extends BaseController<ExampleBean>{
         controller.addFieldFile("formFile1","附件1",true,true,true,true,formFileConfigs,formFileServiceConfigs1);
         controller.addFieldFile("formFile2","附件2",true,true,true,true,formFileConfigs,formFileServiceConfigs2);
         controller.addFieldFile("formFile3","附件3",true,true,true,true,formFileConfigs,formFileServiceConfigs3);
+
         /***********************************************************************************************************
          * 面板控件
-//         */
+         */
         String formDisplayConfigs = "labelWidth:100,width:400,value:'管理员',submitValue:true";
 //        String formDisplayConfigs = null;
 
-        controller.addFieldDisplay("formDisplay","form面板",true,true,true,true,formDisplayConfigs);
+        controller.addFieldDisplay("formDisplay","form面板",true,true,false,false,formDisplayConfigs);
 
         /***********************************************************************************************************
          */

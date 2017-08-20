@@ -135,10 +135,10 @@ public class ExampleBeanFormValController extends BaseController<ExampleBeanForm
         controller.addFieldText("accountNumber","账号",true,true,true,false,true,extConfigsAccountNumber);
 
         String extConfigsDefaultPassword = "vtype:'generalPassword'";
-        controller.addFieldPassword("generalPassword","普通密码",true,true,true,false,true,extConfigsDefaultPassword);
+        controller.addFieldPassword("generalPassword","普通密码",true,true,true,true,extConfigsDefaultPassword);
 
         String extConfigsStrongPassword = "vtype:'strongPassword'";
-        controller.addFieldPassword("strongPassword","强密码",true,true,true,false,true,extConfigsStrongPassword);
+        controller.addFieldPassword("strongPassword","强密码",true,true,true,true,extConfigsStrongPassword);
 
         /**
          * regex验证示例
@@ -165,10 +165,10 @@ public class ExampleBeanFormValController extends BaseController<ExampleBeanForm
         controller.addFieldText("valTextParam","valTextParam",true,true,true,true,true,null,extConfigsTranTextParam);
 
         String extConfigsTranPassword = "validatorFunName:'valPassword'";
-        controller.addFieldPassword("valPassword","valPassword",true,true,true,true,true,null,extConfigsTranPassword);
+        controller.addFieldPassword("valPassword","valPassword",true,true,true,true,null,extConfigsTranPassword);
 
         String extConfigsTranPasswordParam = "validatorFunName:'valPasswordParam',validatorFunField:'alpha'";
-        controller.addFieldPassword("valPasswordParam","valPasswordParam",true,true,true,true,true,null,extConfigsTranPasswordParam);
+        controller.addFieldPassword("valPasswordParam","valPasswordParam",true,true,true,true,null,extConfigsTranPasswordParam);
 
         String extConfigsTranTextAreaPassword = "validatorFunName:'valTextArea'";
         controller.addFieldTextArea("valTextArea","valTextArea",true,true,true,true,true,null,extConfigsTranTextAreaPassword);

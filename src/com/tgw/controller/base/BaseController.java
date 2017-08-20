@@ -141,10 +141,12 @@ public class BaseController<T extends AbstractBaseBean> implements Serializable 
 			List<SysEnFieldComboBox> comboBoxList = new ArrayList<SysEnFieldComboBox>();
 			List<SysEnFieldComboBox> comboBoxAddList = new ArrayList<SysEnFieldComboBox>();
 			List<SysEnFieldComboBox> comboBoxUpdateList = new ArrayList<SysEnFieldComboBox>();
+			List<SysEnFieldComboBox> comboBoxSearchList = new ArrayList<SysEnFieldComboBox>();
 			//页面上的所有tag控件，tag继承自comboBox
 			List<SysEnFieldTag> tagList = new ArrayList<SysEnFieldTag>();
 			List<SysEnFieldTag> tagAddList = new ArrayList<SysEnFieldTag>();
 			List<SysEnFieldTag> tagUpdateList = new ArrayList<SysEnFieldTag>();
+			List<SysEnFieldTag> tagSearchList = new ArrayList<SysEnFieldTag>();
 
             for( SysEnControllerField conField : controller.getSysEnControllerFieldList() ){
                 /*if( "id".equals( conField.getName() ) ){//编辑页面一定需要id，不管id字段配置成什么状态，都要加上id
@@ -184,6 +186,10 @@ public class BaseController<T extends AbstractBaseBean> implements Serializable 
 						if( conField.isAllowUpdate() ){
 							comboBoxUpdateList.add( comboBox );
 						}
+						if( conField.isAllowSearch() ){
+							comboBoxSearchList.add( comboBox );
+						}
+
 					}
 				}
 
@@ -195,6 +201,9 @@ public class BaseController<T extends AbstractBaseBean> implements Serializable 
 					}
 					if( conField.isAllowUpdate() ){
 						tagUpdateList.add(sysEnFieldTag);
+					}
+					if( conField.isAllowSearch() ){
+						tagSearchList.add( sysEnFieldTag );
 					}
 				}
             }
@@ -209,9 +218,11 @@ public class BaseController<T extends AbstractBaseBean> implements Serializable 
 			modelAndView.addObject("comboBoxList",comboBoxList);
 			modelAndView.addObject("comboBoxAddList",comboBoxAddList);
 			modelAndView.addObject("comboBoxUpdateList",comboBoxUpdateList);
+			modelAndView.addObject("comboBoxSearchList",comboBoxSearchList);
 			modelAndView.addObject("tagList",tagList);
 			modelAndView.addObject("tagAddList",tagAddList);
 			modelAndView.addObject("tagUpdateList",tagUpdateList);
+			modelAndView.addObject("tagSearchList",tagSearchList);
 
 
             int searchConditionFieldNum = searFieldList.size();
@@ -620,11 +631,12 @@ public class BaseController<T extends AbstractBaseBean> implements Serializable 
 
 								if( Date.class.equals( returnClass ) ){
 									//java类中定义的时间属性为Date类型
-									SysEnFieldDate sysEnFieldDate = (SysEnFieldDate)updateField.getSysEnFieldAttr();
-									SimpleDateFormat sdf = new SimpleDateFormat( sysEnFieldDate.getFormatJava() );
-									Date tempDate = (Date)tempObj;
-
-									objJSON.put( updateField.getName(),sdf.format(tempDate) );
+									if( null!=tempObj ){
+										SysEnFieldDate sysEnFieldDate = (SysEnFieldDate)updateField.getSysEnFieldAttr();
+										SimpleDateFormat sdf = new SimpleDateFormat( sysEnFieldDate.getFormatJava() );
+										Date tempDate = (Date)tempObj;
+										objJSON.put( updateField.getName(),sdf.format(tempDate) );
+									}
 								}else{
 									//java类中定义的时间属性为String类型
 									objJSON.put( updateField.getName(),tempObj );

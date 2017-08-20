@@ -1,7 +1,6 @@
 package com.tgw.bean.example;
 
 import com.tgw.bean.base.AbstractBaseBean;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.persistence.GeneratedValue;
@@ -9,7 +8,6 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import java.util.Date;
-import java.io.File;
 /**
  * Created by zhaojg on 2017/03/24.
  */
@@ -28,6 +26,10 @@ public class ExampleBean extends AbstractBaseBean{
     private String formTextArea;
     private String formHtmlEditor;
     private Short formNumberShort;
+    @Transient
+    private Short formNumberShortStart;
+    @Transient
+    private Short formNumberShortEnd;
     private short formNumberShortBase;
     private Integer formNumberInteger;
     private int formNumberIntBase;
@@ -40,10 +42,17 @@ public class ExampleBean extends AbstractBaseBean{
     private Boolean formBoolean;
     private boolean formBooleanBase;
     private String formDateString;
-//    @DateTimeFormat(pattern="yyyy-MM-dd")
+    @Transient
+    private String formDateStringStart;
+    @Transient
+    private String formDateStringEnd;
     private Date formDateDate;
     private String formDatetimeString;
     private Date formDatetimeDate;
+    @Transient
+    private Date formDatetimeDateStart;
+    @Transient
+    private Date formDatetimeDateEnd;
     private String formComboBoxJson;
     private String formComboBoxSql;
     private String formTagJson;
@@ -141,6 +150,22 @@ public class ExampleBean extends AbstractBaseBean{
 
     public void setFormNumberShort(Short formNumberShort) {
         this.formNumberShort = formNumberShort;
+    }
+
+    public Short getFormNumberShortStart() {
+        return formNumberShortStart;
+    }
+
+    public void setFormNumberShortStart(Short formNumberShortStart) {
+        this.formNumberShortStart = formNumberShortStart;
+    }
+
+    public Short getFormNumberShortEnd() {
+        return formNumberShortEnd;
+    }
+
+    public void setFormNumberShortEnd(Short formNumberShortEnd) {
+        this.formNumberShortEnd = formNumberShortEnd;
     }
 
     public short getFormNumberShortBase() {
@@ -241,6 +266,22 @@ public class ExampleBean extends AbstractBaseBean{
         this.formDateString = formDateString;
     }
 
+    public String getFormDateStringStart() {
+        return formDateStringStart;
+    }
+
+    public void setFormDateStringStart(String formDateStringStart) {
+        this.formDateStringStart = formDateStringStart;
+    }
+
+    public String getFormDateStringEnd() {
+        return formDateStringEnd;
+    }
+
+    public void setFormDateStringEnd(String formDateStringEnd) {
+        this.formDateStringEnd = formDateStringEnd;
+    }
+
     public Date getFormDateDate() {
         return formDateDate;
     }
@@ -263,6 +304,22 @@ public class ExampleBean extends AbstractBaseBean{
 
     public void setFormDatetimeDate(Date formDatetimeDate) {
         this.formDatetimeDate = formDatetimeDate;
+    }
+
+    public Date getFormDatetimeDateStart() {
+        return formDatetimeDateStart;
+    }
+
+    public void setFormDatetimeDateStart(Date formDatetimeDateStart) {
+        this.formDatetimeDateStart = formDatetimeDateStart;
+    }
+
+    public Date getFormDatetimeDateEnd() {
+        return formDatetimeDateEnd;
+    }
+
+    public void setFormDatetimeDateEnd(Date formDatetimeDateEnd) {
+        this.formDatetimeDateEnd = formDatetimeDateEnd;
     }
 
     public String getFormComboBoxJson() {

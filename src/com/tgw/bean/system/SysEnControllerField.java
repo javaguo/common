@@ -17,6 +17,7 @@ public class SysEnControllerField extends AbstractBaseBean {
     private boolean isAllowUpdate;//是否可更新
     private boolean isShowList;//是否在列表中显示
     private boolean isAllowSearch;//是否可被搜索
+    private boolean isSearByRange;//是否按区间搜索，如果为true，则搜索条件按照大于等于、小于等于查询搜索
     private boolean isAllowBlank;//是否可为空
     private SysEnFieldBase sysEnFieldAttr;//字段具体属性
 
@@ -128,6 +129,18 @@ public class SysEnControllerField extends AbstractBaseBean {
 
     public void setAllowSearch(boolean allowSearch) {
         isAllowSearch = allowSearch;
+    }
+
+    public boolean getIsSearByRange() {
+        return isSearByRange;
+    }
+
+    public boolean isSearByRange() {
+        return isSearByRange;
+    }
+
+    public void setSearByRange(boolean searByRange) {
+        isSearByRange = searByRange;
     }
 
     public boolean getIsAllowBlank() {
