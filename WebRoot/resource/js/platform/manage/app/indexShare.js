@@ -19,61 +19,77 @@ Ext.onReady(function() {
 
 	Ext.QuickTips.init();
 
+	var themeComboox = Ext.create({
+			xtype: 'combobox',
+			width: 150,
+			labelWidth: 50,
+			labelAlign: 'right',
+			fieldLabel: '主题',
+			displayField: 'name',
+			valueField: 'value',
+			//labelStyle: 'cursor:move;',
+			margin: '5 5 5 5',
+			//flex: 1,
+			queryMode: 'local',
+			store: Ext.create('Ext.data.Store', {
+				fields: ['value', 'name'],
+				data : [
+					{ value: 'classic', name: 'Classic主题' },
+					{ value: 'gray', name: 'Gray主题' },
+					{ value: 'neptune', name: 'Neptune主题' },
+					{ value: 'crisp', name: 'Crisp主题' },
+					{ value: 'aria', name: 'aria主题' }
+				]
+			}),
+			//value: theme,
+			listeners: {
+				select: function(combo) {
+					var  theme = combo.getValue();
+					var href = 'resource/js/extjs/extjs5/packages/ext-theme-'+theme+'/build/resources/ext-theme-'+theme+'-all.css';
+					var link = Ext.fly('theme');
+
+					if(!link) {
+						link = Ext.getHead().appendChild({
+							tag:'link',
+							id:'theme',
+							rel:'stylesheet',
+							href:''
+						});
+					};
+					link.set({href:Ext.String.format(href, theme)});
+				}
+			}
+	});
+
 	//顶部区域
 	var topPanel = Ext.create('Ext.panel.Panel', {
 		region: 'north',
 		margin: '0 2 0 2',
 		width:'100%',
 		collapsible:true,
-		layout: {
-			type: 'table',
-			columns: 8
-		},
+		frame:true,//渲染时是否应用当前主题
 		items:[
 			{
-				contentEl: 'head-region-container',
-				colspan: 7
-				/*width:'70%'*/
+				xtype:'container',
+				layout: {
+					type: 'hbox',
+					align: 'middle'
+				},
+				defaults : {
+					xtype : 'component'
+				},
+				items:[{
+					contentEl: 'head-region-container',
+					flex: 4
+					//html:'通用管理系统 '
+				  },
+					{
+						html : '欢迎您，管理员！',
+						style : 'text-align:center;font-size:14px;',
+						width:300
+					},themeComboox
+				]
 			},
-			{
-				xtype: 'combo',
-				width: 100,
-				/*labelWidth: '30',  */
-				/*fieldLabel: '主题',  */
-				displayField: 'name',
-				valueField: 'value',
-				//labelStyle: 'cursor:move;',
-				margin: '5 5 5 5',
-				queryMode: 'local',
-				store: Ext.create('Ext.data.Store', {
-					fields: ['value', 'name'],
-					data : [
-						{ value: 'classic', name: 'Classic主题' },
-						{ value: 'gray', name: 'Gray主题' },
-						{ value: 'neptune', name: 'Neptune主题' },
-						{ value: 'crisp', name: 'Crisp主题' },
-						{ value: 'aria', name: 'aria主题' }
-					]
-				}),
-				//value: theme,
-				listeners: {
-					select: function(combo) {
-						var  theme = combo.getValue();
-						var href = 'resource/js/extjs/extjs5/packages/ext-theme-'+theme+'/build/resources/ext-theme-'+theme+'-all.css';
-						var link = Ext.fly('theme');
-
-						if(!link) {
-							link = Ext.getHead().appendChild({
-								tag:'link',
-								id:'theme',
-								rel:'stylesheet',
-								href:''
-							});
-						};
-						link.set({href:Ext.String.format(href, theme)});
-					}
-				}
-			}
 		]
 	});
 
@@ -117,7 +133,6 @@ Ext.onReady(function() {
 			resize:function(){
 
 				//this.updateLayout();
-				//alert("rightTabs大小改变aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
 				/*var openedTab;
 				 openedTab = rightTabs.getComponent( 'right_tab_default' );
 				 if( openedTab ) {
@@ -167,7 +182,7 @@ Ext.onReady(function() {
 			resizable:true,
 			border : false,
 			bodyStyle: {
-				background: '#ffc'
+				//background: '#ffc'
 			},
 			loader:{
 				url:record.raw.link,
@@ -269,7 +284,7 @@ Ext.onReady(function() {
 	var defaultTab = Ext.create('Ext.panel.Panel', {
 		closable : true,
 		id : 'right_tab_default',
-		title : '通知公告默认21',
+		title : '默认页面',
 		layout : 'border',
 		loadMask: '页面加载中...',
 		autoScroll : true,
@@ -278,10 +293,10 @@ Ext.onReady(function() {
 		//html:'<div  style="background-color:red">abdDdddd</div>',
 		//items:[searPanel,gridPanel888888],
 		bodyStyle: {
-			background: '#ad23a2'
+			//background: '#ad23a2'
 		},
 		loader:{
-			url:'sysUser/test.do',
+			url:'exampleBean/search.do',
 			autoLoad: true,
 			scripts:true,
 			renderer: function (loader, response, active) {//重写此方法实现执行scripts脚本

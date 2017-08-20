@@ -46,8 +46,9 @@ String browserLang=request.getLocale().toString();
 
   </head>
   <body>
+  	<%----%>
   	<div id="head-region-container">
-  		 通用管理系统
+  		 欢迎使用通用后台管理系统
   	</div>
   	<div id="foot-region-container">
   		版权所有
