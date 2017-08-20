@@ -2,7 +2,6 @@ package com.tgw.service.base;
 
 import com.github.pagehelper.Page;
 import com.tgw.bean.base.AbstractBaseBean;
-import com.tgw.dao.base.BaseModelMapper;
 import com.tgw.exception.PlatformException;
 
 import java.util.List;
@@ -44,6 +43,13 @@ public interface BaseService {
      * @throws PlatformException
      */
     public abstract void updateBean(Object object) throws PlatformException;
+
+    /**
+     * 更新多个对象
+     * @param beanList
+     * @throws PlatformException
+     */
+    public abstract void updateBeans(List<Object> beanList) throws PlatformException;
 
     /**
      * 根据ID查询唯一的对象

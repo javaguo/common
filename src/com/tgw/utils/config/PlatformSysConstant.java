@@ -41,5 +41,8 @@ public class PlatformSysConstant {
     public static String FORM_INPUTTYPE_TEXT = "text";
     public static String FORM_INPUTTYPE_PASSWORD = "password";
 
-
+    public static String MENU_TYPE_ADD = "a1";
+    public static String MENU_TYPE_BASE_AJAX = "a2";
+    public static String MENU_TYPE_AJAX_UPDATE_FIELDS = "a3";
+    public static String MENU_TYPE_INSTRUCTIONS = "b1";
 }

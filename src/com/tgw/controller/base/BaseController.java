@@ -112,6 +112,9 @@ public class BaseController<T extends AbstractBaseBean> implements Serializable 
 		System.out.println("----------------- BaseController  search -----------------");
 		SysEnController controller = new SysEnController();
 
+			/**
+			 * 以下三个的初始化顺序不能变。
+			 */
 		this.initSearch(request,response,modelAndView,controller,bean);
 		this.initField( controller );
 		this.initFunction( controller );
@@ -245,8 +248,8 @@ public class BaseController<T extends AbstractBaseBean> implements Serializable 
 
 		//初始化页面上的菜单按钮信息开始
 		List<SysEnControllerFunction> sysEnControllerFunctionList = new ArrayList<SysEnControllerFunction>();
-		SysEnControllerFunction addFunction = new SysEnControllerFunction("baseAdd","添加","",1,true,"Add",-100);
-		SysEnControllerFunction delFunction = new SysEnControllerFunction("baseDelete","删除","/delete.do",2,false,"Delete",-99);
+		SysEnControllerFunction addFunction = new SysEnControllerFunction("baseAdd","添加","",PlatformSysConstant.MENU_TYPE_ADD,true,"Add",-100);
+		SysEnControllerFunction delFunction = new SysEnControllerFunction("baseDelete","删除","/delete.do",PlatformSysConstant.MENU_TYPE_BASE_AJAX,false,"Delete",-99);
 		sysEnControllerFunctionList.add( addFunction );
 		sysEnControllerFunctionList.add( delFunction );
 		sysEnControllerFunctionList.addAll( controller.getSysEnControllerFunctionList() );
@@ -951,6 +954,101 @@ public class BaseController<T extends AbstractBaseBean> implements Serializable 
     public void afterDelete(){
 
     }
+
+	public void beforeMenuAjaxUpdate(  HttpServletRequest request, HttpServletResponse response, T bean  ){
+
+	}
+
+	/**
+	 * 菜单异步更新部分字段值
+	 * @param request
+	 * @param response
+	 * @param bean
+     * @return
+     */
+	@RequestMapping("/menuAjaxUpdate.do")
+	public ModelAndView menuAjaxUpdate( HttpServletRequest request, HttpServletResponse response, T bean ){
+		this.beforeMenuAjaxUpdate( request,response,bean );
+
+		ModelAndView modelAndView = new ModelAndView();
+		JSONObject jo = JSONObject.fromObject("{}");
+
+		/**
+		 * extjs的form表单提交后根据返回值中的success值判断走success回调函数或failure函数
+		 */
+
+		/**
+		 * 更新方法实现思路
+		 *
+		 * 1.根据表单提交的id，从数据库中获取到原先的oldBean对象。
+		 * 2.将表单提交的bean对象的各字段的值赋值给oldBean对象。
+		 * 3.更新保存oldBean对象。
+		 */
+		try{
+			String ids = request.getParameter("ids");
+			String ajaxUpdateFields = request.getParameter("ajaxUpdateFields");
+			if( StringUtils.isBlank( ids ) || StringUtils.isBlank( ajaxUpdateFields ) ){
+				throw new PlatformException("参数不能为空！");
+			}
+
+			List<Object> updateBeanList = new ArrayList<Object>();//所有要更新的对象
+			String[] idArray = ids.split(",");
+			String[] fieldArray = ajaxUpdateFields.split(",");
+			if( idArray!=null && idArray.length>0 && fieldArray!=null && fieldArray.length>0 ){
+				for( int i=0;i<idArray.length;i++ ){
+					Class beanClass = bean.getClass();
+					Integer tempId = Integer.parseInt( idArray[i] );
+
+					//根据id获取oldBean对象
+					Object oldObj = beanClass.newInstance();
+					Method setIdMethod = beanClass.getDeclaredMethod("setId",new Class[]{ Integer.class } );
+					setIdMethod.invoke(oldObj,tempId );
+					oldObj = this.getBaseService().selectUniqueBeanByPrimaryKey( oldObj );
+
+					//将表单提交的bean对象的各字段的值赋值给oldBean对象
+					if( null!=fieldArray && fieldArray.length>0 ){
+						for( int j=0;j<fieldArray.length;j++ ){
+							Method getMet=null;
+							Method setMet=null;
+							Object tempObj =null;
+
+							getMet=beanClass.getDeclaredMethod( "get"+PlatformStringUtils.firstLetterToUpperCase(fieldArray[j]) );
+							tempObj = getMet.invoke( bean );
+
+							setMet=beanClass.getDeclaredMethod( "set"+PlatformStringUtils.firstLetterToUpperCase(fieldArray[j]),getMet.getReturnType() );
+							setMet.invoke(oldObj,tempObj);
+						}
+
+						updateBeanList.add( oldObj );
+
+					}else{
+						throw new PlatformException("没有可更新的字段！");
+					}
+
+				}
+			}else{
+				throw new PlatformException("参数不能为空！");
+			}
+
+			this.getBaseService().updateBeans( updateBeanList );
+			jo.put("success",true);
+			jo.put("msg","修改成功！");
+		}catch (Exception e){
+			e.printStackTrace();
+			jo.put("success",false);
+			jo.put("msg","修改失败！");
+		}
+
+		modelAndView.addObject( PlatformSysConstant.JSONSTR, jo.toString() );
+		modelAndView.setViewName( this.getJsonView() );
+
+		this.afterMenuAjaxUpdate(request,response,bean);
+		return  modelAndView;
+	}
+
+	public void afterMenuAjaxUpdate(  HttpServletRequest request, HttpServletResponse response, T bean  ){
+
+	}
 
 	/**
 	 * 加载下拉框数据

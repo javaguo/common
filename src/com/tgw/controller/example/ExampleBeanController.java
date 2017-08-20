@@ -3,10 +3,13 @@ package com.tgw.controller.example;
 import com.tgw.bean.example.ExampleBean;
 import com.tgw.bean.system.SysEnController;
 import com.tgw.bean.system.SysEnControllerField;
+import com.tgw.bean.system.SysEnControllerFunction;
 import com.tgw.controller.base.BaseController;
 import com.tgw.service.example.ExampleBeanService;
 import com.tgw.utils.collections.PlatformCollectionsUtils;
+import com.tgw.utils.config.PlatformSysConstant;
 import com.tgw.utils.string.PlatformStringUtils;
+import net.sf.json.JSONObject;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
@@ -331,8 +334,21 @@ public class ExampleBeanController extends BaseController<ExampleBean>{
 
     @Override
     public void initFunction(SysEnController controller) {
-        controller.addFunction("menu1","新功能","baseConstant/pass.do",2,true,null,1);
-        controller.addFunction("menu2","功能2","baseConstant/notPass.do",2,false,"Applicationgo",2);
+        controller.addFunctionBaseAjax("menu1","基本ajax请求","exampleBean/ajaxReq.do",true,"Application",1);
+
+        String updateFields = "formText,formPassword,formTextArea,formNumberInteger,formDateString,formDatetimeDate";
+        SysEnControllerFunction ajaxUpdate = controller.addFunctionAjaxUpdateFields("menu2","修改多个字段的值","exampleBean/menuAjaxUpdate.do",false,"Applicationedit",2,controller,updateFields);
+        ajaxUpdate.setAjaxUpdateWindowConfigs( "title: '修改字段窗口-示例'" );
+
+        controller.addFunctionAjaxUpdateFields("menu3","修改Double值","exampleBean/menuAjaxUpdate.do",true,"Applicationedit",3,controller,"formNumberDouble");
+        controller.addFunctionAjaxUpdateFields("menu4","修改TextArea值","exampleBean/menuAjaxUpdate.do",false,"Applicationgo",4,controller,"formTextArea");
+
+        StringBuffer strIns = new StringBuffer();
+        strIns.append("    此列表页面是一个表单控件示例。");
+        strIns.append("此列表页面是一个表单控件示例。");
+        strIns.append("此列表页面是一个表单控件示例。");
+        strIns.append("此列表页面是一个表单控件示例。");
+        controller.addFunctionInstructions("instructions1","功能说明","Zoom",10,strIns.toString());
     }
 
     /**
@@ -417,6 +433,20 @@ public class ExampleBeanController extends BaseController<ExampleBean>{
             dataList.set(i,map);
         }
         return dataList;
+    }
+
+    @RequestMapping("/ajaxReq.do")
+    public ModelAndView ajaxReq(){
+        ModelAndView modelAndView = new ModelAndView();
+        JSONObject jo = JSONObject.fromObject("{}");
+
+        jo.put("success",true);
+        jo.put("msg","ajax异步操作成功！");
+
+        modelAndView.addObject( PlatformSysConstant.JSONSTR, jo.toString() );
+        modelAndView.setViewName( this.getJsonView() );
+
+        return  modelAndView;
     }
 
     private Map<String,Object> getFormBooleanDataMap(){

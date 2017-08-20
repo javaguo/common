@@ -1220,7 +1220,10 @@ Ext.onReady(function() {
 
 	<%-- 搜索区域开始 --%>
 	function createSearPanel_${identifier}(){
-		var resetLeftComboArray=new Array();
+		<%-- 相关的变量名以sear_开头，与添加、编辑窗口进行变量名区分。
+			 搜索区域的相关变量名与添加、编辑窗口变量名一样时，页面搜索区域展开与关闭异常。
+		--%>
+		var resetFieldConLeftArray=new Array();
 		<%-- 下拉框初始化数据开始 --%>
 		<c:forEach items="${comboBoxSearchList}" var="comboBoxInfo" varStatus="comboBoxStatus">
 			<%-- 定义下拉框store开始 --%>
@@ -1295,7 +1298,7 @@ Ext.onReady(function() {
 			});
 			
 			<c:if test='${comboBoxInfo.isCascade}'>
-				resetLeftComboArray.push( sear_field_${comboBoxInfo.comboBoxName}_${identifier} );	
+				resetFieldConLeftArray.push( sear_field_${comboBoxInfo.comboBoxName}_${identifier} );	
 			</c:if>
 			
 			
@@ -1575,7 +1578,7 @@ Ext.onReady(function() {
 									,width:150,
 									labelWidth:0,allowBlank:true,value:''
 								});
-						resetLeftComboArray.push( sear_field_${fieldInfo.name}_${identifier}_start );	
+						resetFieldConLeftArray.push( sear_field_${fieldInfo.name}_${identifier}_start );	
 								
 						var  sear_field_${fieldInfo.name}_${identifier}_connector =
 						Ext.create({
@@ -1583,7 +1586,7 @@ Ext.onReady(function() {
 									width:18,labelWidth:0,
 									style:{lineHeight:'40px',textAlign: 'center'}
 								});
-						resetLeftComboArray.push( sear_field_${fieldInfo.name}_${identifier}_connector );	
+						resetFieldConLeftArray.push( sear_field_${fieldInfo.name}_${identifier}_connector );	
 								
 						var  sear_field_${fieldInfo.name}_${identifier}_end =
 						Ext.create({
@@ -1601,7 +1604,7 @@ Ext.onReady(function() {
 									,width:150,
 									labelWidth:0,allowBlank:true,value:''
 								});
-						resetLeftComboArray.push( sear_field_${fieldInfo.name}_${identifier}_end );	
+						resetFieldConLeftArray.push( sear_field_${fieldInfo.name}_${identifier}_end );	
 								
 						var  sear_field_${fieldInfo.name}_${identifier} =
 						Ext.create({
@@ -1701,7 +1704,7 @@ Ext.onReady(function() {
 					<%-- 纠正级联框左侧与其它控件对齐问题。须在afterlayout后执行，
 						 ext计算布局完毕后，重新设置left值。
 					--%>
-					resetComLeft(resetLeftComboArray);
+					resetComLeft(resetFieldConLeftArray);
 				}
 			},
 		});
@@ -1709,7 +1712,7 @@ Ext.onReady(function() {
 		return searPanel${identifier};
 	}
 	
-	<%--  --%>
+	<%-- 创建搜索区域面板 --%>
 	var searPanel${identifier} = createSearPanel_${identifier}();
 	
 	function searReset${identifier}() {
@@ -1864,80 +1867,228 @@ Ext.onReady(function() {
 				listeners: {
 					click: function(){
 						<c:choose>
-						<c:when test='${functionInfo.typeNum=="1"}'>
-							//addWindow${identifier}.show();
+						<c:when test='${functionInfo.menuTypeCode=="a1"}'>
 							openAddWindow${identifier}();
 						</c:when>
-						<c:when test='${functionInfo.typeNum=="2"}'>
-						var selection = gridPanel${identifier}.getSelection( );
-						//alert("单击事件：selection-->"+selection+"      selection size-->"+selection.length);
-
-						if( selection.length==0 ){
-							Ext.Msg.alert('提示', '请先勾选要操作的数据！');
-							return;
-						}
-
-						<c:if test='${functionInfo.isSingle}'>
-						if( selection.length!=1 ) {
-							Ext.Msg.alert('提示', '只能勾选一条数据进行操作！');
-							return;
-						}
-						</c:if>
-						Ext.Msg.confirm("提示信息","确定要操作选中的数据吗？",function (btn) {
-							if( btn=="yes" ){
-
-								var ids = "";
-								for( var i=0 ;i<selection.length;i++ ){
-									var tempSelect = selection[i];
-									var selecData = tempSelect.getData();
-									//alert("selecData-->"+selecData+"     selecData.id-->"+selecData.id+"     selecData.name-->"+selecData.name );
-									ids += selecData.id+",";
-								}
-
-								Ext.Ajax.request({
-									<c:choose>
-									<c:when test='${functionInfo.identify=="baseDelete"}'>
-									url:'<%=basePath%>${controllerBaseUrl}${functionInfo.url}',
-									</c:when>
-									<c:otherwise>
-									url: '<%=basePath%>${functionInfo.url}',
-									</c:otherwise>
-									</c:choose>
-
-									params: {
-										ids: ids
-									},
-									method:'POST',
-									//form：     指定要提交的表单id或者表单数据对象
-									//isUpload： 指定要提交的表单是否是文件上传表单，默认情况下会自动检查。
-									//headers： 指定要请求的Header信息
-									/**callback：指定Ajax请求的回调函数，该函数不管是调用成功还是失败，都会执行。传递给回调函数的参数有三个，
-									 * 			第一个参数options表示执行request方法时的参数，
-									 第二个参数表示success请求是否成功，
-									 第三个参数表示response用来执行Ajax请求的XMLHttpRequest对象*/
-									success: function(response){
-										var responseStr = response.responseText;
-										var responseJsonObj = Ext.JSON.decode( responseStr );
-
-										if( responseJsonObj.success ){
-											Ext.Msg.alert('提示', '操作成功！' );
-											gridPanel${identifier}.getStore().load();
-										}else{
-											Ext.Msg.alert('提示', '操作失败！'+responseJsonObj.msg );
-										}
-
-										//Ext.Msg.alert('提示', '响应结果：text--->'+responseStr+'           responseJson-->'+responseJsonObj.success+'           msg-->'+responseJsonObj.msg );
-									},
-									failure:function(response){
-										Ext.Msg.alert('提示', '抱歉，操作失败，出错了！' );
-									}
-								});
-
+						<c:when test='${functionInfo.menuTypeCode=="a2"}'>
+							var selection = gridPanel${identifier}.getSelection( );
+							
+							if( selection.length==0 ){
+								Ext.Msg.alert('提示', '请先勾选要操作的数据！');
+								return;
 							}
-						});
+	
+							<c:if test='${functionInfo.isSingle}'>
+							if( selection.length!=1 ) {
+								Ext.Msg.alert('提示', '只能勾选一条数据进行操作！');
+								return;
+							}
+							</c:if>
+							Ext.Msg.confirm("提示信息","确定要操作选中的数据吗？",function (btn) {
+								if( btn=="yes" ){
+	
+									var ids = "";
+									for( var i=0 ;i<selection.length;i++ ){
+										var tempSelect = selection[i];
+										var selecData = tempSelect.getData();
+										<%-- alert("selecData-->"+selecData+"     selecData.id-->"+selecData.id+"     selecData.name-->"+selecData.name ); --%>
+										ids += selecData.id+",";
+									}
+	
+									Ext.Ajax.request({
+										<c:choose>
+										<c:when test='${functionInfo.identify=="baseDelete"}'>
+											url:'<%=basePath%>${controllerBaseUrl}${functionInfo.url}',
+										</c:when>
+										<c:otherwise>
+											url: '<%=basePath%>${functionInfo.url}',
+										</c:otherwise>
+										</c:choose>
+	
+										params: {
+											ids: ids
+										},
+										method:'POST',
+										<%--
+										//form：     指定要提交的表单id或者表单数据对象
+										//isUpload： 指定要提交的表单是否是文件上传表单，默认情况下会自动检查。
+										//headers： 指定要请求的Header信息
+										callback：指定Ajax请求的回调函数，该函数不管是调用成功还是失败，都会执行。传递给回调函数的参数有三个，
+										第一个参数options表示执行request方法时的参数，
+										第二个参数表示success请求是否成功，
+										第三个参数表示response用来执行Ajax请求的XMLHttpRequest对象--%>
+										success: function(response){
+											var responseStr = response.responseText;
+											var responseJsonObj = Ext.JSON.decode( responseStr );
+	
+											if( responseJsonObj.success ){
+												Ext.Msg.alert('提示', '操作成功！' );
+												gridPanel${identifier}.getStore().load();
+											}else{
+												Ext.Msg.alert('提示', '操作失败！'+responseJsonObj.msg );
+											}
+											<%-- Ext.Msg.alert('提示', '响应结果：text--->'+responseStr+'           responseJson-->'+responseJsonObj.success+'           msg-->'+responseJsonObj.msg ); --%>
+											
+										},
+										failure:function(response){
+											Ext.Msg.alert('提示', '抱歉，操作失败，出错了！' );
+										}
+									});
+	
+								}
+							});
+						</c:when>
+						<c:when test='${functionInfo.menuTypeCode=="a3"}'>
+							var selection = gridPanel${identifier}.getSelection( );
+							
+							if( selection.length==0 ){
+								Ext.Msg.alert('提示', '请先勾选要操作的数据！');
+								return;
+							}
+	
+							<c:if test='${functionInfo.isSingle}'>
+							if( selection.length!=1 ) {
+								Ext.Msg.alert('提示', '只能勾选一条数据进行操作！');
+								return;
+							}
+							</c:if>
+							Ext.Msg.confirm("提示信息","确定要操作选中的数据吗？",function (btn) {
+								if( btn=="yes" ){
+	
+									var ids = "";
+									for( var i=0 ;i<selection.length;i++ ){
+										var tempSelect = selection[i];
+										var selecData = tempSelect.getData();
+										<%-- alert("selecData-->"+selecData+"     selecData.id-->"+selecData.id+"     selecData.name-->"+selecData.name ); --%>
+										ids += selecData.id+",";
+									}
+	
+									<c:forEach items="${functionInfo.updateFieldList}" var="fieldInfo" varStatus="fieldStatus">
+										var  ajax_update_field_${fieldInfo.name}_${identifier} =
+										Ext.create({
+											xtype: '${fieldInfo.xtype}',
+											id: 'ajax_update_field_${fieldInfo.name}_${identifier}',
+											name: '${fieldInfo.name}',
+											fieldLabel: '${fieldInfo.fieldLabel}'
+											<c:if test='${!fieldInfo.isAllowBlank}'>
+												,beforeLabelTextTpl: ['<span class="required">*</span>']
+											</c:if>
+											<c:if test='${fieldInfo.sysEnFieldAttr!=null && fieldInfo.sysEnFieldAttr.configs!=null}'>
+												,${fieldInfo.sysEnFieldAttr.configs}
+											</c:if>
+											<c:if test='${fieldInfo.sysEnFieldAttr!=null && fieldInfo.sysEnFieldAttr.validatorFunName!=null}'>
+												,validator: function(value){
+													return ${fieldInfo.sysEnFieldAttr.validatorFunName}(value ${fieldInfo.sysEnFieldAttr.validatorFunField});
+												}
+											</c:if>
+											,value:''
+										});								
+									</c:forEach>
+	
+									var  ajax_update_panel_${identifier}=new Ext.FormPanel({
+										id:'ajax_update_panel_${identifier}',
+										frame : true,
+										bodyBorder:false,
+										bodyStyle : 'padding:0px 0px 0px 0px',
+										// The form will submit an AJAX request to this URL when submitted
+										url: '<%=basePath%>${functionInfo.url}',
+										defaultType: 'textfield',
+										fieldDefaults: {
+											labelWidth: 100,
+											labelAlign: "right",
+											width:400,
+											flex: 0,//每项item的宽度权重。值为0或未设置此属性时，item的width值才起作用。
+											margin: 8
+										},
+										items: [
+												  <c:forEach items="${functionInfo.updateFieldList}" var="fieldInfo" varStatus="fieldStatus">
+												  	ajax_update_field_${fieldInfo.name}_${identifier},
+												  </c:forEach>
+												  {
+												  	xtype: 'hiddenfield',
+													name: 'ids',
+													value: ids,
+												  },
+												  {
+												  	xtype: 'hiddenfield',
+													name: 'ajaxUpdateFields',
+													value: '${functionInfo.ajaxUpdateFields}',
+												  }
+												],
+										// Reset and Submit buttons
+										buttons: [{
+											text: '重置',
+											handler: function() {
+												this.up('form').getForm().reset();
+											}
+										}, {
+											text: '提交',
+											formBind: true, //only enabled once the form is valid
+											disabled: true,
+											handler: function() {
+												var form = this.up('form').getForm();
+												if (form.isValid()) {
+													form.submit({
+														submitEmptyText :false,
+														waitMsg :'正在保存，请耐心等待......',
+														success: function(form, action) {
+															Ext.Msg.alert('提示信息', action.result.msg);
+															Ext.Msg.show({
+																title:"提示信息",
+																message:action.result.msg,
+																buttons:Ext.Msg.OK,
+																icon: Ext.Msg.INFO,
+																fn: function(btn) {
+																	//关闭修改窗口
+																	ajax_update_window_${identifier}.close();
+								
+																	//重新加载列表页面数据
+																	//dataStore${identifier}.load({params:{page:1,start:0,limit:${pageSize}}});
+																	dataStore${identifier}.load();//刷新当前页面
+																}
+								
+															});
+														},
+														failure: function(form, action) {
+															Ext.Msg.alert('错误提示', "抱歉，出错了！"+action.result.msg);
+														}
+													});
+												}
+								
+											}
+										}]
+									});
+								
+									var ajax_update_window_${identifier} = new Ext.Window({
+										id:'ajax_update_window_${identifier}',
+										title: '修改值窗口',
+										width:550,
+										maxHeight:500,
+										scrollable:true,
+										autoHeight:true,
+										resizable:false,
+										bodyStyle : 'padding:0px 0px 0px 0px',
+										<%-- closeAction应该使用destroy --%>
+										//closeAction : 'hide',   默认为destroy
+										modal : true,
+										plain:false,
+										items: [
+											ajax_update_panel_${identifier}
+										]
+										<c:if test='${functionInfo.ajaxUpdateWindowConfigs!=null}'>
+											,${functionInfo.ajaxUpdateWindowConfigs}
+										</c:if>
+									});
+									
+									ajax_update_window_${identifier}.show();
+								}
+							});
+						</c:when>
+						<c:when test='${functionInfo.menuTypeCode=="b1"}'>
+							Ext.Msg.alert('提示', '${functionInfo.instructions}' );
 						</c:when>
 						<c:otherwise>
-							Ext.Msg.alert('提示', '没有定义对应的响应事件！-->${functionInfo.typeNum}');
+							Ext.Msg.alert('提示', '没有定义对应的响应事件！${functionInfo.menuTypeCode}');
 						</c:otherwise>
 						</c:choose>
 					}
@@ -1988,21 +2139,22 @@ Ext.onReady(function() {
 		listeners:{
 			itemdblclick:function (dataview, record, item, index, e, eOpts) {
                 var tempModel = record.getData();
-                //查看model结构信息
-                //var tempModelJSONStr = Ext.JSON.encode( tempModel );
-                //Ext.Msg.alert('提示', '双击了一行！'+"    tempModel.name-->"+tempModel.name+"    tempModel.id-->"+tempModel.id );
-
-                /**  编辑开始 */
+                <%--查看model结构信息
+					var tempModelJSONStr = Ext.JSON.encode( tempModel );
+					Ext.Msg.alert('提示', '双击了一行！'+"    tempModel.name-->"+tempModel.name+"    tempModel.id-->"+tempModel.id );
+				--%>
+                <%--  编辑开始 --%>
                 Ext.Ajax.request({
                     url:'<%=basePath%>${controllerBaseUrl}/edit.do',
                     params: {
                         beanId: tempModel.id
                     },
                     method:'POST',
-                    /**callback：指定Ajax请求的回调函数，该函数不管是调用成功还是失败，都会执行。传递给回调函数的参数有三个，
-                     * 			第一个参数options表示执行request方法时的参数，
+					<%--  
+                     callback：指定Ajax请求的回调函数，该函数不管是调用成功还是失败，都会执行。传递给回调函数的参数有三个，
+                     第一个参数options表示执行request方法时的参数，
                      第二个参数表示success请求是否成功，
-                     第三个参数表示response用来执行Ajax请求的XMLHttpRequest对象*/
+                     第三个参数表示response用来执行Ajax请求的XMLHttpRequest对象--%>
                     success: function(response){
                         var responseStr = response.responseText;
                         var responseJsonObj = Ext.JSON.decode( responseStr );
@@ -2018,7 +2170,7 @@ Ext.onReady(function() {
                         Ext.Msg.alert('提示', '抱歉，操作失败，出错了！' );
                     }
                 });
-                /**  编辑结束 */
+                <%--  编辑开始 --%>
 			}
 		}
 

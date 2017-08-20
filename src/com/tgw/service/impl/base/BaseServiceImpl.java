@@ -14,7 +14,6 @@ import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 @Service("baseService")
 public  class BaseServiceImpl  implements BaseService,Serializable {
@@ -69,6 +68,15 @@ public  class BaseServiceImpl  implements BaseService,Serializable {
     @Override
     public void updateBean(Object object) throws PlatformException {
         this.getBaseModelMapper().updateByPrimaryKey(object);
+    }
+
+    @Override
+    public void updateBeans(List<Object> beanList) throws PlatformException {
+        if( null!=beanList && beanList.size()>0 ){
+            for(  Object object : beanList){
+                this.getBaseModelMapper().updateByPrimaryKey(object);
+            }
+        }
     }
 
     @Override

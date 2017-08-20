@@ -3,6 +3,7 @@ package com.tgw.bean.system;
 import com.tgw.bean.base.AbstractBaseBean;
 import com.tgw.bean.system.form.field.*;
 import com.tgw.exception.PlatformException;
+import com.tgw.utils.collections.PlatformCollectionsUtils;
 import com.tgw.utils.config.PlatformSysConstant;
 import com.tgw.utils.string.PlatformStringUtils;
 import net.sf.json.JSONArray;
@@ -13,6 +14,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by zhaojg on 2016/10/20.
@@ -1369,18 +1371,89 @@ public class SysEnController extends AbstractBaseBean {
 
 
     /**
-     * 添加菜单按钮
+     * 添加一个基本的ajax请求菜单。
      * @param identify
      * @param name
      * @param url
-     * @param typeNum
      * @param isSingle
      * @param iconCls
      * @param orderNum
      */
-    public void addFunction( String identify,String name,String url, Integer typeNum,boolean isSingle,String iconCls,int orderNum ){
-        SysEnControllerFunction sysEnControllerFunction = new SysEnControllerFunction(identify,name,url,typeNum,isSingle,iconCls,orderNum);
+    public SysEnControllerFunction addFunctionBaseAjax( String identify,String name,String url,boolean isSingle,String iconCls,int orderNum ){
+        SysEnControllerFunction sysEnControllerFunction = new SysEnControllerFunction(identify,name,url,PlatformSysConstant.MENU_TYPE_BASE_AJAX,isSingle,iconCls,orderNum);
         this.getSysEnControllerFunctionList().add( sysEnControllerFunction );
+
+        return sysEnControllerFunction;
+    }
+
+    /**
+     * 添加一个ajax请求菜单，可以统一修改某些字段的值。
+     * @param identify
+     * @param name
+     * @param url
+     * @param isSingle
+     * @param iconCls
+     * @param orderNum
+     * @param fields
+     * @return
+     */
+    public SysEnControllerFunction addFunctionAjaxUpdateFields( String identify,String name,String url,boolean isSingle,String iconCls,int orderNum,SysEnController controller,String fields ){
+        if( StringUtils.isBlank( fields ) ){
+            throw new PlatformException("菜单类型编码："+PlatformSysConstant.MENU_TYPE_AJAX_UPDATE_FIELDS+"。缺少字段配置！");
+        }
+        String[] fieldArray = fields.split(",");
+        if( fieldArray==null || fieldArray.length==0 ){
+            throw new PlatformException("菜单类型编码："+PlatformSysConstant.MENU_TYPE_AJAX_UPDATE_FIELDS+"。缺少字段配置！");
+        }
+
+        SysEnControllerFunction sysEnControllerFunction = new SysEnControllerFunction(identify,name,url,PlatformSysConstant.MENU_TYPE_AJAX_UPDATE_FIELDS,isSingle,iconCls,orderNum);
+        sysEnControllerFunction.setUpdateFieldList( new ArrayList<SysEnControllerField>() );
+
+        Map fieldMap = PlatformCollectionsUtils.convertObjectToMap(controller.getSysEnControllerFieldList(),"name");
+        for( int i=0;i<fieldArray.length;i++ ){
+            SysEnControllerField tempField = (SysEnControllerField)fieldMap.get( fieldArray[i] );
+            if( null!=tempField ){
+                String tempXtype = tempField.getXtype();
+                if( PlatformSysConstant.FORM_XTYPE_TEXT.equals( tempXtype ) ||
+                    PlatformSysConstant.FORM_XTYPE_TEXTAREA.equals( tempXtype ) ||
+                    PlatformSysConstant.FORM_XTYPE_NUMBER.equals( tempXtype ) ||
+                    PlatformSysConstant.FORM_XTYPE_DATE.equals( tempXtype ) ||
+                    PlatformSysConstant.FORM_XTYPE_DATE_TIME.equals( tempXtype ) ){
+
+                    sysEnControllerFunction.getUpdateFieldList().add( tempField );
+                }else{
+                    throw new PlatformException("菜单类型编码："+PlatformSysConstant.MENU_TYPE_AJAX_UPDATE_FIELDS+"。不支持的字段，只能配置以下控件类型的字段：文本框、文本域、数字、日期！");
+                }
+            }else{
+                throw new PlatformException("菜单类型编码："+PlatformSysConstant.MENU_TYPE_AJAX_UPDATE_FIELDS+"。字段配置错误！");
+            }
+        }
+        sysEnControllerFunction.setAjaxUpdateFields( fields );
+
+        this.getSysEnControllerFunctionList().add( sysEnControllerFunction );
+
+        return sysEnControllerFunction;
+    }
+
+    /**
+     * 添加一个功能说明性的菜单。
+     * @param identify
+     * @param name
+     * @param iconCls
+     * @param orderNum
+     * @param instructions
+     * @return
+     */
+    public SysEnControllerFunction addFunctionInstructions( String identify,String name,String iconCls,int orderNum,String instructions ){
+        SysEnControllerFunction sysEnControllerFunction = new SysEnControllerFunction(identify,name,null,PlatformSysConstant.MENU_TYPE_INSTRUCTIONS,false,iconCls,orderNum);
+        if( StringUtils.isNotBlank( instructions ) ){
+            sysEnControllerFunction.setInstructions( instructions );
+        }else{
+            throw new PlatformException("菜单类型编码："+PlatformSysConstant.MENU_TYPE_INSTRUCTIONS+"。缺少说明内容配置！");
+        }
+        this.getSysEnControllerFunctionList().add( sysEnControllerFunction );
+
+        return sysEnControllerFunction;
     }
 
     /**
