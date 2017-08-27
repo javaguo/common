@@ -30,16 +30,15 @@ import java.util.Map;
 @RequestMapping("/exampleBean")
 public class ExampleBeanController extends BaseController<ExampleBean>{
 
-    public ExampleBeanController(){
-        if( this.getExampleBeanService()!=null ){
-            System.out.println("exampleBeanService存在-->"+exampleBeanService.toString());
-        }else{
-            System.out.println("exampleBeanService不存在！");
-        }
-    }
-
     @Resource
     private ExampleBeanService exampleBeanService;
+
+    @Override
+    public void initControllerBaseInfo(SysEnController controller){
+        controller.setIdentifier( "ExampleBeanList" );// 每一个列表页面的唯一身份id
+        controller.setLoadDataUrl( "exampleBean/searchData.do" );//加载列表页面数据的方法
+        controller.setControllerBaseUrl( "exampleBean/" );//控制器的请求地址
+    }
 
     @Override
     public void beforeSearch(HttpServletRequest request, HttpServletResponse response, ExampleBean bean){
@@ -81,14 +80,19 @@ public class ExampleBeanController extends BaseController<ExampleBean>{
 
         }
 
-        controller.setIdentifier( "ExampleBeanList" );// 每一个列表页面的唯一身份id
-        controller.setLoadDataUrl( "exampleBean/searchData.do" );//加载列表页面数据的方法
-        controller.setControllerBaseUrl( "exampleBean" );//控制器的请求地址
+        /**
+         * initSearch方法中还可以初始化bean对象的值，供在页面上使用。
+         * 暂时还没有实现
+         */
 
-        //此处的配置会覆盖jsp页面中默认的配置
+        /**
+         *此处的配置会覆盖jsp页面中默认的配置。
+         * 此处配置也可以写在   initControllerBaseInfo()或initField()或initFunction()方法中
+         */
         String addWindowConfigs = "title: '添加窗口-示例',width:800";
         String editWindowConfigs = "title: '编辑窗口-示例',width:800";
-        //controller.addWindowConfig( addWindowConfigs,editWindowConfigs );
+        String viewWindowConfigs = "title: '查看详情窗口-示例',width:600";
+        controller.addWindowConfig( null,null,viewWindowConfigs );
     }
 
     @Override
@@ -105,6 +109,8 @@ public class ExampleBeanController extends BaseController<ExampleBean>{
 
         //构造字段
         controller.addFieldId("id","ID",null);
+
+
 
         /***********************************************************************************************************
          * 隐藏域、文本框、密码框、文本域
@@ -277,6 +283,9 @@ public class ExampleBeanController extends BaseController<ExampleBean>{
         String treeUrl5 = "exampleBean/loadTreeData.do?fieldMap=id:id,text:name,parentId:parent_id&treeFlag=district&resType=map&multiSelect=true";
         String treeUrl6 = "exampleBean/loadTreeData.do?fieldMap=id:id,text:name,parentId:parent_id&treeFlag=district&resType=map&multiSelect=false";
 
+        /**
+         * 目前遇到一个问题，formComboBoxTree1与formComboBoxTree2这两个字段会引起searchData请求的返回值乱码。尚未发现原因。此问题不太确定。
+         */
         controller.addFieldComboBoxTree( "formComboBoxTree1","树(多选级联)",true,true,true,false,false,formComboBoxTreeConfigs1,treeUrl1 );
         controller.addFieldComboBoxTree( "formComboBoxTree2","树(多选不级联)",true,true,true,false,true,formComboBoxTreeConfigs2,treeUrl2 );
         controller.addFieldComboBoxTree( "formComboBoxTree3","树(单选)",true,true,true,false,true,formComboBoxTreeConfigs3,treeUrl3 );
@@ -330,11 +339,42 @@ public class ExampleBeanController extends BaseController<ExampleBean>{
         String updateTimeConfigs = "value:'"+sdf.format( new Date() )+"'";
         controller.addFieldDatetime("insertTime","添加时间",true,true,false,false,false,insertTimeConfigs);
         controller.addFieldDatetime("updateTime","更新时间",true,true,true,false,false,updateTimeConfigs);
+
+
+        /***********************************************************************************************************
+         * 添加可操作的列表字段
+         */
+
+        //设置自定义js函数所在的js文件；可以添加多个js文件。
+        controller.addJsFileName( "example/fieldUserDefineOpe.js" );
+
+        controller.addFieldViewDetail("id",null);
+        controller.addFieldSingleBaseAjaxReq( "exampleBeanOpeSingDataAjaxReq","基本ajax异步请求","exampleBean/exampleBeanOpeSingDataAjaxReq.do","id",null );
+        controller.addFieldSingleDelete("id",null);
+        /**
+         * reqUrl及param可为空
+         *
+         * 自定义的js函数。
+         * js函数的参数顺序参考fieldUserDefineOpe.js
+         */
+        controller.addFieldUserDefineOperate( "exampleBeanUserDefineOpe1","自定义操作(带参)","exampleBeanUserDefineOpe1","exampleBean/exampleBeanUserDefineOpe.do","id,formText,formNumberInteger",null );
+        controller.addFieldUserDefineOperate( "exampleBeanUserDefineOpe2","自定义操作(不带参)","exampleBeanUserDefineOpe2",null,null,null );
+
+        //idFieldName可为空
+        controller.addFieldOpenNewTab( "openNewTab1","打开新tab(带参，自定义页面)","exampleBean/openNewTab.do","打开新tab(带参，自定义页面)","id",null );
+        controller.addFieldOpenNewTab( "openNewTab2","打开新tab(不带参，自定义页面)","exampleBean/openNewTab.do","打开新tab(不带参，自定义页面)","",null );
+        controller.addFieldOpenNewTabList( "openNewTab3","打开新tab(框架列表页面)","exampleBeanFormVal/search.do","打开新tab(框架列表页面)","id","ExampleBeanFormVal",null );
+        //idFieldName可为空
+        controller.addFieldOpenNewBrowserWindow( "openNewBrowserWindow1","打开浏览器窗口(带参)","http://www.baidu.com","id",null );
+        controller.addFieldOpenNewBrowserWindow( "openNewBrowserWindow2","打开浏览器窗口(不带参)","http://www.baidu.com",null,null );
     }
 
     @Override
     public void initFunction(SysEnController controller) {
         controller.addFunctionBaseAjax("menu1","基本ajax请求","exampleBean/ajaxReq.do",true,"Application",1);
+
+        controller.addJsFileName( "example/menuUserDefineOpe.js" );
+        controller.addFunctionUserDefineOperate("menu5","自定义操作","menuUserDefineOpe","Application",5);
 
         String updateFields = "formText,formPassword,formTextArea,formNumberInteger,formDateString,formDatetimeDate";
         SysEnControllerFunction ajaxUpdate = controller.addFunctionAjaxUpdateFields("menu2","修改多个字段的值","exampleBean/menuAjaxUpdate.do",false,"Applicationedit",2,controller,updateFields);
@@ -342,6 +382,7 @@ public class ExampleBeanController extends BaseController<ExampleBean>{
 
         controller.addFunctionAjaxUpdateFields("menu3","修改Double值","exampleBean/menuAjaxUpdate.do",true,"Applicationedit",3,controller,"formNumberDouble");
         controller.addFunctionAjaxUpdateFields("menu4","修改TextArea值","exampleBean/menuAjaxUpdate.do",false,"Applicationgo",4,controller,"formTextArea");
+
 
         StringBuffer strIns = new StringBuffer();
         strIns.append("    此列表页面是一个表单控件示例。");
@@ -402,7 +443,7 @@ public class ExampleBeanController extends BaseController<ExampleBean>{
         for( int i=0;i<dataList.size();i++ ){
             HashMap<String,Object> map = (HashMap<String,Object>)dataList.get(i);
 
-            if( map.get("formBoolean")!=null ){
+           if( map.get("formBoolean")!=null ){
                 map.put("formBoolean", PlatformStringUtils.strKeyToName( map.get("formBoolean").toString(),formBooleanDataMap ));
             }
 
@@ -430,6 +471,49 @@ public class ExampleBeanController extends BaseController<ExampleBean>{
                 map.put("formComboBoxTree6", PlatformStringUtils.strKeyToName( map.get("formComboBoxTree6").toString(),disMap ));
             }
 
+            /**
+             * 把结果集中的某个字段值移除掉
+             */
+            /*map.remove("formHidden");
+            map.remove("formText");
+            map.remove("formTextArea");
+            map.remove("formNumberShort");
+            map.remove("formNumberInteger");
+            map.remove("formNumberLong");
+            map.remove("formNumberFloat");
+            map.remove("formNumberDouble");
+            map.remove("formBoolean");
+            map.remove("formTagJson");
+            map.remove("formTagSql");
+            map.remove("formDateString");
+            map.remove("formDateDate");
+            map.remove("formDatetimeString");
+            map.remove("formDatetimeDate");
+            map.remove("formRadio");
+            map.remove("formCheckbox");
+            map.remove("formComboBoxJson");
+            map.remove("formComboBoxSql");
+            map.remove("formComboBoxCascadeA");
+            map.remove("formComboBoxCascadeB");
+            map.remove("formComboBoxCascade1");
+            map.remove("formComboBoxCascade2");
+            map.remove("formComboBoxCascade3");*/
+
+            /*map.remove("formComboBoxTree1");
+            map.remove("formComboBoxTree2");
+            map.remove("formComboBoxTree3");*/
+            /*map.remove("formComboBoxTree4");
+            map.remove("formComboBoxTree5");
+            map.remove("formComboBoxTree6");*/
+
+           /* map.remove("formHtmlEditor");
+            map.remove("formFile1OrigFileName");
+            map.remove("formFile2OrigFileName");
+            map.remove("formFile3OrigFileName");
+            map.remove("formDisplay");
+            map.remove("insertTime");
+            map.remove("updateTime");*/
+
             dataList.set(i,map);
         }
         return dataList;
@@ -441,11 +525,59 @@ public class ExampleBeanController extends BaseController<ExampleBean>{
         JSONObject jo = JSONObject.fromObject("{}");
 
         jo.put("success",true);
-        jo.put("msg","ajax异步操作成功！");
+        jo.put("msg","菜单按钮ajax异步操作成功！");
 
         modelAndView.addObject( PlatformSysConstant.JSONSTR, jo.toString() );
         modelAndView.setViewName( this.getJsonView() );
 
+        return  modelAndView;
+    }
+
+
+    @RequestMapping("/exampleBeanOpeSingDataAjaxReq.do")
+    public ModelAndView exampleBeanOpeSingDataAjaxReq(HttpServletRequest request, HttpServletResponse response){
+        ModelAndView modelAndView = new ModelAndView();
+        JSONObject jo = JSONObject.fromObject("{}");
+
+        String id = request.getParameter("id");
+
+        System.out.println("请求参数：id-->"+id);
+
+        jo.put("success",true);
+        jo.put("msg","单条数据ajax异步操作成功！");
+
+        modelAndView.addObject( PlatformSysConstant.JSONSTR, jo.toString() );
+        modelAndView.setViewName( this.getJsonView() );
+
+        return  modelAndView;
+    }
+
+
+    @RequestMapping("/exampleBeanUserDefineOpe.do")
+    public ModelAndView exampleBeanUserDefineOpe(HttpServletRequest request, HttpServletResponse response){
+        ModelAndView modelAndView = new ModelAndView();
+        JSONObject jo = JSONObject.fromObject("{}");
+
+        String id = request.getParameter("id");
+        String formText = request.getParameter("formText");
+        String formNumberInteger = request.getParameter("formNumberInteger");
+
+        System.out.println("请求参数：id-->"+id+"  formText-->"+formText+"  formNumberInteger-->"+formNumberInteger);
+
+        jo.put("success",true);
+        jo.put("msg","单条数据自定义方法操作成功！");
+
+        modelAndView.addObject( PlatformSysConstant.JSONSTR, jo.toString() );
+        modelAndView.setViewName( this.getJsonView() );
+
+        return  modelAndView;
+    }
+
+    @RequestMapping("/openNewTab.do")
+    public ModelAndView openNewTab(HttpServletRequest request, HttpServletResponse responsen){
+        ModelAndView modelAndView = new ModelAndView();
+
+        modelAndView.setViewName("manage/exampleBean/openNewTab");
         return  modelAndView;
     }
 

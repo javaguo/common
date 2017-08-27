@@ -14,9 +14,11 @@ public class SysEnControllerFunction extends AbstractBaseBean {
     private String  url;//菜单请求地址
     private String  type;//菜单类型
     /**
+     * PlatformSysConstant中定义了所有的相关常量。
      * a1：基本的添加方法
      * a2：基本的ajax请求方法
      * a3: ajax请求方法，可以统一修改指定字段的值
+     * a4: 自定义按钮的处理方法
      *
      * b1:介绍说明
      */
@@ -28,6 +30,8 @@ public class SysEnControllerFunction extends AbstractBaseBean {
     private List<SysEnControllerField> updateFieldList;//要修改的字段  menuTypeCode为a3使用此字段
     private String ajaxUpdateFields;//要修改的字段  menuTypeCode为a3使用此字段
     private String ajaxUpdateWindowConfigs;//修改字段值窗口配置 menuTypeCode为a3使用此字段
+
+    private String functionName;//自定义js函数名称，menuTypeCode为a4使用此字段
 
     private String instructions;//功能介绍说明   menuTypeCode为b1使用此字段
 
@@ -47,6 +51,15 @@ public class SysEnControllerFunction extends AbstractBaseBean {
         this.url = url;
         this.menuTypeCode = menuTypeCode;
         this.isSingle = isSingle;
+        this.iconCls = iconCls;
+        this.orderNum = orderNum;
+    }
+
+    public SysEnControllerFunction(String identify, String name,String functionName, String menuTypeCode,String iconCls, int orderNum) {
+        this.identify = identify;
+        this.name = name;
+        this.functionName = functionName;
+        this.menuTypeCode = menuTypeCode;
         this.iconCls = iconCls;
         this.orderNum = orderNum;
     }
@@ -149,6 +162,14 @@ public class SysEnControllerFunction extends AbstractBaseBean {
 
     public void setAjaxUpdateWindowConfigs(String ajaxUpdateWindowConfigs) {
         this.ajaxUpdateWindowConfigs = ajaxUpdateWindowConfigs;
+    }
+
+    public String getFunctionName() {
+        return functionName;
+    }
+
+    public void setFunctionName(String functionName) {
+        this.functionName = functionName;
     }
 
     public String getInstructions() {

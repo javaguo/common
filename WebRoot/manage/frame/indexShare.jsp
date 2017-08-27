@@ -23,7 +23,7 @@ String browserLang=request.getLocale().toString();
 	<link rel="stylesheet" type="text/css"
 			href="resource/css/platform/common.css">
 	<link rel="stylesheet" type="text/css" 
-			href="resource/css/platform/manage/app/index.css">
+			href="resource/css/platform/manage/frame/index.css">
 	<link rel="stylesheet" type="text/css" 
 			href="resource/js/extjs/extjs5/packages/ext-theme-classic/build/resources/ext-theme-classic-all.css">
     <link rel="stylesheet" type="text/css"
@@ -35,7 +35,7 @@ String browserLang=request.getLocale().toString();
 		 	src="resource/js/extjs/extjs5/locale/ext-lang-<%=browserLang%>.js"></script>
 
 	<script type="text/javascript"
-		 	src="resource/js/platform/manage/app/indexShare.js"></script>
+		 	src="resource/js/platform/manage/frame/indexShare.js"></script>
 
 	<script type="text/javascript"
 			  src="resource/js/platform/common/platformValidate.js"></script>
@@ -43,7 +43,9 @@ String browserLang=request.getLocale().toString();
 			  src="resource/js/extjs/common/extPlatformCommon.js"></script>
 	<script type="text/javascript"
 			  src="resource/js/extjs/extend/validate/PlatformVTypes.js"></script>
-
+	<script type="text/javascript">
+		var globalBasePath = '<%=basePath%>';
+	</script>
   </head>
   <body>
   	<%----%>

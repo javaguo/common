@@ -12,9 +12,7 @@ import org.apache.commons.lang.StringUtils;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by zhaojg on 2016/10/20.
@@ -27,23 +25,29 @@ public class SysEnController extends AbstractBaseBean {
     private String controllerBaseUrl;//控制器的请求地址
     private String addWindowConfigs;//添加窗口(Ext.Window)的配置
     private String editWindowConfigs;//编辑窗口(Ext.Window)的配置
+    private String viewWindowConfigs;//详情窗口(Ext.Window)的配置
     /**
-     * 自定义函数js文件名，不需要带后缀，此js文件中写自己的表单验证函数。
+     * 自定义函数js文件名，此js文件中写自己的表单验证函数。
      * js文件必须放在resource/js/platform/manage/formVal目录下。
-     * 文件名示例：exampleBeanFormVal或path1/path2/exampleBeanFormVal
+     * 文件名示例：exampleBeanFormVal.js或path1/path2/exampleBeanFormVal.js
      */
     private String formValJsFileName;
+    private Set<String> jsFileNameSet = new HashSet<String>();
 
     private List<SysEnControllerField> sysEnControllerFieldList = new ArrayList<SysEnControllerField>();
     private List<SysEnControllerFunction> sysEnControllerFunctionList = new ArrayList<SysEnControllerFunction>();
 
-    public void addWindowConfig(String addWindowConfigs,String editWindowConfigs){
+    public void addWindowConfig(String addWindowConfigs,String editWindowConfigs,String viewWindowConfigs){
         if( StringUtils.isNotBlank( addWindowConfigs ) ){
             this.setAddWindowConfigs( addWindowConfigs );
         }
 
         if( StringUtils.isNotBlank( editWindowConfigs ) ){
             this.setEditWindowConfigs( editWindowConfigs );
+        }
+
+        if( StringUtils.isNotBlank( viewWindowConfigs ) ){
+            this.setViewWindowConfigs( viewWindowConfigs );
         }
     }
 
@@ -73,6 +77,26 @@ public class SysEnController extends AbstractBaseBean {
             }
 
         }
+    }
+
+    /**
+     * 添加列表中用到的js文件名。
+     *
+     * 自定义函数js文件名。
+     * js文件必须放在resource/js/platform/manage目录下。
+     * 文件名示例：exampleBeanFormVal.js或path1/path2/exampleBeanFormVal.js
+     *
+     * @param jsFileName  js文件名，可包含路径。
+     */
+    public void addJsFileName( String jsFileName ) throws PlatformException{
+        if( StringUtils.isBlank( jsFileName ) ){
+            throw new PlatformException("配置的js文件名为空 ！");
+        }
+        if( !jsFileName.endsWith( ".js" ) ){
+            throw new PlatformException("配置的js文件名错误！");
+        }
+
+        this.getJsFileNameSet().add( jsFileName.trim() );
     }
 
     /**
@@ -111,6 +135,7 @@ public class SysEnController extends AbstractBaseBean {
      */
     public SysEnControllerField addFieldHidden( String name, String fieldLabel, boolean isValid, boolean isAllowAdd, boolean isAllowUpdate,String configs){
         SysEnControllerField  sysEnControllerField = new SysEnControllerField(name,fieldLabel,PlatformSysConstant.FORM_XTYPE_HIDDEN,isValid,isAllowAdd,isAllowUpdate,false,false,true);
+        sysEnControllerField.setShowOnView(false);
 
         SysEnFieldHidden formField = new SysEnFieldHidden();
         if( StringUtils.isNotBlank( configs ) ){
@@ -170,7 +195,9 @@ public class SysEnController extends AbstractBaseBean {
         if( StringUtils.isNotBlank( configs ) ){
             tempConfigs += ","+configs;
         }
-        return this.addFieldText(name,fieldLabel,isValid,isAllowAdd,isAllowUpdate,false,false,isAllowBlank,tempConfigs,null);
+        SysEnControllerField sysEnControllerField =this.addFieldText(name,fieldLabel,isValid,isAllowAdd,isAllowUpdate,false,false,isAllowBlank,tempConfigs,null);
+        sysEnControllerField.setShowOnView(false);
+        return sysEnControllerField;
     }
 
     public SysEnControllerField addFieldPassword( String name, String fieldLabel, boolean isValid, boolean isAllowAdd, boolean isAllowUpdate, boolean isAllowBlank,String configs,String extConfigsTransform ){
@@ -178,7 +205,9 @@ public class SysEnController extends AbstractBaseBean {
         if( StringUtils.isNotBlank( configs ) ){
             tempConfigs += ","+configs;
         }
-        return this.addFieldText(name,fieldLabel,isValid,isAllowAdd,isAllowUpdate,false,false,isAllowBlank,tempConfigs,extConfigsTransform);
+        SysEnControllerField sysEnControllerField =this.addFieldText(name,fieldLabel,isValid,isAllowAdd,isAllowUpdate,false,false,isAllowBlank,tempConfigs,extConfigsTransform);
+        sysEnControllerField.setShowOnView(false);
+        return sysEnControllerField;
     }
 
     /**
@@ -1318,8 +1347,10 @@ public class SysEnController extends AbstractBaseBean {
         this.getSysEnControllerFieldList().add( sysEnControllerField );
 
         if( isShowList ){
-            //列表中显示附件名称
-            this.addFieldText(name+"OrigFileName",fieldLabel,isValid,false,false,false,true,null);
+            //设置只在列表中显示附件名称
+            SysEnControllerField orgFileNameField = this.addFieldText(name+"OrigFileName",fieldLabel,isValid,false,false,false,true,null);
+            //设置不在详情页面显示
+            orgFileNameField.setShowOnView( false );
         }
 
         return sysEnControllerField;
@@ -1368,7 +1399,239 @@ public class SysEnController extends AbstractBaseBean {
         return sysEnControllerField;
     }
 
+    /**
+     * 列表中添加操作类型字段的基本方法。
+     * 不支持在controller调用此方法添加列表字段。
+     * @param name
+     * @param fieldLabel
+     * @param extConfigs
+     * @param serviceConfigs
+     * @return
+     */
+    public SysEnControllerField addFieldOperate(String name, String fieldLabel, String extConfigs, String serviceConfigs){
+        SysEnControllerField  sysEnControllerField = new SysEnControllerField(name,fieldLabel,null,true,false,false,true,false,true);
+        sysEnControllerField.setShowOnView(false);
+        sysEnControllerField.setFieldType( PlatformSysConstant.FIELD_TYPE_OPERATE );
 
+        SysEnFieldListExtend fieldAttr = new SysEnFieldListExtend();
+
+        if( StringUtils.isNotBlank(extConfigs) ){
+            fieldAttr.setConfigs(extConfigs);
+        }
+
+        if( StringUtils.isNotBlank(serviceConfigs) ){
+            JSONObject jo = JSONObject.fromObject( "{"+ serviceConfigs +"}" );
+
+            if( !jo.containsKey("functionName") ){
+                throw new PlatformException("列表操作字段("+name+")配置错误！缺少脚本函数名配置！");
+            }else{
+                fieldAttr.setFunctionName( jo.getString( "functionName" ).trim() );
+            }
+
+            //url不是必须参数
+            if( jo.containsKey("url") ){
+                fieldAttr.setUrl( jo.getString( "url" ).trim() );
+            }
+
+            if( jo.containsKey("param") ){
+                String tempParam = jo.getString("param");
+                if( StringUtils.isNotBlank( tempParam ) && tempParam.split(",").length>0 ){
+                    fieldAttr.setParam( jo.getString( "param" ) );
+                }
+            }
+
+            //tabTitle不是必须参数，打开新tab的操作才需要
+            if( jo.containsKey("tabTitle") ){
+                fieldAttr.setTabTitle( jo.getString( "tabTitle" ).trim() );
+            }
+
+            if( jo.containsKey( "tabFlag" ) ){
+                fieldAttr.setTabFlag( jo.getString("tabFlag").trim() );
+            }
+
+        }
+
+        sysEnControllerField.setSysEnFieldAttr( fieldAttr );
+        this.getSysEnControllerFieldList().add( sysEnControllerField );
+
+        return sysEnControllerField;
+    }
+
+    /**
+     * 列表中添加查看详情字段。
+     * @param idFieldName  不能为空
+     * @param extConfigs
+     * @return
+     */
+    public SysEnControllerField addFieldViewDetail(String idFieldName,String extConfigs){
+        if( StringUtils.isBlank( idFieldName ) ){
+            throw new PlatformException("列表操作字段'查看详情'列配置错误！缺少参数配置！");
+        }
+        String viewServiceConfig = "functionName:'viewDetail_"+this.getIdentifier()+"',param:'"+idFieldName+"'";
+        SysEnControllerField sysEnControllerField =this.addFieldOperate( "viewDetail","查看详情",extConfigs,viewServiceConfig );
+
+        SysEnFieldListExtend sysEnFieldAttr =(SysEnFieldListExtend)sysEnControllerField.getSysEnFieldAttr();
+        sysEnFieldAttr.setListFieldOperateTypeCode( PlatformSysConstant.LIST_FIELD_VIEW_DETAIL );
+
+        return sysEnControllerField;
+    }
+
+
+    /**
+     * 列表中添加一个ajax异步请求字段。
+     * @param name
+     * @param fieldLabel
+     * @param reqUrl   不能为空
+     * @param idFieldName  不能为空
+     * @param extConfigs
+     * @return
+     */
+    public SysEnControllerField addFieldSingleBaseAjaxReq(String name, String fieldLabel,String reqUrl, String idFieldName,String extConfigs){
+        if( StringUtils.isBlank( reqUrl ) || StringUtils.isBlank( idFieldName ) ){
+            throw new PlatformException("列表操作字段（"+name+"）列配置错误！缺少参数配置！");
+        }
+        String serviceConfigs = "functionName:'singleBaseAjaxReq_"+this.getIdentifier()+"',url:'"+reqUrl+"',param:'"+idFieldName+"'";
+        SysEnControllerField sysEnControllerField =this.addFieldOperate( name,fieldLabel,extConfigs,serviceConfigs );
+
+        SysEnFieldListExtend sysEnFieldAttr =(SysEnFieldListExtend)sysEnControllerField.getSysEnFieldAttr();
+        sysEnFieldAttr.setListFieldOperateTypeCode( PlatformSysConstant.LIST_FIELD_SINGLE_BASE_AJAX_REQ );
+
+        return sysEnControllerField;
+    }
+
+    /**
+     * 列表中添加一个删除操作字段
+     * @param idFieldName  不能为空
+     * @param extConfigs
+     * @return
+     */
+    public SysEnControllerField addFieldSingleDelete(String idFieldName,String extConfigs){
+        if( StringUtils.isBlank( idFieldName ) ){
+            throw new PlatformException("列表操作字段'删除'列配置错误！缺少参数配置！");
+        }
+        String deleServiceConfig = "functionName:'deleteSingleData_"+this.getIdentifier()+"',url:'delete.do',param:'"+idFieldName+"'";
+        SysEnControllerField sysEnControllerField =this.addFieldOperate( "deleteSingleData","删除",extConfigs,deleServiceConfig );
+
+        SysEnFieldListExtend sysEnFieldAttr =(SysEnFieldListExtend)sysEnControllerField.getSysEnFieldAttr();
+        sysEnFieldAttr.setListFieldOperateTypeCode( PlatformSysConstant.LIST_FIELD_SINGLE_DELETE );
+
+        return sysEnControllerField;
+    }
+
+    /**
+     * 列表中添加一个自定义函数字段。
+     * @param name
+     * @param fieldLabel
+     * @param functionName  不能为空
+     * @param reqUrl  可为空
+     * @param param  可为空
+     * @param extConfigs
+     * @return
+     */
+    public SysEnControllerField addFieldUserDefineOperate(String name, String fieldLabel,String functionName,String reqUrl,String param, String extConfigs){
+        if( StringUtils.isBlank( functionName ) ){
+            throw new PlatformException("列表操作字段（"+name+"）列配置错误！缺少参数配置！");
+        }
+        StringBuffer serviceConfigs = new StringBuffer( "functionName:'"+functionName+"'" );
+        if( StringUtils.isNotBlank( reqUrl ) ){
+            serviceConfigs.append( ",url:'"+reqUrl+"'" );
+        }
+        if( StringUtils.isNotBlank( param ) ){
+            serviceConfigs.append( ",param:'"+param+"'" );
+        }
+
+        SysEnControllerField sysEnControllerField =this.addFieldOperate( name,fieldLabel,extConfigs,serviceConfigs.toString() );
+
+        SysEnFieldListExtend sysEnFieldAttr =(SysEnFieldListExtend)sysEnControllerField.getSysEnFieldAttr();
+        sysEnFieldAttr.setListFieldOperateTypeCode( PlatformSysConstant.LIST_FIELD_USER_DEFINE_OPERATE );
+
+        return sysEnControllerField;
+    }
+
+    /**
+     * 列表中添加一个打开新tab窗口字段。
+     * 适用情况：新窗口的页面是自定义的。
+     * @param name
+     * @param fieldLabel
+     * @param reqUrl  不能为空
+     * @param tabTitle  不能为空
+     * @param idFieldName  可为空
+     * @param extConfigs
+     * @return
+     */
+    public SysEnControllerField addFieldOpenNewTab(String name, String fieldLabel,String reqUrl,String tabTitle, String idFieldName,String extConfigs){
+        if( StringUtils.isBlank( reqUrl ) || StringUtils.isBlank( tabTitle ) ){
+            throw new PlatformException("列表操作字段（"+name+"）列配置错误！缺少参数配置！");
+        }
+        StringBuffer serviceConfigs = new StringBuffer( "functionName:'openNewTab',url:'"+reqUrl+"',tabTitle:'"+tabTitle+"'" );
+        if( StringUtils.isNotBlank( idFieldName ) ){
+            serviceConfigs.append( ",param:'"+idFieldName+"'" );
+        }
+        SysEnControllerField sysEnControllerField =this.addFieldOperate( name,fieldLabel,extConfigs,serviceConfigs.toString() );
+
+        SysEnFieldListExtend sysEnFieldAttr =(SysEnFieldListExtend)sysEnControllerField.getSysEnFieldAttr();
+        sysEnFieldAttr.setListFieldOperateTypeCode( PlatformSysConstant.LIST_FIELD_OPEN_NEW_TAB );
+
+        return sysEnControllerField;
+    }
+
+    /**
+     * 列表中添加一个打开新tab窗口字段。
+     * 适用情况：新窗口的页面是通过框架配置的列表页面。
+     *
+     * 此方法中的controllerIdentifier参数，是为了解决在新tab窗口中打开框架的列表页面报错问题。
+     * 与列表页面中的某一行代码有关，代码如下：
+     * Ext.getCmp('right_tab_${identifier}').add( pagePanel${identifier} );
+     *
+     * @param name
+     * @param fieldLabel
+     * @param reqUrl  不能为空
+     * @param tabTitle  不能为空
+     * @param idFieldName  可为空
+     * @param controllerIdentifier controller的id
+     * @param extConfigs
+     * @return
+     */
+    public SysEnControllerField addFieldOpenNewTabList(String name, String fieldLabel,String reqUrl,String tabTitle, String idFieldName,String controllerIdentifier, String extConfigs){
+        if( StringUtils.isBlank( reqUrl ) || StringUtils.isBlank( tabTitle ) || StringUtils.isBlank( controllerIdentifier ) ){
+            throw new PlatformException("列表操作字段（"+name+"）列配置错误！缺少参数配置！");
+        }
+        StringBuffer serviceConfigs = new StringBuffer( "functionName:'openNewTab',url:'"+reqUrl+"',tabTitle:'"+tabTitle+"',tabFlag:'"+controllerIdentifier+"'" );
+        if( StringUtils.isNotBlank( idFieldName ) ){
+            serviceConfigs.append( ",param:'"+idFieldName+"'" );
+        }
+        SysEnControllerField sysEnControllerField =this.addFieldOperate( name,fieldLabel,extConfigs,serviceConfigs.toString() );
+
+        SysEnFieldListExtend sysEnFieldAttr =(SysEnFieldListExtend)sysEnControllerField.getSysEnFieldAttr();
+        sysEnFieldAttr.setListFieldOperateTypeCode( PlatformSysConstant.LIST_FIELD_OPEN_NEW_TAB_LIST );
+
+        return sysEnControllerField;
+    }
+
+    /**
+     * 列表中添加一个打开浏览器新窗口字段。
+     * @param name
+     * @param fieldLabel
+     * @param reqUrl  不能为空
+     * @param idFieldName  可为空
+     * @param extConfigs
+     * @return
+     */
+    public SysEnControllerField addFieldOpenNewBrowserWindow(String name, String fieldLabel,String reqUrl, String idFieldName,String extConfigs){
+        if( StringUtils.isBlank( reqUrl )  ){
+            throw new PlatformException("列表操作字段（"+name+"）列配置错误！缺少参数配置！");
+        }
+        StringBuffer serviceConfigs = new StringBuffer( "functionName:'openNewBrowserWindow',url:'"+reqUrl+"'" );
+        if( StringUtils.isNotBlank( idFieldName ) ){
+            serviceConfigs.append( ",param:'"+idFieldName+"'" );
+        }
+        SysEnControllerField sysEnControllerField =this.addFieldOperate( name,fieldLabel,extConfigs,serviceConfigs.toString() );
+
+        SysEnFieldListExtend sysEnFieldAttr =(SysEnFieldListExtend)sysEnControllerField.getSysEnFieldAttr();
+        sysEnFieldAttr.setListFieldOperateTypeCode( PlatformSysConstant.LIST_FIELD_OPEN_NEW_BROWSER_WINDOW );
+
+        return sysEnControllerField;
+    }
 
     /**
      * 添加一个基本的ajax请求菜单。
@@ -1430,6 +1693,13 @@ public class SysEnController extends AbstractBaseBean {
         }
         sysEnControllerFunction.setAjaxUpdateFields( fields );
 
+        this.getSysEnControllerFunctionList().add( sysEnControllerFunction );
+
+        return sysEnControllerFunction;
+    }
+
+    public SysEnControllerFunction addFunctionUserDefineOperate( String identify,String name,String functionName,String iconCls,int orderNum ){
+        SysEnControllerFunction sysEnControllerFunction = new SysEnControllerFunction(identify,name,functionName,PlatformSysConstant.MENU_TYPE_USER_DEFINE_OPERATE,iconCls,orderNum);
         this.getSysEnControllerFunctionList().add( sysEnControllerFunction );
 
         return sysEnControllerFunction;
@@ -1695,12 +1965,28 @@ public class SysEnController extends AbstractBaseBean {
         this.editWindowConfigs = editWindowConfigs;
     }
 
+    public String getViewWindowConfigs() {
+        return viewWindowConfigs;
+    }
+
+    public void setViewWindowConfigs(String viewWindowConfigs) {
+        this.viewWindowConfigs = viewWindowConfigs;
+    }
+
     public String getFormValJsFileName() {
         return formValJsFileName;
     }
 
     public void setFormValJsFileName(String formValJsFileName) {
         this.formValJsFileName = formValJsFileName;
+    }
+
+    public Set<String> getJsFileNameSet() {
+        return jsFileNameSet;
+    }
+
+    public void setJsFileNameSet(Set<String> jsFileNameSet) {
+        this.jsFileNameSet = jsFileNameSet;
     }
 
     public List<SysEnControllerField> getSysEnControllerFieldList() {

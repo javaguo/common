@@ -18,6 +18,9 @@ public class PlatformSysConstant {
     public static String DATE_FORMAT_EXT_YMDHMS = "Y-m-d H:i:s";
     public static String DATE_FORMAT_EXT_HMS = "H:i:s";
 
+    public static String FIELD_TYPE_GENERAL="general";//普通类型的字段，可进行增、删、查、改操作
+    public static String FIELD_TYPE_OPERATE="operate";//操作类型的字段，此类型的字段只在列表中出现，例：列表中第一行数据后的删除、查看详情。
+
     public static String FORM_XTYPE_HIDDEN = "hiddenfield";
     public static String FORM_XTYPE_TEXT = "textfield";
     public static String FORM_XTYPE_TEXTAREA = "textareafield";
@@ -31,7 +34,7 @@ public class PlatformSysConstant {
     public static String FORM_XTYPE_CHECKBOX = "checkboxfield";
     public static String FORM_XTYPE_CHECKBOXGROUP = "checkboxgroup";
     public static String FORM_XTYPE_COMBOBOX = "combobox";
-    public static String FORM_XTYPE_COMBOBOXTREE = "comboboxtree";////extjs未提供comboboxtree组件，此组件是自定义扩展的组件
+    public static String FORM_XTYPE_COMBOBOXTREE = "comboboxtree";//extjs未提供comboboxtree组件，此组件是自定义扩展的组件
     public static String FORM_XTYPE_FILE = "filefield";
     public static String FORM_XTYPE_DISPLAY = "displayfield";
     public static String FORM_XTYPE_SPINNER = "spinnerfield";
@@ -44,5 +47,16 @@ public class PlatformSysConstant {
     public static String MENU_TYPE_ADD = "a1";
     public static String MENU_TYPE_BASE_AJAX = "a2";
     public static String MENU_TYPE_AJAX_UPDATE_FIELDS = "a3";
+    public static String MENU_TYPE_USER_DEFINE_OPERATE = "a4";
     public static String MENU_TYPE_INSTRUCTIONS = "b1";
+
+
+
+    public static String LIST_FIELD_VIEW_DETAIL = "1";
+    public static String LIST_FIELD_SINGLE_BASE_AJAX_REQ = "2";
+    public static String LIST_FIELD_SINGLE_DELETE = "3";
+    public static String LIST_FIELD_USER_DEFINE_OPERATE = "4";
+    public static String LIST_FIELD_OPEN_NEW_TAB = "5";
+    public static String LIST_FIELD_OPEN_NEW_TAB_LIST = "6";
+    public static String LIST_FIELD_OPEN_NEW_BROWSER_WINDOW = "7";
 }

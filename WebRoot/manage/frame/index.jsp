@@ -23,7 +23,7 @@
 	<link rel="stylesheet" type="text/css"
 		  href="resource/css/platform/common.css">
 	<link rel="stylesheet" type="text/css"
-		  href="resource/css/platform/manage/app/index.css">
+		  href="resource/css/platform/manage/frame/index.css">
 	<link rel="stylesheet" type="text/css"
 		  href="resource/js/extjs/extjs5/packages/ext-theme-classic/build/resources/ext-theme-classic-all.css">
 	<link rel="stylesheet" type="text/css"
@@ -35,14 +35,21 @@
 			src="resource/js/extjs/extjs5/locale/ext-lang-<%=browserLang%>.js"></script>
 
 	<script type="text/javascript"
-			src="resource/js/platform/manage/app/indexShare.js"></script>
+			src="resource/js/platform/manage/frame/index.js"></script>
 
 	<script type="text/javascript"
 			src="resource/js/platform/common/platformValidate.js"></script>
+	<script type="text/javascript"
+			src="resource/js/extjs/common/extPlatformCommon.js"></script>
+	<script type="text/javascript"
+			src="resource/js/extjs/extend/validate/PlatformVTypes.js"></script>
+	<script type="text/javascript">
+		var globalBasePath = '<%=basePath%>';
+	</script>
 </head>
 <body>
 <div id="head-region-container">
-	通用管理系统
+	欢迎使用通用后台管理系统
 </div>
 <div id="foot-region-container">
 	版权所有

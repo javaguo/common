@@ -40,7 +40,7 @@ public class ExampleBeanFormValController extends BaseController<ExampleBeanForm
         //此处的配置会覆盖jsp页面中默认的配置
         String addWindowConfigs = "title: '添加窗口-表单验证示例'";
         String editWindowConfigs = "title: '编辑窗口-表单验证示例'";
-        controller.addWindowConfig( addWindowConfigs,editWindowConfigs );
+        controller.addWindowConfig( addWindowConfigs,editWindowConfigs,null );
     }
 
     @Override
@@ -56,8 +56,10 @@ public class ExampleBeanFormValController extends BaseController<ExampleBeanForm
         /**
          * vtype示例
          */
+
+        //此示例中，增、改、查询表单其它字段验证时引用了alpha字段，所以alpha字段设置为可以增、改、查
         String extConfigsAlpha = "vtype:'alpha'";
-        controller.addFieldText("alpha","alpha",true,true,true,false,false,extConfigsAlpha);
+        controller.addFieldText("alpha","alpha",true,true,true,true,false,extConfigsAlpha);
 
         String extConfigsAlphanum = "vtype:'alphanum'";
         controller.addFieldText("alphanum","alphanum",true,true,true,false,true,extConfigsAlphanum);
@@ -151,55 +153,59 @@ public class ExampleBeanFormValController extends BaseController<ExampleBeanForm
          *
          * 提供了两种方式（下方有举例说明）：
          * 1.验证方法参数只传验证字段本身的值
-         * 2.验证方法参数传公证字段本身的值外，还可以传其它字段。
+         * 2.验证方法参数传字段本身的值外，还可以传其它字段。
+         * (第2种方式目前有bug，生成的代码变量先后的顺序有问题，被引用的变量在引用的代码后面出现，则会报js错误。
+         *          combobox控件目前就存在此问题，其它控件只要先后顺序没有问题，也可以使用。)
          *
          * 使用validator验证注意事项：
          * regex、vtype进行验证时，如果输入值为空，则不会进行正则验证。
          * 但validator不论值是否为空，都会进行正则验证，所以使用validator验证时要做好判空处理。
          */
-        controller.setFormValJsFileName("exampleBeanFormVal");
+
+        controller.setFormValJsFileName("exampleBeanFormVal.js");
         String extConfigsTranText = "validatorFunName:'valText'";
         controller.addFieldText("valText","valText",true,true,true,true,true,null,extConfigsTranText);
 
-        String extConfigsTranTextParam = "validatorFunName:'valTextParam',validatorFunField:'alpha,chinese'";//validatorFunField为要验证的字段名
+        //String extConfigsTranTextParam = "validatorFunName:'valTextParam',validatorFunField:'alpha,chinese'";//validatorFunField为要验证的字段名
+        String extConfigsTranTextParam = "validatorFunName:'valTextParam'";//validatorFunField为要验证的字段名
         controller.addFieldText("valTextParam","valTextParam",true,true,true,true,true,null,extConfigsTranTextParam);
 
         String extConfigsTranPassword = "validatorFunName:'valPassword'";
         controller.addFieldPassword("valPassword","valPassword",true,true,true,true,null,extConfigsTranPassword);
 
-        String extConfigsTranPasswordParam = "validatorFunName:'valPasswordParam',validatorFunField:'alpha'";
+        String extConfigsTranPasswordParam = "validatorFunName:'valPasswordParam'";
         controller.addFieldPassword("valPasswordParam","valPasswordParam",true,true,true,true,null,extConfigsTranPasswordParam);
 
         String extConfigsTranTextAreaPassword = "validatorFunName:'valTextArea'";
         controller.addFieldTextArea("valTextArea","valTextArea",true,true,true,true,true,null,extConfigsTranTextAreaPassword);
 
-        String extConfigsTranTextAreaParam = "validatorFunName:'valTextAreaParam',validatorFunField:'alpha'";
+        String extConfigsTranTextAreaParam = "validatorFunName:'valTextAreaParam'";
         controller.addFieldTextArea("valTextAreaParam","valTextAreaParam",true,true,true,true,true,null,extConfigsTranTextAreaParam);
 
         String extConfigsTranNumber = "validatorFunName:'valNumber'";
         controller.addFieldNumber("valNumber","valNumber",true,true,true,true,true,null,extConfigsTranNumber);
 
-        String extConfigsTranNumberParam = "validatorFunName:'valNumberParam',validatorFunField:'alpha'";
+        String extConfigsTranNumberParam = "validatorFunName:'valNumberParam'";
         controller.addFieldNumber("valNumberParam","valNumberParam",true,true,true,true,true,null,extConfigsTranNumberParam);
 
         String extConfigsTranTag = "validatorFunName:'valTag'";
         String tagJson = "[{name:'优',value:'90'},{name:'良',value:'80'},{name:'中',value:'70'},{name:'及格',value:'60'},{name:'差',value:'50'}]";
         controller.addFieldTagByJSON( "valTag","valTag",true,true,true,false,false,tagJson,null,extConfigsTranTag );
 
-        String extConfigsTranTagParam = "validatorFunName:'valTagParam',validatorFunField:'alpha'";
+        String extConfigsTranTagParam = "validatorFunName:'valTagParam'";
         controller.addFieldTagByJSON( "valTagParam","valTagParam",true,true,true,false,false,tagJson,null,extConfigsTranTagParam );
 
         String extConfigsTranDate = "validatorFunName:'valDate'";
         controller.addFieldDate("valDate","valDate",true,true,true,true,true,null,extConfigsTranDate);
 
-        String extConfigsTranDateParam = "validatorFunName:'valDateParam',validatorFunField:'alpha'";
+        String extConfigsTranDateParam = "validatorFunName:'valDateParam'";
         controller.addFieldDate("valDateParam","valDateParam",true,true,true,true,true,null,extConfigsTranDateParam);
 
         String comboBoxJson = "[{name:'优',value:'90'},{name:'良',value:'80'},{name:'中',value:'70'},{name:'及格',value:'60'},{name:'差',value:'50'}]";
         String extConfigsTranComboBox = "validatorFunName:'valComboBox'";
         controller.addFieldComboBoxByJSON("valComboBox","valComboBox",true,true,true,false,false,comboBoxJson,null,extConfigsTranComboBox);
 
-        String extConfigsComboBoxParam = "validatorFunName:'valComboBoxParam',validatorFunField:'alpha'";
+        String extConfigsComboBoxParam = "validatorFunName:'valComboBoxParam'";
         controller.addFieldComboBoxByJSON("valComboBoxParam","valComboBoxParam",true,true,true,false,false,comboBoxJson,null,extConfigsComboBoxParam);
 
 /*        String extConfigsTranComboBoxCascade = "validatorFunName:'valComboBoxCascade'";
@@ -212,14 +218,14 @@ public class ExampleBeanFormValController extends BaseController<ExampleBeanForm
         String extConfigsTranTree = "validatorFunName:'valTree'";
         controller.addFieldComboBoxTree( "valTree","valTree",true,true,true,false,true,null,treeUrl6,extConfigsTranTree );
 
-        String extConfigsTranTreeParam = "validatorFunName:'valTreeParam',validatorFunField:'alpha'";
+        String extConfigsTranTreeParam = "validatorFunName:'valTreeParam'";
         controller.addFieldComboBoxTree( "valTreeParam","valTreeParam",true,true,true,false,true,null,treeUrl6,extConfigsTranTreeParam );
 
         String formFileServiceConfigs1 = "savePath:'/upload/doc/',allowFileType:'doc,docx'";
         String extConfigsTranFile = "validatorFunName:'valFile'";
         controller.addFieldFile("valFile","valFile",true,true,true,true,null,formFileServiceConfigs1,extConfigsTranFile);
 
-        String extConfigsTranFileParam = "validatorFunName:'valFileParam',validatorFunField:'alpha'";
+        String extConfigsTranFileParam = "validatorFunName:'valFileParam'";
         controller.addFieldFile("valFileParam","valFileParam",true,true,true,true,null,formFileServiceConfigs1,extConfigsTranFileParam);
 
         /**

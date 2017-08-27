@@ -5,10 +5,7 @@ import com.tgw.bean.base.AbstractBaseBean;
 import com.tgw.bean.system.SysEnController;
 import com.tgw.bean.system.SysEnControllerField;
 import com.tgw.bean.system.SysEnControllerFunction;
-import com.tgw.bean.system.form.field.SysEnFieldComboBox;
-import com.tgw.bean.system.form.field.SysEnFieldComboBoxGroup;
-import com.tgw.bean.system.form.field.SysEnFieldDate;
-import com.tgw.bean.system.form.field.SysEnFieldTag;
+import com.tgw.bean.system.form.field.*;
 import com.tgw.bean.system.tree.SysEnTreeNode;
 import com.tgw.exception.PlatformException;
 import com.tgw.platform.propertyeditors.PlatformCustomDateEditor;
@@ -67,6 +64,14 @@ public class BaseController<T extends AbstractBaseBean> implements Serializable 
 		this.getBaseService().initMapper();
 	}
 
+	/**
+	 * 初始化controller基本信息
+	 * @param controller
+     */
+	public void initControllerBaseInfo(SysEnController controller){
+
+	}
+
 	public void initSearch(HttpServletRequest request, HttpServletResponse response,ModelAndView modelAndView,SysEnController controller, T bean){
 		System.out.println("----------------- BaseController  initSearch -----------------");
 	}
@@ -113,8 +118,11 @@ public class BaseController<T extends AbstractBaseBean> implements Serializable 
 		SysEnController controller = new SysEnController();
 
 			/**
-			 * 以下三个的初始化顺序不能变。
+			 * 以下初始化顺序不能变。
+			 *
+			 * initField必须在initFunction之前，添加列表中的menubar时，menuFunction依赖field。
 			 */
+		this.initControllerBaseInfo(controller);
 		this.initSearch(request,response,modelAndView,controller,bean);
 		this.initField( controller );
 		this.initFunction( controller );
@@ -135,20 +143,26 @@ public class BaseController<T extends AbstractBaseBean> implements Serializable 
             List<SysEnControllerField> addFieldList = new ArrayList<SysEnControllerField>();
 			//可被更新的字段
 			List<SysEnControllerField> updateFieldList = new ArrayList<SysEnControllerField>();
+			//详情页面中展示的字段
+			List<SysEnControllerField> viewFieldList = new ArrayList<SysEnControllerField>();
             //可被搜索的字段
 			List<SysEnControllerField> searFieldList = new ArrayList<SysEnControllerField>();
             //可在列表显示的字段
 			List<SysEnControllerField> showFieldList = new ArrayList<SysEnControllerField>();
+			//列表中的可操作字段
+			List<SysEnControllerField> operateFieldList = new ArrayList<SysEnControllerField>();
 
 			//页面上的所有下拉框
 			List<SysEnFieldComboBox> comboBoxList = new ArrayList<SysEnFieldComboBox>();
 			List<SysEnFieldComboBox> comboBoxAddList = new ArrayList<SysEnFieldComboBox>();
 			List<SysEnFieldComboBox> comboBoxUpdateList = new ArrayList<SysEnFieldComboBox>();
+			List<SysEnFieldComboBox> comboBoxViewList = new ArrayList<SysEnFieldComboBox>();
 			List<SysEnFieldComboBox> comboBoxSearchList = new ArrayList<SysEnFieldComboBox>();
 			//页面上的所有tag控件，tag继承自comboBox
 			List<SysEnFieldTag> tagList = new ArrayList<SysEnFieldTag>();
 			List<SysEnFieldTag> tagAddList = new ArrayList<SysEnFieldTag>();
 			List<SysEnFieldTag> tagUpdateList = new ArrayList<SysEnFieldTag>();
+			List<SysEnFieldTag> tagViewList = new ArrayList<SysEnFieldTag>();
 			List<SysEnFieldTag> tagSearchList = new ArrayList<SysEnFieldTag>();
 
             for( SysEnControllerField conField : controller.getSysEnControllerFieldList() ){
@@ -178,6 +192,14 @@ public class BaseController<T extends AbstractBaseBean> implements Serializable 
                 	showFieldList.add( conField );
 				}
 
+				if( conField.isShowOnView() ){
+					viewFieldList.add( conField );
+				}
+
+				if( PlatformSysConstant.FIELD_TYPE_OPERATE.equals( conField.getFieldType() ) ){
+					operateFieldList.add( conField );
+				}
+
 				if( PlatformSysConstant.FORM_XTYPE_COMBOBOX.equals( conField.getXtype() ) ){
 					SysEnFieldComboBoxGroup comboBoxGroup = (SysEnFieldComboBoxGroup)conField.getSysEnFieldAttr();
 					 comboBoxGroup.getComboBoxList();
@@ -191,6 +213,9 @@ public class BaseController<T extends AbstractBaseBean> implements Serializable 
 						}
 						if( conField.isAllowSearch() ){
 							comboBoxSearchList.add( comboBox );
+						}
+						if( conField.isShowOnView() ){
+							comboBoxViewList.add(comboBox);
 						}
 
 					}
@@ -208,6 +233,9 @@ public class BaseController<T extends AbstractBaseBean> implements Serializable 
 					if( conField.isAllowSearch() ){
 						tagSearchList.add( sysEnFieldTag );
 					}
+					if( conField.isShowOnView() ){
+						tagViewList.add(sysEnFieldTag);
+					}
 				}
             }
 
@@ -215,16 +243,20 @@ public class BaseController<T extends AbstractBaseBean> implements Serializable 
 			modelAndView.addObject("validFieldList",validFieldList);
 			modelAndView.addObject("addFieldList",addFieldList );
 			modelAndView.addObject("updateFieldList",updateFieldList );
+			modelAndView.addObject("viewFieldList",viewFieldList );
 			modelAndView.addObject("searFieldList",searFieldList );
 			modelAndView.addObject("showFieldList",showFieldList );
+			modelAndView.addObject("operateFieldList",operateFieldList );
 
 			modelAndView.addObject("comboBoxList",comboBoxList);
 			modelAndView.addObject("comboBoxAddList",comboBoxAddList);
 			modelAndView.addObject("comboBoxUpdateList",comboBoxUpdateList);
+			modelAndView.addObject("comboBoxViewList",comboBoxViewList);
 			modelAndView.addObject("comboBoxSearchList",comboBoxSearchList);
 			modelAndView.addObject("tagList",tagList);
 			modelAndView.addObject("tagAddList",tagAddList);
 			modelAndView.addObject("tagUpdateList",tagUpdateList);
+			modelAndView.addObject("tagViewList",tagViewList);
 			modelAndView.addObject("tagSearchList",tagSearchList);
 
 
@@ -249,7 +281,7 @@ public class BaseController<T extends AbstractBaseBean> implements Serializable 
 		//初始化页面上的菜单按钮信息开始
 		List<SysEnControllerFunction> sysEnControllerFunctionList = new ArrayList<SysEnControllerFunction>();
 		SysEnControllerFunction addFunction = new SysEnControllerFunction("baseAdd","添加","",PlatformSysConstant.MENU_TYPE_ADD,true,"Add",-100);
-		SysEnControllerFunction delFunction = new SysEnControllerFunction("baseDelete","删除","/delete.do",PlatformSysConstant.MENU_TYPE_BASE_AJAX,false,"Delete",-99);
+		SysEnControllerFunction delFunction = new SysEnControllerFunction("baseDelete","删除","delete.do",PlatformSysConstant.MENU_TYPE_BASE_AJAX,false,"Delete",-99);
 		sysEnControllerFunctionList.add( addFunction );
 		sysEnControllerFunctionList.add( delFunction );
 		sysEnControllerFunctionList.addAll( controller.getSysEnControllerFunctionList() );
@@ -311,15 +343,6 @@ public class BaseController<T extends AbstractBaseBean> implements Serializable 
 		System.out.println("----------------- BaseController  searchData -----------------");
 		ModelAndView modelAndView = new ModelAndView();
 
-		/*try{
-			String renameFileName = PlatformFileUtils.renameFileNameByTimeRandom( "简历.doc" );
-			String path= PlatformInfo.getAbsolutePath(request,"/upload/pic");
-			System.out.println("renameFileName-->"+renameFileName);
-			System.out.println("path-->"+path);
-		}catch( Exception e ){
-			e.printStackTrace();
-		}*/
-
 		try {
             /**
              * 处理分页参数
@@ -335,6 +358,9 @@ public class BaseController<T extends AbstractBaseBean> implements Serializable 
 			//查询数据
 			Page queryResPage = this.getBaseService().searchData(pageNum,pageSize,bean);
 			List items = queryResPage.getResult();
+
+			//将非数值列的相关配置添加到查询结果items中
+			items = addFieldConfigListExtend(request,response,bean,items);
 			items = dealSearchData(request,response,bean,items);
 
 			//组装查询结果
@@ -343,6 +369,7 @@ public class BaseController<T extends AbstractBaseBean> implements Serializable 
 			jo.put("items", items );
 
 			modelAndView.addObject( PlatformSysConstant.JSONSTR, jo.toString() );
+			//System.out.println( "jo.toString()-->"+jo.toString() );
 
 		} catch(Exception e) {
 			e.printStackTrace();
@@ -350,6 +377,124 @@ public class BaseController<T extends AbstractBaseBean> implements Serializable 
 
 		modelAndView.setViewName( this.getJsonView() );
 		return modelAndView;
+	}
+
+	/**
+	 * 配置添加列表中操作类型的字段。
+	 * 例：列表中每一行数据后的删除按钮等。
+	 * @param request
+	 * @param response
+	 * @param bean
+	 * @param dataList
+     * @return
+     */
+	public List addFieldConfigListExtend(HttpServletRequest request, HttpServletResponse response, T bean,List dataList){
+		SysEnController controller = new SysEnController();
+		this.initControllerBaseInfo( controller );
+		this.initField( controller );
+
+		List<SysEnControllerField> controllerFieldList = controller.getSysEnControllerFieldList();//所有字段配置
+		List<SysEnControllerField> operateFieldList = new ArrayList<SysEnControllerField>();//操作类型的字段配置
+
+		//把操作类型的字段配置查找出来。
+		for(SysEnControllerField field:controllerFieldList){
+			if(  PlatformSysConstant.FIELD_TYPE_OPERATE.equals( field.getFieldType() ) ){
+				operateFieldList.add( field );
+			}
+		}
+
+		if( operateFieldList.size()==0 ){
+			return dataList;
+		}
+
+		for( int i=0;i<dataList.size();i++ ){
+			HashMap<String,Object> listFieldValMap = (HashMap<String,Object>)dataList.get(i);
+
+			for( SysEnControllerField field:operateFieldList ){
+				SysEnFieldListExtend fieldListExtendAttr = (SysEnFieldListExtend) field.getSysEnFieldAttr();
+
+				StringBuffer tempParamValStr = new StringBuffer();
+				if( PlatformSysConstant.LIST_FIELD_VIEW_DETAIL.equals( fieldListExtendAttr.getListFieldOperateTypeCode() ) ){
+
+					tempParamValStr.append( this.createJsFunParam( fieldListExtendAttr.getParam(),field,listFieldValMap ) );
+
+				}else if( PlatformSysConstant.LIST_FIELD_SINGLE_BASE_AJAX_REQ.equals( fieldListExtendAttr.getListFieldOperateTypeCode() ) ){
+
+					tempParamValStr.append("'"+fieldListExtendAttr.getUrl()+"',");
+					tempParamValStr.append( this.createJsFunParam( fieldListExtendAttr.getParam(),field,listFieldValMap ) );
+
+				}else if( PlatformSysConstant.LIST_FIELD_SINGLE_DELETE.equals( fieldListExtendAttr.getListFieldOperateTypeCode() ) ){
+
+					tempParamValStr.append("'"+fieldListExtendAttr.getUrl()+"',");
+					tempParamValStr.append( this.createJsFunParam( fieldListExtendAttr.getParam(),field,listFieldValMap ) );
+
+				}else if( PlatformSysConstant.LIST_FIELD_USER_DEFINE_OPERATE.equals( fieldListExtendAttr.getListFieldOperateTypeCode() ) ){
+
+					if( StringUtils.isNotBlank( fieldListExtendAttr.getUrl() ) ){
+						tempParamValStr.append("'"+fieldListExtendAttr.getUrl()+"',");
+					}
+					tempParamValStr.append( this.createJsFunParam( fieldListExtendAttr.getParam(),field,listFieldValMap ) );
+
+				}else if( PlatformSysConstant.LIST_FIELD_OPEN_NEW_TAB.equals( fieldListExtendAttr.getListFieldOperateTypeCode() ) ){
+
+					tempParamValStr.append("'"+fieldListExtendAttr.getUrl()+"',");
+					tempParamValStr.append("'"+fieldListExtendAttr.getTabTitle()+"',");
+					tempParamValStr.append( this.createJsFunParam( fieldListExtendAttr.getParam(),field,listFieldValMap ) );
+
+				}else if( PlatformSysConstant.LIST_FIELD_OPEN_NEW_TAB_LIST.equals( fieldListExtendAttr.getListFieldOperateTypeCode() ) ){
+
+					tempParamValStr.append("'"+fieldListExtendAttr.getUrl()+"',");
+					tempParamValStr.append("'"+fieldListExtendAttr.getTabTitle()+"',");
+					tempParamValStr.append( this.createJsFunParam( fieldListExtendAttr.getParam(),field,listFieldValMap ) );
+					tempParamValStr.append( "'"+ fieldListExtendAttr.getTabFlag() +"'," );
+
+				}else if( PlatformSysConstant.LIST_FIELD_OPEN_NEW_BROWSER_WINDOW.equals( fieldListExtendAttr.getListFieldOperateTypeCode() ) ){
+
+					tempParamValStr.append("'"+fieldListExtendAttr.getUrl()+"',");
+					tempParamValStr.append( this.createJsFunParam( fieldListExtendAttr.getParam(),field,listFieldValMap ) );
+
+				}else{
+					throw new PlatformException("配置列表字段出错，不存在的列表字段操作类型");
+				}
+
+				if( tempParamValStr.toString().endsWith(",") ){
+					tempParamValStr.deleteCharAt( tempParamValStr.length()-1 );
+				}
+
+				StringBuffer javaScriptStr = new StringBuffer();
+				javaScriptStr.append(" <a onclick=\"");
+				javaScriptStr.append( fieldListExtendAttr.getFunctionName() );
+				javaScriptStr.append( "("+tempParamValStr );
+				javaScriptStr.append( ")\">"+field.getFieldLabel()+"</a>");
+
+				listFieldValMap.put( field.getName(), javaScriptStr.toString() );
+
+			}
+
+			dataList.set(i,listFieldValMap);
+		}
+
+		return dataList;
+	}
+
+	private String createJsFunParam( String param ,SysEnControllerField field,HashMap<String,Object> listFieldValMap){
+		StringBuffer res = new StringBuffer();
+		if( StringUtils.isNotBlank( param ) ){
+			String[] tempParam = param.split(",");
+			for( int j=0;j<tempParam.length;j++ ){
+				if( StringUtils.isBlank( tempParam[j] ) ){
+					throw new PlatformException("列表操作字段("+field.getName()+")配置错误！脚本参数配置错误！");
+				}
+				Object tempParamVal = listFieldValMap.get( tempParam[j].trim() );
+				if( tempParamVal!=null && StringUtils.isNotBlank( tempParamVal.toString() ) ){
+					res.append( "'"+tempParamVal.toString()+"'," );
+				}else{
+					res.append( "''," );
+				}
+			}
+		}
+
+		return res.toString();
 	}
 
 	/**

@@ -8,6 +8,7 @@ import com.tgw.bean.system.form.field.SysEnFieldBase;
  */
 public class SysEnControllerField extends AbstractBaseBean {
     private Integer id;
+    private String fieldType;//字段类型。PlatformSysConstant.FIELD_TYPE_GENERAL或PlatformSysConstant.Field_TYPE_OPERATE两种
     private String name;//字段名称
     private String fieldLabel;//字段标签名称
     private String type;//数据类型
@@ -16,6 +17,7 @@ public class SysEnControllerField extends AbstractBaseBean {
     private boolean isAllowAdd;//是否可添加
     private boolean isAllowUpdate;//是否可更新
     private boolean isShowList;//是否在列表中显示
+    private boolean isShowOnView=true;//是否在详情窗口中显示。大部分字段需要在详情页面中展示，所以默认设置为true
     private boolean isAllowSearch;//是否可被搜索
     private boolean isSearByRange;//是否按区间搜索，如果为true，则搜索条件按照大于等于、小于等于查询搜索
     private boolean isAllowBlank;//是否可为空
@@ -46,13 +48,20 @@ public class SysEnControllerField extends AbstractBaseBean {
         this.isAllowBlank = isAllowBlank;
     }
 
-
     public Integer getId() {
         return id;
     }
 
     public void setId(Integer id) {
         this.id = id;
+    }
+
+    public String getFieldType() {
+        return fieldType;
+    }
+
+    public void setFieldType(String fieldType) {
+        this.fieldType = fieldType;
     }
 
     public String getName() {
@@ -121,6 +130,18 @@ public class SysEnControllerField extends AbstractBaseBean {
 
     public void setShowList(boolean showList) {
         isShowList = showList;
+    }
+
+    public boolean getIsShowOnView() {
+        return isShowOnView;
+    }
+
+    public boolean isShowOnView() {
+        return isShowOnView;
+    }
+
+    public void setShowOnView(boolean showOnView) {
+        isShowOnView = showOnView;
     }
 
     public boolean isAllowSearch() {
